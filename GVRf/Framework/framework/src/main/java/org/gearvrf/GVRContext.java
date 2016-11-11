@@ -50,8 +50,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -2407,6 +2409,8 @@ public abstract class GVRContext implements IEventReceiver {
      */
     public abstract GVREventManager getEventManager();
 
+    abstract void renderTexture(GVRScene scene, GVRCamera camera, GVRRenderTexture renderTexture);
+
     /**
      * Returns the {@link GVRScriptManager}.
      *
@@ -2815,6 +2819,80 @@ public abstract class GVRContext implements IEventReceiver {
         GVRReference reference;
         while (null != (reference = (GVRReference)mReferenceQueue.poll())) {
             reference.close();
+        }
+    }
+
+    public interface RenderToTextureListener {
+        void onReady(GVRTexture texture);
+    }
+
+    private final HashMap<GVRTexture, GVRDrawFrameListener> mRenderTextureToDrawFrameListener = new HashMap<>();
+    /**
+     * Start rendering the specified scene to a texture. If the scene is used for anything other than rendering
+     * to the texture the result is undefined. Executes asynchronously. See the listener for getting the result.
+     * @param scene
+     * @param width
+     * @param height
+     * @param listener the texture is passed to the listener
+     */
+    public void startRenderingToTexture(final GVRScene scene, final int width, final int height, final RenderToTextureListener listener) {
+        runOnGlThread(new Runnable() {
+            @Override
+            public void run() {
+                final GVRPerspectiveCamera centerCamera = scene.getMainCameraRig().getCenterCamera();
+                //flips vertically the output
+                centerCamera.setFovY(-centerCamera.getFovY());
+
+                final GVRRenderTexture renderTexture = new GVRRenderTexture(GVRContext.this, width, height);
+                final WeakReference<GVRRenderTexture> weakRef = new WeakReference<>(renderTexture);
+
+                final GVRDrawFrameListener drawFrameListener = new GVRDrawFrameListener() {
+                    @Override
+                    public void onDrawFrame(float frameTime) {
+                        final GVRRenderTexture rt = weakRef.get();
+                        if (null != rt) {
+                            renderTexture(scene, scene.getMainCameraRig().getCenterCamera(), rt);
+                        } else {
+                            unregisterDrawFrameListener(this);
+                        }
+                    }
+                };
+                registerDrawFrameListener(drawFrameListener);
+
+                Threads.spawnLow(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (mRenderTextureToDrawFrameListener) {
+                            mRenderTextureToDrawFrameListener.put(renderTexture, drawFrameListener);
+                        }
+                        //to ensure at least one frame is rendered to the texture first
+                        GVRNotifications.waitBeforeStep();
+                        GVRNotifications.waitAfterStep();
+                        //now let the user know it is ready
+                        runOnTheFrameworkThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.onReady(renderTexture);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * Stop rendering to the specified texture. If the texture specified has not been passed to
+     * RenderToTextureListener.onReady the call has no effect.
+     * @param texture
+     */
+    public void stopRenderingToTexture(final GVRTexture texture) {
+        final GVRDrawFrameListener listener;
+        synchronized (mRenderTextureToDrawFrameListener) {
+            listener = mRenderTextureToDrawFrameListener.remove(texture);
+        }
+        if (null != listener) {
+            unregisterDrawFrameListener(listener);
         }
     }
 
