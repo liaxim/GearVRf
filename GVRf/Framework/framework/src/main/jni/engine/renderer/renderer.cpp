@@ -18,25 +18,13 @@
  ***************************************************************************/
 
 #include "renderer.h"
-#include "gl/gl_program.h"
 #include "glm/gtc/matrix_inverse.hpp"
 
-#include "eglextension/tiledrendering/tiled_rendering_enhancer.h"
-#include "objects/material.h"
 #include "objects/post_effect_data.h"
 #include "objects/scene.h"
-#include "objects/scene_object.h"
-#include "objects/components/camera.h"
-#include "objects/components/render_data.h"
 #include "objects/textures/render_texture.h"
 #include "shaders/shader_manager.h"
 #include "shaders/post_effect_shader_manager.h"
-#include "util/gvr_gl.h"
-#include "util/gvr_log.h"
-#include "batch_manager.h"
-
-#include <unordered_map>
-#include <unordered_set>
 
 #include "gl_renderer.h"
 #include "vulkan_renderer.h"
@@ -141,6 +129,12 @@ void Renderer::state_sort() {
     // 3. camera distance last to minimize overdraw
     std::sort(render_data_vector.begin(), render_data_vector.end(),
             compareRenderDataByOrderShaderDistance);
+
+    if (render_data_vector.size()) {
+        useStencilBuffer_ = RenderData::Queue::Stencil == render_data_vector[0]->rendering_order();
+    } else {
+        useStencilBuffer_ = false;
+    }
 
     if (DEBUG_RENDERER) {
         LOGD("SORTING: After sorting");

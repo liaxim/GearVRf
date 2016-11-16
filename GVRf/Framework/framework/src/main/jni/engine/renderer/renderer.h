@@ -191,6 +191,7 @@ protected:
     std::vector<RenderData*> render_data_vector;
     int numberDrawCalls;
     int numberTriangles;
+    bool useStencilBuffer_ = false;
 
 public:
     //to be used only on the gl thread

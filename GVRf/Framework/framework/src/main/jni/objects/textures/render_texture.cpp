@@ -126,6 +126,10 @@ RenderTexture::RenderTexture(int width, int height, int sample_count,
     if (jdepth_format != DepthFormat::DEPTH_0) {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
                 GL_RENDERBUFFER, renderTexture_gl_render_buffer_->id());
+        if (DepthFormat::DEPTH_24_STENCIL_8 == jdepth_format) {
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
+                                      GL_RENDERBUFFER, renderTexture_gl_render_buffer_->id());
+        }
     }
 
     glScissor(0, 0, width, height);
