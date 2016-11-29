@@ -13,28 +13,23 @@
  * limitations under the License.
  */
 
-#include "objects/hybrid_object.h"
-#include "objects/components/render_data.h"
 #include "objects/render_pass.h"
+#include "objects/material.h"
 
 namespace gvr {
 
-void RenderPass::add_listener(RenderData* render_data){
-    if(render_data){
-        listener_->add_listener(render_data);
-        if(material_)
-            material_->add_listener(render_data);
+void RenderPass::set_material(Material* material) {
+    material_ = material;
+    material->set_dirty_flag(renderdata_dirty_flag_);
+    *renderdata_dirty_flag_ = true;
+}
+
+void RenderPass::set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag) {
+    renderdata_dirty_flag_ = renderdata_dirty_flag;
+    if (nullptr != material_) {
+        material_->set_dirty_flag(renderdata_dirty_flag_);
     }
 }
 
-void RenderPass::set_material(Material* material) {
-    // if renderData changes its material in-between remove the owners from previous material and add the owners into new
-    if(material_)
-        material_->remove_listener(listener_);
 
-    material_ = material;
-
-    material->add_listener(listener_);
-    listener_->notify_listeners(true);
-}
 }

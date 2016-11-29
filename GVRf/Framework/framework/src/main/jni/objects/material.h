@@ -30,10 +30,7 @@
 #include "objects/textures/texture.h"
 #include "objects/components/render_data.h"
 
-#include "objects/components/event_handler.h"
 namespace gvr {
-class RenderData;
-class Color;
 
 class Material: public HybridObject {
 public:
@@ -60,8 +57,15 @@ public:
     };
 
     explicit Material(ShaderType shader_type) :
-            shader_type_(shader_type), textures_(), floats_(), vec2s_(), vec3s_(), vec4s_(), shader_feature_set_(
-                    0),listener_(new Listener()) {
+            shader_type_(shader_type),
+            textures_(),
+            floats_(),
+            vec2s_(),
+            vec3s_(),
+            vec4s_(),
+            shader_feature_set_(0),
+            renderdata_dirty_flag_(std::make_shared<bool>(false))
+    {
         switch (shader_type) {
         default:
             vec3s_["color"] = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -79,7 +83,7 @@ public:
 
     void set_shader_type(ShaderType shader_type) {
         shader_type_ = shader_type;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     Texture* getTexture(const std::string& key) const {
@@ -112,7 +116,7 @@ public:
         if (key == "main_texture") {
             main_texture = texture;
         }
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     float getFloat(const std::string& key) {
@@ -126,7 +130,7 @@ public:
     }
     void setFloat(const std::string& key, float value) {
         floats_[key] = value;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     glm::vec2 getVec2(const std::string& key) {
@@ -141,7 +145,7 @@ public:
 
     void setVec2(const std::string& key, glm::vec2 vector) {
         vec2s_[key] = vector;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     glm::vec3 getVec3(const std::string& key) {
@@ -156,7 +160,7 @@ public:
 
     void setVec3(const std::string& key, glm::vec3 vector) {
         vec3s_[key] = vector;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     glm::vec4 getVec4(const std::string& key) {
@@ -171,7 +175,7 @@ public:
 
     void setVec4(const std::string& key, glm::vec4 vector) {
         vec4s_[key] = vector;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     glm::mat4 getMat4(const std::string& key) {
@@ -182,10 +186,6 @@ public:
             std::string error = "Material::getMat4() : " + key + " not found";
             throw error;
         }
-    }
-
-    bool hasTexture() const {
-        return (main_texture != NULL) || (textures_.size() > 0);
     }
 
     bool hasUniform(const std::string& key) const {
@@ -209,7 +209,7 @@ public:
 
     void setMat4(const std::string& key, glm::mat4 matrix) {
         mat4s_[key] = matrix;
-        listener_->notify_listeners(true);
+        *renderdata_dirty_flag_ = true;
     }
 
     int get_shader_feature_set() {
@@ -223,26 +223,8 @@ public:
         return (main_texture != NULL) && main_texture->isReady();
     }
 
-    bool isTextureReady(const std::string& name) {
-        auto it = textures_.find(name);
-        if (it != textures_.end()) {
-            return ((Texture*) it->second)->isReady();
-        } else {
-            return false;
-        }
-    }
-    void add_listener(Listener* listener){
-        listener_->add_listener(listener);
-    }
-    void add_listener(RenderData* render_data){
-        if(render_data)
-            listener_->add_listener(render_data);
-    }
-    void remove_listener(Listener* listener){
-        listener_->remove_listener(listener);
-    }
-    void notify_listener(bool dirty){
-        listener_->notify_listeners(dirty);
+    void set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag) {
+        renderdata_dirty_flag_ = renderdata_dirty_flag;
     }
 
 private:
@@ -252,7 +234,6 @@ private:
     Material& operator=(Material&& material);
 
 private:
-    Listener* listener_;
     ShaderType shader_type_;
     std::map<std::string, Texture*> textures_;
     Texture* main_texture = NULL;
@@ -261,8 +242,10 @@ private:
     std::map<std::string, glm::vec3> vec3s_;
     std::map<std::string, glm::vec4> vec4s_;
     std::map<std::string, glm::mat4> mat4s_;
+    std::shared_ptr<bool> renderdata_dirty_flag_;
 
     unsigned int shader_feature_set_;
 };
+
 }
 #endif

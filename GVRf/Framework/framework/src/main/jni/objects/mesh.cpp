@@ -19,16 +19,8 @@
 
 #include "mesh.h"
 
-#include <limits>
-
 #include "assimp/Importer.hpp"
-#include "assimp/mesh.h"
-#include "assimp/postprocess.h"
-#include "assimp/scene.h"
-#include "util/gvr_log.h"
-#include "util/gvr_gl.h"
 #include "glm/gtc/matrix_inverse.hpp"
-#include "../gl/gl_program.h"
 
 namespace gvr {
 
@@ -488,6 +480,10 @@ void Mesh::generateBoneArrayBuffers(GLuint programId) {
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+void Mesh::set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag) {
+    renderdata_dirty_flag_ = renderdata_dirty_flag;
 }
 
 }
