@@ -21,6 +21,7 @@
 
 #include "assimp/Importer.hpp"
 #include "glm/gtc/matrix_inverse.hpp"
+#include "objects/helpers.h"
 
 namespace gvr {
 
@@ -482,8 +483,12 @@ void Mesh::generateBoneArrayBuffers(GLuint programId) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag) {
-    renderdata_dirty_flag_ = renderdata_dirty_flag;
+void Mesh::add_dirty_flag(const std::shared_ptr<bool>& dirty_flag) {
+    dirty_flags_.insert(dirty_flag);
+}
+
+void Mesh::dirty() {
+    dirtyImpl(dirty_flags_);
 }
 
 }

@@ -21,7 +21,9 @@
 #define RENDER_PASS_H_
 
 #include <memory>
+#include <unordered_set>
 #include "objects/hybrid_object.h"
+#include "objects/helpers.h"
 
 namespace gvr {
 
@@ -36,8 +38,7 @@ public:
 
     RenderPass() :
             material_(0),
-            cull_face_(DEFAULT_CULL_FACE),
-            renderdata_dirty_flag_(std::make_shared<bool>(false)) {
+            cull_face_(DEFAULT_CULL_FACE) {
     }
 
     Material* material() const {
@@ -52,16 +53,20 @@ public:
 
     void set_cull_face(int cull_face) {
         cull_face_ = cull_face;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
-    void set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag);
+    void dirty() {
+        dirtyImpl(dirty_flags_);
+    }
+
+    void add_dirty_flag(const std::shared_ptr<bool>& dirty_flag);
 
 private:
     static const int DEFAULT_CULL_FACE = CullBack;
     Material* material_;
     int cull_face_;
-    std::shared_ptr<bool> renderdata_dirty_flag_;
+    std::unordered_set<std::shared_ptr<bool>> dirty_flags_;
 };
 
 }

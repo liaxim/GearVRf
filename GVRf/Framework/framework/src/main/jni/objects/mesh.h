@@ -25,6 +25,8 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <unordered_set>
+
 #include "gl/gl_headers.h"
 
 #include "glm/glm.hpp"
@@ -55,8 +57,7 @@ public:
             boneVboID_(GVR_INVALID),
             vertexBoneData_(this),
             bone_data_dirty_(true),
-            regenerate_vao_(true),
-            renderdata_dirty_flag_(std::make_shared<bool>(false))
+            regenerate_vao_(true)
     {
     }
 
@@ -111,7 +112,7 @@ public:
         have_bounding_volume_ = false;
         getBoundingVolume(); // calculate bounding volume
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     void set_vertices(std::vector<glm::vec3>&& vertices) {
@@ -119,7 +120,7 @@ public:
         have_bounding_volume_ = false;
         getBoundingVolume(); // calculate bounding volume
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     const std::vector<glm::vec3>& normals() const {
@@ -129,13 +130,13 @@ public:
     void set_normals(const std::vector<glm::vec3>& normals) {
         normals_ = normals;
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     void set_normals(std::vector<glm::vec3>&& normals) {
         normals_ = std::move(normals);
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     const std::vector<unsigned short>& triangles() const {
@@ -145,13 +146,13 @@ public:
     void set_triangles(const std::vector<unsigned short>& triangles) {
         indices_ = triangles;
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     void set_triangles(std::vector<unsigned short>&& triangles) {
         indices_ = std::move(triangles);
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     const std::vector<unsigned short>& indices() const {
@@ -161,13 +162,13 @@ public:
     void set_indices(const std::vector<unsigned short>& indices) {
         indices_ = indices;
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     void set_indices(std::vector<unsigned short>&& indices) {
         indices_ = std::move(indices);
         vao_dirty_ = true;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     bool hasAttribute(std::string key) const {
@@ -226,7 +227,7 @@ public:
     void setVec2Vector(std::string key, const std::vector<glm::vec2>& vector) {
         vec2_vectors_[key] = vector;
         if(strstr((key.c_str()),"a_texcoord")) {
-            *renderdata_dirty_flag_ = true;
+            dirty();
         }
         vao_dirty_ = true;
     }
@@ -349,7 +350,8 @@ public:
 
     void generateVAO(int programId);
 
-    void set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag);
+    void add_dirty_flag(const std::shared_ptr<bool>& dirty_flag);
+    void dirty();
 
 private:
     Mesh(const Mesh& mesh);
@@ -412,7 +414,7 @@ private:
     GlDelete* deleter_ = nullptr;
     static std::vector<std::string> dynamicAttribute_Names_;
 
-    std::shared_ptr<bool> renderdata_dirty_flag_;
+    std::unordered_set<std::shared_ptr<bool>> dirty_flags_;
 };
 }
 #endif

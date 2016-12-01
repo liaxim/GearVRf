@@ -22,6 +22,7 @@
 
 #include <map>
 #include <memory>
+#include <unordered_set>
 #include <string>
 
 #include "glm/glm.hpp"
@@ -29,6 +30,7 @@
 #include "objects/hybrid_object.h"
 #include "objects/textures/texture.h"
 #include "objects/components/render_data.h"
+#include "objects/helpers.h"
 
 namespace gvr {
 
@@ -63,8 +65,7 @@ public:
             vec2s_(),
             vec3s_(),
             vec4s_(),
-            shader_feature_set_(0),
-            renderdata_dirty_flag_(std::make_shared<bool>(false))
+            shader_feature_set_(0)
     {
         switch (shader_type) {
         default:
@@ -83,7 +84,7 @@ public:
 
     void set_shader_type(ShaderType shader_type) {
         shader_type_ = shader_type;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     Texture* getTexture(const std::string& key) const {
@@ -116,7 +117,7 @@ public:
         if (key == "main_texture") {
             main_texture = texture;
         }
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     float getFloat(const std::string& key) {
@@ -130,7 +131,7 @@ public:
     }
     void setFloat(const std::string& key, float value) {
         floats_[key] = value;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     glm::vec2 getVec2(const std::string& key) {
@@ -145,7 +146,7 @@ public:
 
     void setVec2(const std::string& key, glm::vec2 vector) {
         vec2s_[key] = vector;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     glm::vec3 getVec3(const std::string& key) {
@@ -160,7 +161,7 @@ public:
 
     void setVec3(const std::string& key, glm::vec3 vector) {
         vec3s_[key] = vector;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     glm::vec4 getVec4(const std::string& key) {
@@ -175,7 +176,7 @@ public:
 
     void setVec4(const std::string& key, glm::vec4 vector) {
         vec4s_[key] = vector;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     glm::mat4 getMat4(const std::string& key) {
@@ -209,7 +210,7 @@ public:
 
     void setMat4(const std::string& key, glm::mat4 matrix) {
         mat4s_[key] = matrix;
-        *renderdata_dirty_flag_ = true;
+        dirty();
     }
 
     int get_shader_feature_set() {
@@ -223,11 +224,19 @@ public:
         return (main_texture != NULL) && main_texture->isReady();
     }
 
-    void set_dirty_flag(const std::shared_ptr<bool> renderdata_dirty_flag) {
-        renderdata_dirty_flag_ = renderdata_dirty_flag;
+    void add_dirty_flag(const std::shared_ptr<bool>& dirty_flag) {
+        dirty_flags_.insert(dirty_flag);
     }
 
-private:
+    void add_dirty_flags(const std::unordered_set<std::shared_ptr<bool>>& dirty_flags) {
+        dirty_flags_.insert(dirty_flags.begin(), dirty_flags.end());
+    }
+
+    void dirty() {
+        dirtyImpl(dirty_flags_);
+    }
+
+    private:
     Material(const Material& material);
     Material(Material&& material);
     Material& operator=(const Material& material);
@@ -242,7 +251,7 @@ private:
     std::map<std::string, glm::vec3> vec3s_;
     std::map<std::string, glm::vec4> vec4s_;
     std::map<std::string, glm::mat4> mat4s_;
-    std::shared_ptr<bool> renderdata_dirty_flag_;
+    std::unordered_set<std::shared_ptr<bool>> dirty_flags_;
 
     unsigned int shader_feature_set_;
 };

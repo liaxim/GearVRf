@@ -13,22 +13,30 @@
  * limitations under the License.
  */
 
-#include "objects/render_pass.h"
-#include "objects/material.h"
+#ifndef HELPERS_H_
+#define HELPERS_H_
+
+#include <memory>
+#include <unordered_set>
 
 namespace gvr {
 
-void RenderPass::set_material(Material* material) {
-    material_ = material;
-    material->add_dirty_flags(dirty_flags_);
-    dirty();
-}
+static void dirtyImpl(std::unordered_set<std::shared_ptr<bool>>& dirty_flags) {
+    for (std::unordered_set<std::shared_ptr<bool>>::iterator it = dirty_flags.begin();
+         it != dirty_flags.end(); ++it) {
+        const std::shared_ptr<bool> &flag = *it;
 
-void RenderPass::add_dirty_flag(const std::shared_ptr<bool>& dirty_flag) {
-    dirty_flags_.insert(dirty_flag);
-    if (nullptr != material_) {
-        material_->add_dirty_flag(dirty_flag);
+        if (1 == flag.use_count()) {
+            dirty_flags.erase(it);
+            if (it == dirty_flags.end()) {
+                break;
+            }
+        } else {
+            *flag = true;
+        }
     }
 }
 
 }
+
+#endif

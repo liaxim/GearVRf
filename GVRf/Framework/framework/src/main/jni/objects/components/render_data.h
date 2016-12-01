@@ -72,7 +72,7 @@ public:
                     offset_(false), offset_factor_(0.0f), offset_units_(0.0f),
                     depth_test_(true), alpha_blend_(true), alpha_to_coverage_(false),
                     sample_coverage_(1.0f), invert_coverage_mask_(GL_FALSE), draw_mode_(GL_TRIANGLES),
-                    texture_capturer(0), cast_shadows_(true), renderdata_dirty_(std::make_shared<bool>(true)) {
+                    texture_capturer(0), cast_shadows_(true), dirty_flag_(std::make_shared<bool>(true)) {
     }
 
     void copy(const RenderData& rdata) {
@@ -101,7 +101,7 @@ public:
         invert_coverage_mask_ = rdata.invert_coverage_mask_;
         draw_mode_ = rdata.draw_mode_;
         texture_capturer = rdata.texture_capturer;
-        renderdata_dirty_ = rdata.renderdata_dirty_;
+        dirty_flag_ = rdata.dirty_flag_;
     }
 
     RenderData(const RenderData& rdata) {
@@ -129,10 +129,12 @@ public:
 
     Material* material(int pass) const ;
 
-    void set_renderdata_dirty(bool dirty_);
-    bool renderdata_dirty(){
-        return *renderdata_dirty_;
+    void setDirty(bool dirty);
+
+    bool isDirty(){
+        return *dirty_flag_;
     }
+
     Light* light() const {
         return light_;
     }
@@ -357,7 +359,7 @@ private:
     std::string hash_code;
     std::vector<RenderPass*> render_pass_list_;
     Light* light_;
-    std::shared_ptr<bool> renderdata_dirty_;
+    std::shared_ptr<bool> dirty_flag_;
     bool use_light_;
     bool batching_;
     bool use_lightmap_;

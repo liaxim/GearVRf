@@ -24,8 +24,8 @@ RenderData::~RenderData() {
 
 void RenderData::add_pass(RenderPass* render_pass) {
     render_pass_list_.push_back(render_pass);
-    render_pass->set_dirty_flag(renderdata_dirty_);
-    *renderdata_dirty_ = true;
+    render_pass->add_dirty_flag(dirty_flag_);
+    *dirty_flag_ = true;
 }
 
 const RenderPass* RenderData::pass(int pass) const {
@@ -37,12 +37,12 @@ const RenderPass* RenderData::pass(int pass) const {
 
 void RenderData::set_mesh(Mesh* mesh) {
     mesh_ = mesh;
-    mesh->set_dirty_flag(renderdata_dirty_);
-    *renderdata_dirty_ = true;
+    mesh->add_dirty_flag(dirty_flag_);
+    *dirty_flag_ = true;
 }
 
-void RenderData::set_renderdata_dirty(bool dirty_){
-    *renderdata_dirty_ = dirty_;
+void RenderData::setDirty(bool dirty){
+    *dirty_flag_ = dirty;
 }
 
 bool RenderData::cull_face(int pass) const {
