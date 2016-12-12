@@ -56,8 +56,7 @@ public:
             vao_dirty_(true),
             boneVboID_(GVR_INVALID),
             vertexBoneData_(this),
-            bone_data_dirty_(true),
-            regenerate_vao_(true)
+            bone_data_dirty_(true)
     {
     }
 
@@ -285,31 +284,26 @@ public:
     void setVertexAttribLocF(GLuint location, std::string key) {
         attribute_float_keys_[location] = key;
         vao_dirty_ = true;
-        regenerate_vao_ = true;
         LOGD("SHADER: setVertexAttrib %s\n", key.c_str());
     }
 
     void setVertexAttribLocV2(GLuint location, std::string key) {
         attribute_vec2_keys_[location] = key;
         vao_dirty_ = true;
-        regenerate_vao_ = true;
         LOGD("SHADER: setVertexAttrib %s\n", key.c_str());
     }
 
     void setVertexAttribLocV3(GLuint location, std::string key) {
         attribute_vec3_keys_[location] = key;
         vao_dirty_ = true;
-        regenerate_vao_ = true;
         LOGD("SHADER: setVertexAttrib %s\n", key.c_str());
     }
 
     void setVertexAttribLocV4(GLuint location, std::string key) {
         attribute_vec4_keys_[location] = key;
         vao_dirty_ = true;
-        regenerate_vao_ = true;
         LOGD("SHADER: setVertexAttrib %s\n", key.c_str());
     }
-
 
     const GLuint getVAOId(int programId);
 
@@ -400,7 +394,6 @@ private:
     // triangle information
     GLuint numTriangles_;
     bool vao_dirty_;
-    bool regenerate_vao_;
     bool have_bounding_volume_;
     BoundingVolume bounding_volume;
 
