@@ -399,7 +399,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
     public GVRComponent getComponent(long type) {
         return  mComponents.get(type);
     }
-    
+
     /**
      * Replace the current {@link GVRTransform transform}
      * 

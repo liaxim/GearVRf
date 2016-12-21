@@ -25,8 +25,7 @@ import org.gearvrf.GVRCamera;
 import org.gearvrf.GVRCameraRig;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRDirectLight;
-import org.gearvrf.GVRLodGroup;
-import org.gearvrf.GVRLodRange;
+import org.gearvrf.GVRLODGroup;
 import org.gearvrf.GVRMaterial;
 import org.gearvrf.GVRMesh;
 import org.gearvrf.GVRPerspectiveCamera;
@@ -870,10 +869,11 @@ public class X3Dobject {
                 if (lodManager.isActive()) {
                     shapeLODSceneObject = AddGVRSceneObject();
                     final GVRSceneObject parent = shapeLODSceneObject.getParent();
-                    if (null == parent.getComponent(GVRLodGroup.getComponentType())) {
-                        parent.attachComponent(new GVRLodGroup(gvrContext));
+                    if (null == parent.getComponent(GVRLODGroup.getComponentType())) {
+                        parent.attachComponent(new GVRLODGroup(gvrContext));
                     }
-                    shapeLODSceneObject.attachComponent(new GVRLodRange(gvrContext, lodManager.getMinRange(), lodManager.getMaxRange()));
+                    final GVRLODGroup lodGroup = (GVRLODGroup)parent.getComponent(GVRLODGroup.getComponentType());
+                    lodGroup.addRange(lodManager.getMinRange(), shapeLODSceneObject);
                     currentSceneObject = shapeLODSceneObject;
                 }
 
@@ -2375,10 +2375,11 @@ public class X3Dobject {
                             inlineGVRSceneObject.setName("inlineGVRSceneObject"
                                     + lodManager.getCurrentRangeIndex());
                             final GVRSceneObject parent = inlineGVRSceneObject.getParent();
-                            if (null == parent.getComponent(GVRLodGroup.getComponentType())) {
-                                parent.attachComponent(new GVRLodGroup(gvrContext));
+                            if (null == parent.getComponent(GVRLODGroup.getComponentType())) {
+                                parent.attachComponent(new GVRLODGroup(gvrContext));
                             }
-                            inlineGVRSceneObject.attachComponent(new GVRLodRange(gvrContext, lodManager.getMinRange(), lodManager.getMaxRange()));
+                            final GVRLODGroup lodGroup = (GVRLODGroup) parent.getComponent(GVRLODGroup.getComponentType());
+                            lodGroup.addRange(lodManager.getMinRange(), inlineGVRSceneObject);
                             lodManager.increment();
                         }
                         InlineObject inlineObject = new InlineObject(inlineGVRSceneObject,
