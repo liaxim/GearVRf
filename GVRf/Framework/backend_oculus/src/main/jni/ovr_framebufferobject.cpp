@@ -144,6 +144,9 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
         mResolveFrameBuffers = new GLuint[mTextureSwapChainLength];
     }
 
+    const GLenum depthStencilAttachment =
+            VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT;
+
     for (int i = 0; i < mTextureSwapChainLength; ++i) {
 
         const GLuint colorTexture = vrapi_GetTextureSwapChainHandle(mColorTextureSwapChain, i);
@@ -160,11 +163,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
                                                                GL_COLOR_ATTACHMENT0, colorTexture,
                                                                0, multisamples, 0, 2));
                 if (VRAPI_TEXTURE_FORMAT_NONE != depthFormat) {
-                    GL(glFramebufferTextureMultisampleMultiviewOVR(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mDepthBuffers[i], 0, multisamples, 0, 2));
-                    if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                        GL(glFramebufferTextureMultisampleMultiviewOVR(
-                                GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, mDepthBuffers[i], 0, multisamples, 0, 2));
-                    }
+                    GL(glFramebufferTextureMultisampleMultiviewOVR(GL_DRAW_FRAMEBUFFER, depthStencilAttachment, mDepthBuffers[i], 0, multisamples, 0, 2));
                 }
             }
             else {
@@ -172,10 +171,7 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
                                                         GL_TEXTURE_2D,
                                                         colorTexture, 0, multisamples));
                 if (VRAPI_TEXTURE_FORMAT_NONE != depthFormat) {
-                    GL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]));
-                    if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                        GL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]));
-                    }
+                    GL(glFramebufferRenderbuffer(GL_FRAMEBUFFER, depthStencilAttachment, GL_RENDERBUFFER, mDepthBuffers[i]));
                 }
             }
             GLenum renderStatus = GL( glCheckFramebufferStatus(GL_FRAMEBUFFER) );
@@ -188,19 +184,13 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
             if(use_multiview){
                 GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, mColorBuffer, 0 , multisamples , 0 , 2  ) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
-                    GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, mDepthBuffers[i], 0 , multisamples , 0 , 2  ) );
-                    if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                        GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, mDepthBuffers[i], 0 , multisamples , 0 , 2  ) );
-                    }
+                    GL( glFramebufferTextureMultisampleMultiviewOVR( GL_DRAW_FRAMEBUFFER, depthStencilAttachment, mDepthBuffers[i], 0 , multisamples , 0 , 2  ) );
                 }
             }
             else {
                 GL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, mColorBuffer) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
-                    GL( glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]) );
-                    if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                        GL( glFramebufferRenderbuffer( GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]) );
-                    }
+                    GL( glFramebufferRenderbuffer( GL_FRAMEBUFFER, depthStencilAttachment, GL_RENDERBUFFER, mDepthBuffers[i]) );
                 }
             }
             GLenum renderStatus = GL( glCheckFramebufferStatus(GL_FRAMEBUFFER) );
@@ -233,25 +223,16 @@ void FrameBufferObject::create(const ovrTextureFormat colorFormat, const int wid
                 GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTexture, 0 , 0 , 2 ) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
                     const GLuint texture = resolveDepth ? depthTexture : mDepthBuffers[i];
-                    GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, texture, 0 , 0 , 2 ) );
-                    if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                        GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, texture, 0 , 0 , 2 ) );
-                    }
+                    GL( glFramebufferTextureMultiviewOVR( GL_DRAW_FRAMEBUFFER, depthStencilAttachment, texture, 0 , 0 , 2 ) );
                 }
             }
             else {
                 GL( glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0) );
                 if (depthFormat != VRAPI_TEXTURE_FORMAT_NONE) {
                     if (resolveDepth) {
-                        GL( glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0) );
-                        if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                            GL( glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0) );
-                        }
+                        GL( glFramebufferTexture2D(GL_FRAMEBUFFER, depthStencilAttachment, GL_TEXTURE_2D, depthTexture, 0) );
                     } else {
-                        GL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]) );
-                        if (VRAPI_TEXTURE_FORMAT_DEPTH_24_STENCIL_8 == depthFormat) {
-                            GL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mDepthBuffers[i]) );
-                        }
+                        GL( glFramebufferRenderbuffer(GL_FRAMEBUFFER, depthStencilAttachment, GL_RENDERBUFFER, mDepthBuffers[i]) );
                     }
                 }
             }
