@@ -130,12 +130,6 @@ void Renderer::state_sort() {
     std::sort(render_data_vector.begin(), render_data_vector.end(),
             compareRenderDataByOrderShaderDistance);
 
-    if (render_data_vector.size()) {
-        useStencilBuffer_ = RenderData::Queue::Stencil == render_data_vector[0]->rendering_order();
-    } else {
-        useStencilBuffer_ = false;
-    }
-
     if (DEBUG_RENDERER) {
         LOGD("SORTING: After sorting");
 

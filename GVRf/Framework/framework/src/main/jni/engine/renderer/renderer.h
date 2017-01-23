@@ -196,6 +196,8 @@ protected:
 public:
     //to be used only on the gl thread
     const std::vector<RenderData*>& getRenderDataVector() const { return render_data_vector; }
+
+    void setUseStencilBuffer(bool enable) { useStencilBuffer_ = enable; }
 };
 extern Renderer* gRenderer;
 }
