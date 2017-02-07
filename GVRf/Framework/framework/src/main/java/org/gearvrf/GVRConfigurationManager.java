@@ -103,9 +103,10 @@ abstract class GVRConfigurationManager {
 
         //must determine the default fov
         if (model.contains("R323")) {
-            fovY = 93;
+            fovY = 84.6f;
         } else {
-            fovY = 90;
+            //fovY = 83.6f;
+            fovY = 100.0f;
         }
         Log.i(TAG, "set the default fov-y to " + fovY);
 
