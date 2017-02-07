@@ -401,6 +401,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
                     }
                 }
             }
+            return true;
         } else {
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_VOLUME_UP:
