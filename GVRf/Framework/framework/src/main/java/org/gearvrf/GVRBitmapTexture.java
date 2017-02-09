@@ -20,6 +20,10 @@ import static android.opengl.GLES20.*;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.opengl.GLES10;
+import android.opengl.GLES11;
+import android.opengl.GLES20;
+import android.opengl.GLES30;
 import android.opengl.GLUtils;
 
 import org.gearvrf.utility.Log;
@@ -266,7 +270,9 @@ public class GVRBitmapTexture extends GVRTexture {
         glBindTexture(GL_TEXTURE_2D, getId());
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
         glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);        
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+        glTexParameterf(GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAX_LOD,2.0f);
         return (glGetError() == GL_NO_ERROR);
     }
 
