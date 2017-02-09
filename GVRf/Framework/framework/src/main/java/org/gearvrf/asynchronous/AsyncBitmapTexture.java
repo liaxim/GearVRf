@@ -125,7 +125,7 @@ class AsyncBitmapTexture {
     protected static final boolean CHECK_ARGUMENTS = Threads.RUNTIME_ASSERTIONS;
 
     /** A very low value, for testing */
-    private static final int DEFAULT_GL_MAX_TEXTURE_SIZE = 1024;
+    private static final int DEFAULT_GL_MAX_TEXTURE_SIZE = 8192;
 
     /**
      * Can only load textures whose width and height are both less than
@@ -140,7 +140,8 @@ class AsyncBitmapTexture {
      * A multiple of the "memory class" - <i>e.g.</i> 7.5% of a 32M heap is a
      * 2.4M image; 6% is 1.92M
      */
-    private static final float MAXIMUM_IMAGE_FACTOR = 0.625f;
+    //private static final float MAXIMUM_IMAGE_FACTOR = 0.625f;
+    private static final float MAXIMUM_IMAGE_FACTOR = 4.0f;
 
     /**
      * When {@link #fractionalDecode(FractionalDecodeShim, Options, int, int)}
@@ -158,7 +159,7 @@ class AsyncBitmapTexture {
      * size, in bytes. Compiled in value allows image loading to work (albeit
      * with very conservative default settings) if setup() is not called.
      */
-    protected static int maxImageSize = 1024 * 1024; // bytes
+    protected static int maxImageSize = 3840 * 2160; // bytes
 
     /**
      * Either {@link #setup(Context)} or
