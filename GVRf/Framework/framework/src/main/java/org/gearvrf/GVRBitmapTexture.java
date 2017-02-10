@@ -270,9 +270,7 @@ public class GVRBitmapTexture extends GVRTexture {
         glBindTexture(GL_TEXTURE_2D, getId());
         GLUtils.texImage2D(GL_TEXTURE_2D, 0, bitmap, 0);
         glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-        glTexParameterf(GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAX_LOD,2.0f);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         return (glGetError() == GL_NO_ERROR);
     }
 
