@@ -23,10 +23,13 @@ import java.util.concurrent.Future;
 import org.gearvrf.GVRAndroidResource.TextureCallback;
 import org.gearvrf.asynchronous.GVRAsynchronousResourceLoader.FutureResource;
 import org.gearvrf.utility.Colors;
+import org.gearvrf.utility.FileNameUtils;
 import org.gearvrf.utility.Threads;
 import org.gearvrf.utility.Log;
 
 import static org.gearvrf.utility.Assert.*;
+import static org.gearvrf.utility.FileNameUtils.*;
+
 import android.graphics.Color;
 
 /**
@@ -609,17 +612,20 @@ public class GVRMaterial extends GVRHybridObject implements
     public void setTexture(final String key, final Future<GVRTexture> texture) {
         if (texture.isDone()) {
             try {
+                Log.i("mmarinov", "setTexture isDone for material " + toHex(this));
                 setTexture(key, texture.get());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
             if (texture instanceof FutureResource<?>) {
+                Log.i("mmarinov", "setTexture instanceof FutureResource<?> for material " + toHex(this));
 				setTexture(key, (GVRTexture) null);
                 TextureCallback callback = new TextureCallback() {
                     @Override
                     public void loaded(GVRTexture texture,
                             GVRAndroidResource ignored) {
+                        Log.i("mmarinov", "setTexture loaded for material " + toHex(GVRMaterial.this));
                         setTexture(key, texture);
                         Log.d(TAG, "Finish loading and setting texture %s",
                                 texture);
@@ -628,6 +634,7 @@ public class GVRMaterial extends GVRHybridObject implements
                 @Override
                 public void failed(Throwable t,
                         GVRAndroidResource androidResource) {
+                    Log.i("mmarinov", "setTexture failed for material " + toHex(GVRMaterial.this));
                     Log.e(TAG, "Error loading texture %s; exception: %s",
                             texture, t.getMessage());
                 }
@@ -636,7 +643,7 @@ public class GVRMaterial extends GVRHybridObject implements
                 public boolean stillWanted(GVRAndroidResource androidResource) {
                     return true;
                 }
-            };
+                };
 
                 getGVRContext().getAssetLoader().loadTexture(
                         ((FutureResource<GVRTexture>) texture).getResource(), callback);
@@ -645,6 +652,7 @@ public class GVRMaterial extends GVRHybridObject implements
                     @Override
                     public void run() {
                         try {
+                            Log.i("mmarinov", "setTexture Threads.spawn for material " + toHex(GVRMaterial.this));
                             setTexture(key, texture.get());
                         } catch (Exception e) {
                             e.printStackTrace();

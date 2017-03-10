@@ -26,6 +26,10 @@ import java.util.regex.Pattern;
 public class FileNameUtils {
     private static final String sPatternUrl = "^[a-zA-Z]+://.*";
 
+    public static String toHex(Object o) {
+        return Integer.toHexString(o.hashCode());
+    }
+
     /**
      * Gets the base filename without the extension but includes
      * the path if {@code fileName} includes path.
