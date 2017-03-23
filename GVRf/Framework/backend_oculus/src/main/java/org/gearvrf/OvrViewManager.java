@@ -418,5 +418,4 @@ class OvrViewManager extends GVRViewManager implements OvrRotationSensorListener
     }
 
     private native void drawEyes(long ptr);
-    private native void readRenderResultNative(long renderTexture, Object readbackBuffer);
 }
