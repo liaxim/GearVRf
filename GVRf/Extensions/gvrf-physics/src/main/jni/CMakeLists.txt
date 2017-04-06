@@ -14,8 +14,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Framework/framewo
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Framework/framework/src/main/jni/contrib)
 
 add_library(gvrf SHARED IMPORTED)
+
 set_property(TARGET gvrf PROPERTY IMPORTED_LOCATION
              ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Framework/framework/build/intermediates/bundles/release/jni/${ANDROID_ABI}/libgvrf.so)
+set_property(TARGET gvrf PROPERTY IMPORTED_LOCATION
+             ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../Framework/framework/build/intermediates/bundles/debug/jni/${ANDROID_ABI}/libgvrf.so)
+
 add_library(Bullet SHARED IMPORTED)
 set_property(TARGET Bullet PROPERTY IMPORTED_LOCATION
              ${CMAKE_CURRENT_SOURCE_DIR}/prebuilt/armeabi-v7a/libBullet.so)

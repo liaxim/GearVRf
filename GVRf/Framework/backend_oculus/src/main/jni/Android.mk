@@ -61,7 +61,12 @@ LOCAL_CFLAGS := -Wattributes
 #LOCAL_LDLIBS += -ljnigraphics -lm_hard
 #softFP
 LOCAL_LDLIBS += -ljnigraphics -llog -lGLESv3 -lEGL -lz -landroid
-LOCAL_LDLIBS += $(PROJECT_DIR)/build/intermediates/exploded-aar/Framework/framework/unspecified/jni/$(TARGET_ARCH_ABI)/libgvrf.so
+ifneq ($(wildcard $(PROJECT_DIR)/../framework/build/intermediates/bundles/release/jni/$(TARGET_ARCH_ABI)/libgvrf.so), )
+    LOCAL_LDLIBS += $(PROJECT_DIR)/../framework/build/intermediates/bundles/release/jni/$(TARGET_ARCH_ABI)/libgvrf.so
+endif
+ifneq ($(wildcard $(PROJECT_DIR)/../framework/build/intermediates/bundles/debug/jni/$(TARGET_ARCH_ABI)/libgvrf.so), )
+    LOCAL_LDLIBS += $(PROJECT_DIR)/../framework/build/intermediates/bundles/debug/jni/$(TARGET_ARCH_ABI)/libgvrf.so
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 
