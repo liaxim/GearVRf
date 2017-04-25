@@ -4,13 +4,13 @@ apply plugin: 'com.android.library'
 
 repositories {
     flatDir {
-        dirs 'src/main/libs', '../../Framework/framework/build/outputs/aar/'
+        dirs 'src/main/libs', '../../gearvrf-libs/'
     }
 }
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '23.0.3'
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 19
@@ -77,24 +77,31 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile fileTree(dir: 'src/main/libs', include: ['*.jar'])
-    compile(name: 'framework-debug', ext: 'aar')
+    if(rootProject.hasProperty("buildGvrfAndDemos")) {
+        compile project (':framework')
+    } else {
+        compile(name: 'framework-debug', ext: 'aar')
+    }
 }
 
-assembleDebug {}.doLast {
-    task copyAARFiles(type: Copy) {
-        if (rootProject.hasProperty("LIBS_DIRECTORY")) {
-            println "copying aar files to the libs_directory"
-            def libsdirPath = projectDir.absolutePath + '/../../../' +
-                    rootProject.property("LIBS_DIRECTORY")
-            def libsDir = new File(libsdirPath);
-            if (libsDir.exists()) {
-                from 'build/outputs/aar'
-                into libsDir
-                include '**/*.aar'
-            } else {
-                println "Cannot copy aar files, libs directory does not exist!"
-            }
-        }
+task copyJarToBin(type: Copy) {
+    outputs.upToDateWhen { false }
+    from tasks.matching { it.name.startsWith('bundle') }
+    into project.rootDir.absolutePath + "/../gearvrf-libs"
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'bundleDebug') {
+        task.finalizedBy(copyJarToBin)
+    } else if (task.name == 'bundleRelease') {
+        task.finalizedBy(copyJarToBin)
     }
-    tasks.copyAARFiles.execute()
+}
+
+clean {}.doLast {
+    def gearvrfLibs = project.rootDir.absolutePath + "/../gearvrf-libs"
+    if (file(gearvrfLibs).exists()) {
+        project.delete(gearvrfLibs + '/' + project.name + '-release.aar')
+        project.delete(gearvrfLibs + '/' + project.name + '-debug.aar')
+    }
 }
