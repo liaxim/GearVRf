@@ -15,26 +15,29 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 19
-    }
 
-    task buildNative(type: Exec) {
-        def ndkbuild = ""
-        if (rootProject.hasProperty("ANDROID_NDK_HOME")) {
-            ndkbuild = rootProject.property("ANDROID_NDK_HOME")
-            ndkbuild += '/'
+        ndk {
+            moduleName "gvrf-platformsdk"
+            abiFilter "armeabi-v7a"
         }
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            ndkbuild += 'ndk-build.cmd'
-        } else {
-            ndkbuild += 'ndk-build'
+        externalNativeBuild {
+            cmake {
+                //difference in sign extension when reinterpret_cast-ing a pointer between
+                //gcc and clang hence overriding the default toolchain to match the one used
+                //by the other modules
+                arguments.add('-DANDROID_TOOLCHAIN=gcc')
+                arguments.add('-DOVR_PLATFORM_SDK=' + rootProject.property("OVR_PLATFORM_SDK"))
+                if (rootProject.hasProperty("buildGvrfAndDemos")) {
+                    arguments.add('-DCMAKE_BUILD_TYPE=Debug')
+                }
+            }
         }
-
-        environment 'OVR_PLATFORM_SDK', rootProject.property("OVR_PLATFORM_SDK")
-        commandLine ndkbuild, '-C', file('src/main').absolutePath, '-j', Runtime.runtime.availableProcessors()//, 'NDK_DEBUG=1'
     }
 
     buildTypes {
         debug {
+            debuggable = true
+            jniDebuggable = true
         }
         release {
             minifyEnabled false
@@ -48,29 +51,14 @@ android {
         // pre-compiled libraries
         jniLibs {
             srcDir 'src/main/libs'
+            srcDir rootProject.property("OVR_PLATFORM_SDK") + '/Android/libs/'
         }
     }
 
-    task cleanNative(type: Exec) {
-        def ndkbuild = ""
-        if (rootProject.hasProperty("ANDROID_NDK_HOME")) {
-            ndkbuild = rootProject.property("ANDROID_NDK_HOME")
-            ndkbuild += '/'
+    externalNativeBuild {
+        cmake {
+            path 'src/main/jni/CMakeLists.txt'
         }
-        if (Os.isFamily(Os.FAMILY_WINDOWS)) {
-            ndkbuild += 'ndk-build.cmd'
-        } else {
-            ndkbuild += 'ndk-build'
-        }
-
-        environment 'OVR_PLATFORM_SDK', rootProject.property("OVR_PLATFORM_SDK")
-        commandLine ndkbuild, '-C', file('src/main').absolutePath, '-j', Runtime.runtime.availableProcessors(), 'clean'
-    }
-
-    clean.dependsOn 'cleanNative'
-
-    tasks.withType(JavaCompile) {
-        compileTask -> compileTask.dependsOn buildNative
     }
 }
 
