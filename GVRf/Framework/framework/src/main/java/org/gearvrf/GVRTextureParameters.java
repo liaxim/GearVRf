@@ -36,7 +36,7 @@ public class GVRTextureParameters {
 
     /**
      * Constructs a texture parameter object with default values for filter and
-     * warp.
+     * wrap.
      * 
      * @param gvrContext
      *            Current {@link GVRContext}
