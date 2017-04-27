@@ -70,8 +70,9 @@ public class YuvNv21ToRgbShader extends GVRShaderTemplate
             "  void main (void) {\n" +
             "  float r, g, b, y, u, v;\n" +
             "  y = texture(y_texture, v_texCoord).r;\n" +
-            "  u = texture(uv_texture, v_texCoord).a - 0.5;\n" +
-            "  v = texture(uv_texture, v_texCoord).r - 0.5;\n" +
+            "  vec4 texColor = texture(uv_texture,v_texCoord);\n" +
+            "  u = texColor.a - 0.5;\n" +
+            "  v = texColor.r - 0.5;\n" +
             "  r = y + 1.13983*v;\n" +
             "  g = y - 0.39465*u - 0.58060*v;\n" +
             "  b = y + 2.03211*u;\n" +
