@@ -85,6 +85,12 @@ public:
         }
     }
 
+    void updateFromBuffer(int internalFormat, int width, int height, int format, int type, void* data) {
+        glBindTexture(GL_TEXTURE_2D, getId());
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
 private:
     BaseTexture(const BaseTexture& base_texture);
     BaseTexture(BaseTexture&& base_texture);
