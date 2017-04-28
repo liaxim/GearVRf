@@ -28,8 +28,8 @@ import org.gearvrf.GVRShaderTemplate;
  * ByteBuffer mUvBuffer = ByteBuffer.allocateDirect(width*height/2);
  * myBuffer.order(ByteOrder.nativeOrder());
  * muvBuffer.order(ByteOrder.nativeOrder());
- * GVRTexture mYBufferTexture = new GVRNioBufferTexture(context);
- * GVRTexture mUVBufferTexture = new GVRNioBufferTexture(context);
+ * GVRTexture mYBufferTexture = new GVRBitmapTexture(context, new GVRTextureParameters());
+ * GVRTexture mUVBufferTexture = new GVRBitmapTexture(context, new GVRTextureParameters());
  *
  * GVRSceneObject quad = new GVRSceneObject(context, 3f, 1.5f);
  * GVRMaterial material = new GVRMaterial(context, GVRMaterial.GVRShaderType.BeingGenerated.ID);
