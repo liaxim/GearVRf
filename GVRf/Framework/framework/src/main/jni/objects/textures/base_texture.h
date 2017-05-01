@@ -85,9 +85,9 @@ public:
         }
     }
 
-    void updateFromBuffer(int internalFormat, int width, int height, int format, int type, void* data) {
+    void updateFromBuffer(int width, int height, int format, int type, void* data) {
         glBindTexture(GL_TEXTURE_2D, getId());
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, type, data);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, format, type, data);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 

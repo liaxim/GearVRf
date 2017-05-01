@@ -64,11 +64,11 @@ Java_org_gearvrf_NativeBaseTexture_update(JNIEnv * env, jobject obj,
 extern "C"
 JNIEXPORT jboolean JNICALL
 Java_org_gearvrf_NativeBaseTexture_updateFromBuffer(JNIEnv *env, jclass type_, jlong pointer,
-                                                    jint internalFormat, jint width, jint height,
-                                                    jint format, jint type, jobject pixels) {
+                                                    jint width, jint height, jint format, jint type,
+                                                    jobject pixels) {
     BaseTexture* texture = reinterpret_cast<BaseTexture*>(pointer);
     void* directPtr = env->GetDirectBufferAddress(pixels);
-    texture->updateFromBuffer(internalFormat, width, height, format, type, directPtr);
+    texture->updateFromBuffer(width, height, format, type, directPtr);
 }
 
 }

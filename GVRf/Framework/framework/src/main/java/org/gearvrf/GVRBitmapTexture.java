@@ -176,6 +176,10 @@ public class GVRBitmapTexture extends GVRTexture {
     /**
      * This constructor prepare the texture according to the specified parameters. Use in
      * conjunction with the postBuffer method to load the texture data.
+     *
+     * @param textureParameters this is the only constructor that uses GVRTextureParameter's
+     *                          internalFormat, width, height, format and type fields; hence they
+     *                          must be set to valid values.
      */
     public GVRBitmapTexture(GVRContext gvrContext, GVRTextureParameters textureParameters) {
         super(gvrContext, NativeBaseTexture.bareConstructor(textureParameters.getCurrentValuesArray()));
@@ -360,11 +364,11 @@ public class GVRBitmapTexture extends GVRTexture {
      * For detailed information see glTexImage2D's internalformat, width, height, format, type,
      * pixels parameters. The buffer is not copied!
      */
-    public void postBuffer(final int internalFormat, final int width, final int height, final int format, final int type, final Buffer pixels) {
+    public void postBuffer(final int width, final int height, final int format, final int type, final Buffer pixels) {
         getGVRContext().runOnGlThread(new Runnable() {
             @Override
             public void run() {
-                NativeBaseTexture.updateFromBuffer(getNative(), internalFormat, width, height, format, type, pixels);
+                NativeBaseTexture.updateFromBuffer(getNative(), width, height, format, type, pixels);
             }
         });
     }
@@ -383,5 +387,5 @@ final class NativeBaseTexture {
     static native boolean update(long pointer, int width, int height,
             byte[] grayscaleData);
 
-    static native boolean updateFromBuffer(long pointer, int internalFormat, int width, int height, int format, int type, Buffer pixels);
+    static native boolean updateFromBuffer(long pointer, int width, int height, int format, int type, Buffer pixels);
 }
