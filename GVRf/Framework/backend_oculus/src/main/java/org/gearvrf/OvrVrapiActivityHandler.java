@@ -145,6 +145,29 @@ class OvrVrapiActivityHandler implements OvrActivityHandler {
     public void onSetScript() {
         mSurfaceView = new GLSurfaceView(mActivity);
 
+        final DisplayMetrics metrics = new DisplayMetrics();
+        mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        final VrAppSettings appSettings = mActivity.getAppSettings();
+        int defaultWidthPixels = Math.max(metrics.widthPixels, metrics.heightPixels);
+        int defaultHeightPixels = Math.min(metrics.widthPixels, metrics.heightPixels);
+        final int frameBufferWidth = appSettings.getFramebufferPixelsWide();
+        final int frameBufferHeight = appSettings.getFramebufferPixelsHigh();
+        final SurfaceHolder holder = mSurfaceView.getHolder();
+        holder.setFormat(PixelFormat.TRANSLUCENT);
+
+        if ((-1 != frameBufferHeight) && (-1 != frameBufferWidth)) {
+            if ((defaultWidthPixels != frameBufferWidth) && (defaultHeightPixels != frameBufferHeight)) {
+                Log.v(TAG, "--- window configuration ---");
+                Log.v(TAG, "--- width: %d", frameBufferWidth);
+                Log.v(TAG, "--- height: %d", frameBufferHeight);
+                //a different resolution of the native window requested
+                defaultWidthPixels = frameBufferWidth;
+                defaultHeightPixels = frameBufferHeight;
+                Log.v(TAG, "----------------------------");
+            }
+        }
+        holder.setFixedSize(defaultWidthPixels, defaultHeightPixels);
+
         mSurfaceView.setPreserveEGLContextOnPause(true);
         mSurfaceView.setEGLContextClientVersion(3);
         mSurfaceView.setEGLContextFactory(mContextFactory);
@@ -154,27 +177,6 @@ class OvrVrapiActivityHandler implements OvrActivityHandler {
         mSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
 
         mActivity.setContentView(mSurfaceView);
-
-        final DisplayMetrics metrics = new DisplayMetrics();
-        mActivity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        final VrAppSettings appSettings = mActivity.getAppSettings();
-        final int screenWidthPixels = Math.max(metrics.widthPixels, metrics.heightPixels);
-        final int screenHeightPixels = Math.min(metrics.widthPixels, metrics.heightPixels);
-        final int frameBufferWidth = appSettings.getFramebufferPixelsWide();
-        final int frameBufferHeight = appSettings.getFramebufferPixelsHigh();
-        final SurfaceHolder holder = mSurfaceView.getHolder();
-        holder.setFormat(PixelFormat.TRANSLUCENT);
-
-        if ((-1 != frameBufferHeight) && (-1 != frameBufferWidth)) {
-            if ((screenWidthPixels != frameBufferWidth) && (screenHeightPixels != frameBufferHeight)) {
-                Log.v(TAG, "--- window configuration ---");
-                Log.v(TAG, "--- width: %d", frameBufferWidth);
-                Log.v(TAG, "--- height: %d", frameBufferHeight);
-                //a different resolution of the native window requested
-                holder.setFixedSize((int) frameBufferWidth, (int) frameBufferHeight);
-                Log.v(TAG, "----------------------------");
-            }
-        }
     }
 
     private final EGLContextFactory mContextFactory = new EGLContextFactory() {
