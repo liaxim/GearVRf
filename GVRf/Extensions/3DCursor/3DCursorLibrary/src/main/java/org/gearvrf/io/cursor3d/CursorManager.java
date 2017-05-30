@@ -892,6 +892,7 @@ public final class CursorManager {
         while (continueLoop) {
             continueLoop = false;
 
+            ArrayList<Cursor> usedCursors = null;
             synchronized (mUnusedCursors) {
                 for (Iterator<Cursor> cursorIterator = mUnusedCursors.iterator(); cursorIterator.hasNext(); ) {
                     IoDevice compatibleIoDevice = null;
@@ -923,13 +924,22 @@ public final class CursorManager {
                             if (availableIoDevice.equals(compatibleIoDevice)) {
                                 Log.d(TAG, "Found match attaching cursor to Io device");
                                 ioDeviceIterator.remove();
-                                cursorIterator.remove();
+
+                                if (null == usedCursors) {
+                                    usedCursors = new ArrayList<>(mUnusedCursors.size());
+                                }
+                                usedCursors.add(unUsedCursor);
+
                                 addNewCursor(unUsedCursor, availableIoDevice);
                                 break;
                             }
                         }
                     }
                 }
+            }
+
+            if (null != usedCursors) {
+                mUnusedCursors.removeAll(usedCursors);
             }
 
             if (checkSavedIoDevice) {
