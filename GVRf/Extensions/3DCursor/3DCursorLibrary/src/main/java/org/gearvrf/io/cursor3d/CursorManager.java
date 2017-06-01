@@ -31,6 +31,7 @@ import org.gearvrf.io.cursor3d.settings.SettingsView;
 import org.gearvrf.io.cursor3d.settings.SettingsView.SettingsChangeListener;
 import org.gearvrf.scene_objects.GVRViewSceneObject;
 import org.gearvrf.utility.Log;
+import org.gearvrf.utility.Threads;
 import org.joml.FrustumIntersection;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -896,7 +897,7 @@ public final class CursorManager {
             synchronized (mUnusedCursors) {
                 for (Iterator<Cursor> cursorIterator = mUnusedCursors.iterator(); cursorIterator.hasNext(); ) {
                     IoDevice compatibleIoDevice = null;
-                    Cursor unUsedCursor = cursorIterator.next();
+                    final Cursor unUsedCursor = cursorIterator.next();
                     if (!unUsedCursor.isEnabled()) {
                         continue;
                     }
@@ -915,7 +916,7 @@ public final class CursorManager {
 
                         for (Iterator<IoDevice> ioDeviceIterator = unusedIoDevices
                                 .iterator(); ioDeviceIterator.hasNext(); ) {
-                            IoDevice availableIoDevice = ioDeviceIterator.next();
+                            final IoDevice availableIoDevice = ioDeviceIterator.next();
 
                             Log.d(TAG, "Trying to attach available ioDevice:" +
                                     IoDeviceFactory.getXmlString(availableIoDevice) + " to cursor:" +
@@ -930,7 +931,19 @@ public final class CursorManager {
                                 }
                                 usedCursors.add(unUsedCursor);
 
-                                addNewCursor(unUsedCursor, availableIoDevice);
+                                //force adding the new cursor later; otherwise addNewCursor can lead
+                                //to modifications to mUnusedCursors and thus a ConcurrentModificationException.
+                                Threads.spawn(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        getGVRContext().getActivity().runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                addNewCursor(unUsedCursor, availableIoDevice);
+                                            }
+                                        });
+                                    }
+                                });
                                 break;
                             }
                         }
@@ -992,7 +1005,7 @@ public final class CursorManager {
                         .hasNext(); ) {
                     Cursor cursor = cursorIterator.next();
 
-                    if (cursor.getIoDevice().equals(removedIoDevice)) {
+                    if (removedIoDevice.equals(cursor.getIoDevice())) {
                         if (scene != null) {
                             removeCursorFromScene(cursor);
                         }
