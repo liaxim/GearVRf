@@ -28,10 +28,6 @@ import org.gearvrf.io.GVRInputManager;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
-
 /**
  * This class represents the Gear Controller.
  *
@@ -50,16 +46,6 @@ import java.nio.FloatBuffer;
  * notification whenever the controller information is updated.
  */
 final class OvrGearController extends GVRCursorController {
-    private static final String TAG = "OvrGearController";
-
-    private static final int DATA_SIZE = 12;
-    private static final int BYTE_TO_FLOAT = 4;
-    private static final int INDEX_CONNECTED = 0;
-    private static final int INDEX_HANDEDNESS = 1;
-    private static final int INDEX_POSITION = 2;
-    private static final int INDEX_ROTATION = 5;
-    private static final int INDEX_BUTTON = 9;
-    private static final int INDEX_TOUCHPAD = 10;
     private static final int OVR_BUTTON_A = 0x00000001;
     private static final int OVR_BUTTON_ENTER = 0x00100000;
     private static final int OVR_BUTTON_BACK = 0x00200000;
@@ -79,56 +65,13 @@ final class OvrGearController extends GVRCursorController {
     private boolean isEnabled;
     private final ControllerReader mControllerReader;
 
-    static class ControllerReader {
-        private FloatBuffer readbackBuffer;
-        private final long mPtr;
-        private float handedness;
-
-        ControllerReader() {
-            ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
-            readbackBufferB.order(ByteOrder.nativeOrder());
-            readbackBuffer = readbackBufferB.asFloatBuffer();
-            mPtr = OvrNativeGearController.ctor(readbackBufferB);
-
-        }
-
-        boolean isConnected() {
-            return readbackBuffer.get(INDEX_CONNECTED) == 1.0f;
-        }
-
-        void updateRotation(Quaternionf quat) {
-            quat.set(readbackBuffer.get(INDEX_ROTATION + 1),
-                    readbackBuffer.get(INDEX_ROTATION + 2),
-                    readbackBuffer.get(INDEX_ROTATION + 3),
-                    readbackBuffer.get(INDEX_ROTATION));
-        }
-
-        void updatePosition(Vector3f vec) {
-            vec.set(readbackBuffer.get(INDEX_POSITION),
-                    readbackBuffer.get(INDEX_POSITION + 1),
-                    readbackBuffer.get(INDEX_POSITION + 2));
-        }
-
-        public int getKey() {
-            return (int) readbackBuffer.get(INDEX_BUTTON);
-        }
-
-        public float getHandedness() {
-            return readbackBuffer.get(INDEX_HANDEDNESS);
-        }
-
-        public void updateTouchpad(PointF pt) {
-            pt.set(readbackBuffer.get(INDEX_TOUCHPAD), readbackBuffer.get(INDEX_TOUCHPAD + 1));
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            try {
-                OvrNativeGearController.delete(mPtr);
-            } finally {
-                super.finalize();
-            }
-        }
+    interface ControllerReader {
+        boolean isConnected();
+        void updateRotation(Quaternionf quat);
+        void updatePosition(Vector3f vec);
+        int getKey();
+        float getHandedness();
+        void updateTouchpad(PointF pt);
     }
 
     OvrGearController(GVRContext context, ControllerReader controllerReader) {
@@ -481,10 +424,4 @@ final class OvrGearController extends GVRCursorController {
             return recycled;
         }
     }
-}
-
-class OvrNativeGearController {
-    static native long ctor(ByteBuffer buffer);
-
-    static native void delete(long jConfigurationManager);
 }
