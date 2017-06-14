@@ -35,7 +35,7 @@ import org.joml.Vector3f;
  * the {@link GVRInputManager#addCursorControllerListener(CursorControllerListener)} to get notified
  * when the controller is available to use. To query the device specific information from the
  * Gear Controller make sure to type cast the returned {@link GVRCursorController} to
- * {@link OvrGearController} like below:
+ * {@link GearCursorController} like below:
  *
  * <code>
  * OvrGearController controller = (OvrGearController) gvrCursorController;
@@ -45,7 +45,7 @@ import org.joml.Vector3f;
  * {@link GVRCursorController#addControllerEventListener(ControllerEventListener)} to receive
  * notification whenever the controller information is updated.
  */
-final class OvrGearController extends GVRCursorController {
+final class GearCursorController extends GVRCursorController {
     private static final int OVR_BUTTON_A = 0x00000001;
     private static final int OVR_BUTTON_ENTER = 0x00100000;
     private static final int OVR_BUTTON_BACK = 0x00200000;
@@ -74,7 +74,7 @@ final class OvrGearController extends GVRCursorController {
         void updateTouchpad(PointF pt);
     }
 
-    OvrGearController(GVRContext context, ControllerReader controllerReader) {
+    GearCursorController(GVRContext context, ControllerReader controllerReader) {
         super(GVRControllerType.CONTROLLER);
         this.context = context;
         pivot = new GVRSceneObject(context);
@@ -277,23 +277,23 @@ final class OvrGearController extends GVRCursorController {
                 public boolean handleMessage(Message message) {
                     switch (message.what) {
                         case MSG_INITIALIZE:
-                            context.getInputManager().addCursorController(OvrGearController.this);
+                            context.getInputManager().addCursorController(GearCursorController.this);
                             break;
                         case MSG_EVENT:
                             handleControllerEvent((ControllerEvent) message.obj);
                             break;
                         case MSG_UNINITIALIZE:
-                            context.getInputManager().removeCursorController(OvrGearController
+                            context.getInputManager().removeCursorController(GearCursorController
                                     .this);
                             break;
                         case MSG_SET_ENABLE:
-                            OvrGearController.super.setEnable(message.arg1 == ENABLE);
+                            GearCursorController.super.setEnable(message.arg1 == ENABLE);
                             break;
                         case MSG_SET_SCENE:
-                            OvrGearController.super.setScene((GVRScene) message.obj);
+                            GearCursorController.super.setScene((GVRScene) message.obj);
                             break;
                         case MSG_SEND_INVALIDATE:
-                            OvrGearController.super.invalidate();
+                            GearCursorController.super.invalidate();
                             break;
                         default:
                             break;
@@ -329,7 +329,7 @@ final class OvrGearController extends GVRCursorController {
                     .KEYCODE_BACK);
             prevButtonBack = handleResult == -1 ? prevButtonBack : handleResult;
 
-            OvrGearController.super.setPosition(result.x, result.y, result.z);
+            GearCursorController.super.setPosition(result.x, result.y, result.z);
             event.recycle();
         }
 
