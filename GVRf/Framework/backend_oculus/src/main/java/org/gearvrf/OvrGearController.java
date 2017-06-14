@@ -73,28 +73,72 @@ final class OvrGearController extends GVRCursorController {
 
     private GVRSceneObject pivot;
     private GVRContext context;
-    private FloatBuffer readbackBuffer;
     private final Vector3f position;
     private EventHandlerThread thread;
     private boolean initialized;
-    private final long mPtr;
     private boolean isEnabled;
+    private final ControllerReader mControllerReader;
 
-    OvrGearController(GVRContext context) {
+    static class ControllerReader {
+        private FloatBuffer readbackBuffer;
+        private final long mPtr;
+        private float handedness;
+
+        ControllerReader() {
+            ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
+            readbackBufferB.order(ByteOrder.nativeOrder());
+            readbackBuffer = readbackBufferB.asFloatBuffer();
+            mPtr = OvrNativeGearController.ctor(readbackBufferB);
+
+        }
+
+        boolean isConnected() {
+            return readbackBuffer.get(INDEX_CONNECTED) == 1.0f;
+        }
+
+        void updateRotation(Quaternionf quat) {
+            quat.set(readbackBuffer.get(INDEX_ROTATION + 1),
+                    readbackBuffer.get(INDEX_ROTATION + 2),
+                    readbackBuffer.get(INDEX_ROTATION + 3),
+                    readbackBuffer.get(INDEX_ROTATION));
+        }
+
+        void updatePosition(Vector3f vec) {
+            vec.set(readbackBuffer.get(INDEX_POSITION),
+                    readbackBuffer.get(INDEX_POSITION + 1),
+                    readbackBuffer.get(INDEX_POSITION + 2));
+        }
+
+        public int getKey() {
+            return (int) readbackBuffer.get(INDEX_BUTTON);
+        }
+
+        public float getHandedness() {
+            return readbackBuffer.get(INDEX_HANDEDNESS);
+        }
+
+        public void updateTouchpad(PointF pt) {
+            pt.set(readbackBuffer.get(INDEX_TOUCHPAD), readbackBuffer.get(INDEX_TOUCHPAD + 1));
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                OvrNativeGearController.delete(mPtr);
+            } finally {
+                super.finalize();
+            }
+        }
+    }
+
+    OvrGearController(GVRContext context, ControllerReader controllerReader) {
         super(GVRControllerType.CONTROLLER);
-        ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
-        readbackBufferB.order(ByteOrder.nativeOrder());
-        readbackBuffer = readbackBufferB.asFloatBuffer();
-        mPtr = OvrNativeGearController.ctor(readbackBufferB);
         this.context = context;
         pivot = new GVRSceneObject(context);
         thread = new EventHandlerThread();
         isEnabled = isEnabled();
         position = new Vector3f(0.0f, 0.0f, -1.0f);
-    }
-
-    long getPtr() {
-        return mPtr;
+        mControllerReader = controllerReader;
     }
 
     @Override
@@ -161,7 +205,7 @@ final class OvrGearController extends GVRCursorController {
     }
 
     void onDrawFrame() {
-        boolean connected = readbackBuffer.get(INDEX_CONNECTED) == 1.0f;
+        boolean connected = mControllerReader.isConnected();
         if (connected && isEnabled()) {
             if (!initialized) {
                 if (!thread.isAlive()) {
@@ -174,17 +218,11 @@ final class OvrGearController extends GVRCursorController {
 
             ControllerEvent event = ControllerEvent.obtain();
 
-            event.rotation.set(readbackBuffer.get(INDEX_ROTATION + 1),
-                    readbackBuffer.get(INDEX_ROTATION + 2),
-                    readbackBuffer.get(INDEX_ROTATION + 3),
-                    readbackBuffer.get(INDEX_ROTATION));
-            event.position.set(readbackBuffer.get(INDEX_POSITION),
-                    readbackBuffer.get(INDEX_POSITION + 1),
-                    readbackBuffer.get(INDEX_POSITION + 2));
-            event.key = (int) readbackBuffer.get(INDEX_BUTTON);
-            event.handedness = readbackBuffer.get(INDEX_HANDEDNESS);
-            event.pointF.set(readbackBuffer.get(INDEX_TOUCHPAD),
-                    readbackBuffer.get(INDEX_TOUCHPAD + 1));
+            mControllerReader.updateRotation(event.rotation);
+            mControllerReader.updatePosition(event.position);
+            event.key = mControllerReader.getKey();
+            event.handedness = mControllerReader.getHandedness();
+            mControllerReader.updateTouchpad(event.pointF);
 
             thread.sendEvent(event);
         } else {
@@ -261,7 +299,6 @@ final class OvrGearController extends GVRCursorController {
                 thread.quitSafely();
                 initialized = false;
             }
-            OvrNativeGearController.delete(mPtr);
         } finally {
             super.finalize();
         }
