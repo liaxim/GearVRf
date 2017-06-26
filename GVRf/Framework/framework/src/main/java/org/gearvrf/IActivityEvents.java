@@ -19,6 +19,9 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.view.MotionEvent;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 /**
  * This interface defines the callback interface of an Android {@code Activity}.
  * User can add a listener to {@code GVRActivity.getEventReceiver()} to handle
@@ -40,6 +43,11 @@ public interface IActivityEvents extends IEvents {
     void onActivityResult(int requestCode, int resultCode, Intent data);
 
     void onTouchEvent(MotionEvent event);
+
+    /**
+     * Invoked every frame with the latest controller position and orientation
+     */
+    void onControllerEvent(Vector3f position, Quaternionf orientation);
 
     void dispatchTouchEvent(MotionEvent event);
 }
