@@ -17,6 +17,7 @@ package org.gearvrf;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.PointF;
 import android.view.MotionEvent;
 
 import org.joml.Quaternionf;
@@ -46,8 +47,9 @@ public interface IActivityEvents extends IEvents {
 
     /**
      * Invoked every frame with the latest controller position and orientation
+     * @param touchpadPoint
      */
-    void onControllerEvent(Vector3f position, Quaternionf orientation);
+    void onControllerEvent(Vector3f position, Quaternionf orientation, PointF touchpadPoint);
 
     void dispatchTouchEvent(MotionEvent event);
 }

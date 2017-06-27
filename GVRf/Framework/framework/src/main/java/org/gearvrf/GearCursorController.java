@@ -308,7 +308,7 @@ final class GearCursorController extends GVRCursorController {
                 @Override
                 public void run() {
                     context.getEventManager().sendEvent(context.getActivity(), IActivityEvents.class, "onControllerEvent",
-                            event.position, event.rotation);
+                            event.position, event.rotation, event.pointF);
                 }
             });
 

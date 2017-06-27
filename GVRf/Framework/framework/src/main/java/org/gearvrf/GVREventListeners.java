@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.PointF;
 import android.view.MotionEvent;
 
 /**
@@ -91,7 +92,7 @@ public class GVREventListeners {
         }
 
         @Override
-        public void onControllerEvent(Vector3f position, Quaternionf orientation) {
+        public void onControllerEvent(Vector3f position, Quaternionf orientation, PointF touchpadPoint) {
         }
 
         @Override
