@@ -46,7 +46,8 @@ public interface IActivityEvents extends IEvents {
     void onTouchEvent(MotionEvent event);
 
     /**
-     * Invoked every frame with the latest controller position and orientation
+     * Invoked every frame with the latest controller position and orientation; the parameters
+     * should be copied if they need to be used after the callback returns.
      * @param touchpadPoint
      */
     void onControllerEvent(Vector3f position, Quaternionf orientation, PointF touchpadPoint);
