@@ -67,9 +67,9 @@ void Scene::clearAllColliders() {
 
 void Scene::gatherColliders() {
     lockColliders();
-    allColliders.clear();
-    visibleColliders.clear();
-    scene_root_.getAllComponents(allColliders, Collider::getComponentType());
+//    allColliders.clear();
+//    visibleColliders.clear();
+//    scene_root_.getAllComponents(allColliders, Collider::getComponentType());
     unlockColliders();
 }
 
@@ -102,8 +102,11 @@ void Scene::removeCollider(Collider* collider) {
 }
 
 void Scene::set_main_scene(Scene* scene) {
+    LOGI("mmarinov A");
     main_scene_ = scene;
+    LOGI("mmarinov B");
     scene->gatherColliders();
+    LOGI("mmarinov C");
 }
 
 

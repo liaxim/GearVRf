@@ -97,7 +97,7 @@ LOCAL_SHARED_LIBRARIES += jnlua
 LOCAL_SHARED_LIBRARIES += jav8
 
 ifeq ($(TARGET_ARCH_ABI),$(filter $(TARGET_ARCH_ABI), armeabi-v7a x86))
-LOCAL_ARM_NEON  := true
+#LOCAL_ARM_NEON  := true
 endif
 
 ## CPP flags are already defined in cflags.mk.

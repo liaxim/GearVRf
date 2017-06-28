@@ -118,6 +118,7 @@ class OvrVrapiActivityHandler implements OvrActivityHandler {
             mVrApiInitialized = true;
         }
 
+//        android.os.Debug.waitForDebugger();
         if (null != mSurfaceView) {
             mSurfaceView.onResume();
         }

@@ -220,7 +220,11 @@ Java_org_gearvrf_NativeScene_addCollider(JNIEnv * env,
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene) {
-    Scene::set_main_scene(reinterpret_cast<Scene*>(jscene));
+    LOGI("mmarinov 1");
+    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    LOGI("mmarinov 2");
+    Scene::set_main_scene(scene);
+    LOGI("mmarinov 3");
 }
 
 }
