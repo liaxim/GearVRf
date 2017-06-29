@@ -20,7 +20,7 @@ else
 APP_ABI := arm64-v8a
 endif
 
-APP_PLATFORM := android-19
+APP_PLATFORM := android-21
 APP_STL := gnustl_shared
 NDK_TOOLCHAIN_VERSION := clang
 APP_CPPFLAGS := -fexceptions -Wno-unused-value -Wno-c++11-narrowing -Wno-return-type

@@ -103,7 +103,7 @@ endif
 ## CPP flags are already defined in cflags.mk.
 #LOCAL_CPPFLAGS += -fexceptions -frtti -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__ -mhard-float -D_NDK_MATH_NO_SOFTFP=1
 #for NO_RTTI and softFP
-LOCAL_CPPFLAGS += -fexceptions -std=c++11 -D__GXX_EXPERIMENTAL_CXX0X__
+LOCAL_CPPFLAGS += -fexceptions -std=c++1y -D__GXX_EXPERIMENTAL_CXX0X__
 ifdef ARM64
 LOCAL_CPPFLAGS += -DARM64
 endif
