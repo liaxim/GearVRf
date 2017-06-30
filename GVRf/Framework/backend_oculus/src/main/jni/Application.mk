@@ -20,11 +20,11 @@ APP_ABI := arm64-v8a
 endif
 
 APP_PLATFORM := android-21
-APP_STL := gnustl_shared
+APP_STL := c++_static
 NDK_TOOLCHAIN_VERSION := clang
 ifndef OVR_MOBILE_SDK
    	OVR_MOBILE_SDK=../../../../../ovr_sdk_mobile
 endif
-APP_CPPFLAGS := -fexceptions
+APP_CPPFLAGS := -fexceptions -Wno-everything
 
 NDK_MODULE_PATH := $(OVR_MOBILE_SDK)

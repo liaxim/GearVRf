@@ -112,6 +112,6 @@ LOCAL_CFLAGS := -Wattributes
 # include ld libraries defined in oculus's cflags.mk
 #LOCAL_LDLIBS += -ljnigraphics -lm_hard
 #softFP
-LOCAL_LDLIBS += -ljnigraphics -llog -lGLESv3 -lEGL -lz -landroid
+LOCAL_LDLIBS += -ljnigraphics -llog -lGLESv3 -lEGL -lz -landroid -ldl -lbinder -lgui
 
 include $(BUILD_SHARED_LIBRARY)
