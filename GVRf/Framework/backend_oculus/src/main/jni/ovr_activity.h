@@ -80,6 +80,7 @@ private:
     void endRenderingEye(const int eye);
 
     jobject viewManager_ = nullptr;
+    int mainThreadId_ = 0;
 
 public:
     void onSurfaceCreated(JNIEnv& env);

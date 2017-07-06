@@ -17,6 +17,7 @@
 #include "util/gvr_log.h"
 #include <assert.h>
 #include <cstring>
+#include <malloc.h>
 
 VulkanCore* VulkanCore::theInstance = NULL;
 
