@@ -126,9 +126,7 @@ class OvrVrapiActivityHandler implements OvrActivityHandler {
 
     @Override
     public boolean onBack() {
-        if (!mActivity.getConfigurationManager().isHomeKeyPresent()) {
-            nativeShowConfirmQuit(mPtr);
-        }
+        nativeShowConfirmQuit(mPtr);
         return true;
     }
 
