@@ -102,11 +102,8 @@ void Scene::removeCollider(Collider* collider) {
 }
 
 void Scene::set_main_scene(Scene* scene) {
-    LOGI("mmarinov A");
     main_scene_ = scene;
-    LOGI("mmarinov B");
     scene->gatherColliders();
-    LOGI("mmarinov C");
 }
 
 

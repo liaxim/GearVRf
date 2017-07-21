@@ -1,6 +1,6 @@
 include ':framework'
-include ':backend_oculus'
-include ':backend_daydream'
+//include ':backend_oculus'
+//include ':backend_daydream'
 
 if(file("../../../extra_settings.gradle").exists()) {
     apply from: '../../../extra_settings.gradle'
