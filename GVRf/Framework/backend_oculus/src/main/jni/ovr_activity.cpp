@@ -21,6 +21,7 @@
 #include "VrApi_SystemUtils.h"
 #include <cstring>
 #include <unistd.h>
+#include <VrApi_Types.h>
 #include "engine/renderer/renderer.h"
 
 
@@ -83,7 +84,14 @@ void GVRActivity::uninitializeVrApi() {
 
 void GVRActivity::showConfirmQuit() {
     LOGV("GVRActivity::showConfirmQuit");
-    vrapi_ShowSystemUI(&oculusJavaMainThread_, VRAPI_SYS_UI_CONFIRM_QUIT_MENU);
+
+    ovrFrameParms parms = vrapi_DefaultFrameParms(&oculusJavaGlThread_, VRAPI_FRAME_INIT_BLACK_FINAL, vrapi_GetTimeInSeconds(), nullptr);
+    parms.FrameIndex = ++frameIndex;
+    parms.MinimumVsyncs = 1;
+    parms.PerformanceParms = oculusPerformanceParms_;
+    vrapi_SubmitFrame(oculusMobile_, &parms);
+
+    vrapi_ShowSystemUI(&oculusJavaGlThread_, VRAPI_SYS_UI_CONFIRM_QUIT_MENU);
 }
 
 bool GVRActivity::updateSensoredScene() {
@@ -119,6 +127,7 @@ void GVRActivity::onSurfaceChanged(JNIEnv& env) {
         configurationHelper_.getModeConfiguration(env, AllowPowerSave, ResetWindowFullscreen);
         parms.Flags |=AllowPowerSave;
         parms.Flags |=ResetWindowFullscreen;
+        parms.Flags |= VRAPI_MODE_FLAG_RESET_WINDOW_FULLSCREEN;
 
         oculusMobile_ = vrapi_EnterVrMode(&parms);
         if (gearController != nullptr) {
