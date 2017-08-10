@@ -123,11 +123,15 @@ void GVRActivity::onSurfaceChanged(JNIEnv& env) {
 
     if (nullptr == oculusMobile_) {
         ovrModeParms parms = vrapi_DefaultModeParms(&oculusJavaGlThread_);
-        bool AllowPowerSave, ResetWindowFullscreen;
-        configurationHelper_.getModeConfiguration(env, AllowPowerSave, ResetWindowFullscreen);
-        parms.Flags |=AllowPowerSave;
-        parms.Flags |=ResetWindowFullscreen;
-        parms.Flags |= VRAPI_MODE_FLAG_RESET_WINDOW_FULLSCREEN;
+
+        bool allowPowerSave, resetWindowFullscreen;
+        configurationHelper_.getModeConfiguration(env, allowPowerSave, resetWindowFullscreen);
+        if (allowPowerSave) {
+            parms.Flags |= VRAPI_MODE_FLAG_ALLOW_POWER_SAVE;
+        }
+        if (resetWindowFullscreen) {
+            parms.Flags |= VRAPI_MODE_FLAG_RESET_WINDOW_FULLSCREEN;
+        }
 
         oculusMobile_ = vrapi_EnterVrMode(&parms);
         if (gearController != nullptr) {
