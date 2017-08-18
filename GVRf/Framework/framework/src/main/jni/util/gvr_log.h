@@ -33,9 +33,9 @@
 #define  LOGW(...)  __android_log_print(ANDROID_LOG_WARN,LOG_TAG,__VA_ARGS__)
 #define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
 
-//#define STOP_ON_ERROR
-//#define GL( func )      func; checkGLError(#func);
-#define GL( func )      func;
+#define STOP_ON_ERROR
+#define GL( func )      func; checkGLError(#func);
+//#define GL( func )      func;
 
 //#define clearGLError(msg)
 #define clearGLError(msg) checkGLError(msg);

@@ -54,6 +54,7 @@ namespace gvr
             RenderTexture* post_effect_render_texture_a,
             RenderTexture* post_effect_render_texture_b, bool is_multiview) {
 
+        checkGLError("GLRenderer::renderCamera");
         resetStats();
         RenderState rstate;
         rstate.is_multiview = is_multiview;
@@ -91,8 +92,8 @@ namespace gvr
 
         if (post_effects.size() == 0)
         {
-            glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
-            glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+            GL(glBindFramebuffer(GL_FRAMEBUFFER, framebufferId));
+            GL(glViewport(viewportX, viewportY, viewportWidth, viewportHeight));
 
             clearBuffers(*camera);
             renderRenderDataVector(rstate);
@@ -389,8 +390,8 @@ namespace gvr
     {
         GLint curFBO;
         GLint viewport[4];
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curFBO);
-        glGetIntegerv(GL_VIEWPORT, viewport);
+        GL(glGetIntegerv(GL_FRAMEBUFFER_BINDING, &curFBO));
+        GL(glGetIntegerv(GL_VIEWPORT, viewport));
 
         renderCamera(scene, camera, curFBO, viewport[0], viewport[1], viewport[2], viewport[3],
                      shader_manager, post_effect_shader_manager, post_effect_render_texture_a,
