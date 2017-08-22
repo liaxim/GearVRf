@@ -88,8 +88,8 @@ final class GearCursorController extends GVRCursorController {
     public void setSceneObject(GVRSceneObject object) {
         if(pivot.getParent() != context.getMainScene().getRoot()) {
             context.getMainScene().addSceneObject(pivot);
-            object.getTransform().setPosition(position.x, position.y, position.z);
         }
+        object.getTransform().setPosition(position.x, position.y, position.z);
         pivot.addChildObject(object);
     }
 
@@ -317,8 +317,14 @@ final class GearCursorController extends GVRCursorController {
 
             quaternionf.transform(FORWARD, result);
 
-            pivot.getTransform().setPosition(position.x, position.y, position.z);
-            setOrigin(position.x + result.x, position.y + result.y, position.z + result.z);
+            GVRTransform t = context.getMainScene().getMainCameraRig().getTransform();
+            float cameraX = t.getPositionX();
+            float cameraY = t.getPositionY();
+            float cameraZ = t.getPositionZ();
+
+            pivot.getTransform().setPosition(cameraX + position.x, cameraY + position.y, cameraZ + position.z);
+
+            setOrigin(cameraX + position.x + result.x, cameraY + position.y + result.y, cameraZ + position.z + result.z);
 
             int handleResult = handleButton(key, OVR_BUTTON_ENTER, prevButtonEnter, KeyEvent
                     .KEYCODE_ENTER);
