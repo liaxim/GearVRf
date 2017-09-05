@@ -51,6 +51,7 @@ public:
         height_ = height;
         imageSize_ = imageSize;
         bytesRef_ = static_cast<jbyteArray>(env->NewGlobalRef(bytes));
+        LOGI("mmarinov: compressed_texture.h new %p", bytesRef_);
         dataOffset_ = dataOffset;
     }
 
@@ -62,6 +63,7 @@ public:
         switch (pending_gl_task_) {
         case GL_TASK_INIT_INTERNAL_FORMAT: {
             env->DeleteGlobalRef(bytesRef_);
+            LOGI("mmarinov: compressed_texture.h delete %p", bytesRef_);
             break;
         }
 

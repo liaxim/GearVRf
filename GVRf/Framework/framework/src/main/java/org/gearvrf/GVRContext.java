@@ -250,7 +250,7 @@ public abstract class GVRContext implements IEventReceiver {
     public GVRAssetLoader getAssetLoader() {
         return mImporter;
     }
-    
+
     /**
      * Get the event receiver for this context.
      * 
@@ -812,6 +812,7 @@ public abstract class GVRContext implements IEventReceiver {
     }
 
     void onDestroy() {
+        Log.i("mmarinov", "onDestroy mImport=null");
         mImporter = null;
         if (null != mHandlerThread) {
             mHandlerThread.getLooper().quitSafely();

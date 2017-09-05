@@ -54,7 +54,6 @@ import static java.lang.Integer.parseInt;
 class GVRJassimpAdapter {
     private static final String TAG = GVRJassimpAdapter.class.getSimpleName();
     public static GVRNewWrapperProvider sWrapperProvider = new GVRNewWrapperProvider();
-    private GVRAssetLoader  mLoader;
     private List<INodeFactory> mNodeFactories;
     private AiScene mScene;
     private GVRContext mContext;
@@ -67,8 +66,7 @@ class GVRJassimpAdapter {
         GVRSceneObject createSceneObject(GVRContext ctx, AiNode node);
     }
 
-    public GVRJassimpAdapter(GVRAssetLoader loader, String filename) {
-        mLoader = loader;
+    public GVRJassimpAdapter(String filename) {
         mFileName = filename;
         mNodeFactories = new ArrayList<INodeFactory>();
     }

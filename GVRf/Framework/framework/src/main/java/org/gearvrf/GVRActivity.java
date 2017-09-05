@@ -184,6 +184,13 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
                     "onPause");
         }
         super.onPause();
+        finish();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        Log.i("mmarinov", "finalize "+Integer.toHexString(hashCode()));
+        super.finalize();
     }
 
     @Override
