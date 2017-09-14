@@ -171,9 +171,9 @@ task copyJarToBin(type: Copy) {
 
 tasks.whenTaskAdded { task ->
     if (task.name == 'externalNativeBuildDebug') {
-        task.dependsOn 'buildInfo'
+        //task.dependsOn 'buildInfo'
     } else if (task.name == 'externalNativeBuildRelease') {
-        task.dependsOn 'buildInfo'
+        //task.dependsOn 'buildInfo'
     } else if (task.name == 'bundleDebug') {
         task.finalizedBy(copyJarToBin)
     } else if (task.name == 'bundleRelease') {
