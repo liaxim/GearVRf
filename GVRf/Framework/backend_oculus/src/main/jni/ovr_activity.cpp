@@ -21,6 +21,7 @@
 #include "VrApi_SystemUtils.h"
 #include <cstring>
 #include <unistd.h>
+#include <VrApi_Types.h>
 #include "engine/renderer/renderer.h"
 
 
@@ -39,7 +40,7 @@ namespace gvr {
         activity_ = env.NewGlobalRef(activity);
         activityClass_ = GetGlobalClassReference(env, activityClassName);
 
-        onDrawEyeMethodId = GetMethodId(env, env.FindClass(viewManagerClassName), "onDrawEye", "(I)V");
+        onDrawEyeMethodId = GetMethodId(env, env.FindClass(viewManagerClassName), "onDrawEye", "(IIZ)V");
         updateSensoredSceneMethodId = GetMethodId(env, activityClass_, "updateSensoredScene", "()Z");
 
         mainThreadId_ = gettid();
@@ -82,7 +83,14 @@ namespace gvr {
     }
 
     void GVRActivity::showConfirmQuit() {
-        LOGV("GVRActivity::showConfirmQuit");
+        LOGV("GVRActivity::showConfirmuit");
+
+        ovrFrameParms parms = vrapi_DefaultFrameParms(&oculusJavaGlThread_, VRAPI_FRAME_INIT_BLACK_FINAL, vrapi_GetTimeInSeconds(), nullptr);
+        parms.FrameIndex = ++frameIndex;
+        parms.MinimumVsyncs = 1;
+        parms.PerformanceParms = oculusPerformanceParms_;
+        vrapi_SubmitFrame(oculusMobile_, &parms);
+
         vrapi_ShowSystemUI(&oculusJavaMainThread_, VRAPI_SYS_UI_CONFIRM_QUIT_MENU);
     }
 
@@ -107,7 +115,16 @@ namespace gvr {
                                                          mMultisamplesConfiguration, mColorTextureFormatConfiguration,
                                                          mResolveDepthConfiguration, mDepthTextureFormatConfiguration);
     }
+RenderTexture*  GVRActivity::createRenderTexture(int eye, int index){
+    // for multiview, eye index would be 2
+    eye = eye % 2;
+    FrameBufferObject fbo = frameBuffer_[eye];
 
+    if(use_multiview)
+        return  new GLMultiviewRenderTexture(fbo.getWidth(),fbo.getHeight(),mMultisamplesConfiguration,2, fbo.getRenderBufferFBOId(index), fbo.getColorTexId(index));
+
+    return new GLNonMultiviewRenderTexture(fbo.getWidth(),fbo.getHeight(),mMultisamplesConfiguration,fbo.getRenderBufferFBOId(index), fbo.getColorTexId(index));
+}
     void GVRActivity::onSurfaceChanged(JNIEnv& env) {
         int maxSamples = MSAA::getMaxSampleCount();
         LOGV("GVRActivityT::onSurfaceChanged");
@@ -115,10 +132,15 @@ namespace gvr {
 
         if (nullptr == oculusMobile_) {
             ovrModeParms parms = vrapi_DefaultModeParms(&oculusJavaGlThread_);
-        bool AllowPowerSave, ResetWindowFullscreen;
-            configurationHelper_.getModeConfiguration(env, AllowPowerSave, ResetWindowFullscreen);
-            parms.Flags |=AllowPowerSave;
-            parms.Flags |=ResetWindowFullscreen;
+
+            bool allowPowerSave, resetWindowFullscreen;
+            configurationHelper_.getModeConfiguration(env, allowPowerSave, resetWindowFullscreen);
+            if (allowPowerSave) {
+                parms.Flags |= VRAPI_MODE_FLAG_ALLOW_POWER_SAVE;
+            }
+            if (resetWindowFullscreen) {
+                parms.Flags |= VRAPI_MODE_FLAG_RESET_WINDOW_FULLSCREEN;
+            }
 
             oculusMobile_ = vrapi_EnterVrMode(&parms);
             if (gearController != nullptr) {
@@ -126,6 +148,7 @@ namespace gvr {
             }
 
             oculusPerformanceParms_ = vrapi_DefaultPerformanceParms();
+        env.ExceptionClear(); //clear a weird GearVrRemoteForBatteryWorkAround raised by Oculus
             configurationHelper_.getPerformanceConfiguration(env, oculusPerformanceParms_);
             oculusPerformanceParms_.MainThreadTid = mainThreadId_;
             oculusPerformanceParms_.RenderThreadTid = gettid();
@@ -223,14 +246,11 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
 
         // Render the eye images.
         for (int eye = 0; eye < (use_multiview ? 1 :VRAPI_FRAME_LAYER_EYE_MAX); eye++) {
-
-            beginRenderingEye(eye);
-
-        oculusJavaGlThread_.Env->CallVoidMethod(jViewManager, onDrawEyeMethodId, eye);
             int textureSwapChainIndex = frameBuffer_[eye].mTextureSwapChainIndex;
-            const GLuint colorTexture = vrapi_GetTextureSwapChainHandle(frameBuffer_[eye].mColorTextureSwapChain, textureSwapChainIndex);
+            beginRenderingEye(eye);
+            oculusJavaGlThread_.Env->CallVoidMethod(jViewManager, onDrawEyeMethodId, eye, textureSwapChainIndex, use_multiview);
             if(gRenderer->isVulkanInstance()){
-                glBindTexture(GL_TEXTURE_2D,colorTexture);
+                glBindTexture(GL_TEXTURE_2D,vrapi_GetTextureSwapChainHandle(frameBuffer_[eye].mColorTextureSwapChain, textureSwapChainIndex));
                 glTexSubImage2D(   GL_TEXTURE_2D,
                                    0,
                                    0,
@@ -258,6 +278,8 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
     static const GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT};
 
     void GVRActivity::beginRenderingEye(const int eye) {
+
+       // no n
         frameBuffer_[eye].bind();
 
         GL(glViewport(x, y, width, height));
