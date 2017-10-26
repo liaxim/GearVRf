@@ -123,7 +123,21 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
      * @see GVRVertexBuffer#getFloatVec(String)
      */
     public float[] getVertices() {
-        return mVertices.getFloatVec("a_position").array();
+        final FloatBuffer a_position = mVertices.getFloatVec("a_position");
+        if (a_position.hasArray()) {
+            return a_position.array();
+        } else {
+            float[] result = new float[a_position.limit()];
+            a_position.get(result);
+            return result;
+        }
+    }
+
+    /**
+     * @see GVRMesh#getVertices()
+     */
+    public FloatBuffer getVerticesDirect() {
+        return mVertices.getFloatVec("a_position").asReadOnlyBuffer();
     }
 
     /**
