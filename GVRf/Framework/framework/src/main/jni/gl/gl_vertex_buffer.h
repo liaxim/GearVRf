@@ -26,6 +26,9 @@ namespace gvr {
     class GLVertexBuffer : public VertexBuffer
     {
     public:
+        GLVertexBuffer& operator=(const GLVertexBuffer&) = delete;
+        GLVertexBuffer(const GLVertexBuffer&) = delete;
+
         GLVertexBuffer(const char* layout_desc, int vertexCount);
         virtual ~GLVertexBuffer();
 

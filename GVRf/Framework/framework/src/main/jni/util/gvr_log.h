@@ -18,18 +18,7 @@
  * Logging macros.
  ***************************************************************************/
 
-#ifndef LOG_H_
-#define LOG_H_
-
-#include <android/log.h>
-#include <exception>
-
-#include "gl/gl_headers.h"
-
-#define  LOG_TAG    "gvrf"
-
 #define VERBOSE_LOGGING_GLOBAL 1
-
 
 #if VERBOSE_LOGGING_GLOBAL
     #ifdef VERBOSE_LOGGING
@@ -44,6 +33,17 @@
 #else
     #define  LOGV(...)
 #endif
+
+
+#ifndef LOG_H_
+#define LOG_H_
+
+#include <android/log.h>
+#include <exception>
+
+#include "gl/gl_headers.h"
+
+#define  LOG_TAG    "gvrf"
 
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 #define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)

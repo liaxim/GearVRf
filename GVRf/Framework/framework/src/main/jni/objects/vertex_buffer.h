@@ -31,6 +31,8 @@ namespace gvr {
     class VertexBuffer : public HybridObject, public DataDescriptor
     {
     public:
+        VertexBuffer& operator=(const VertexBuffer&) = delete;
+        VertexBuffer(const VertexBuffer&) = delete;
 
         VertexBuffer(const char* layout_desc, int vertexCount);
         virtual ~VertexBuffer();

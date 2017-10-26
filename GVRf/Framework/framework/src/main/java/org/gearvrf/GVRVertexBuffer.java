@@ -378,13 +378,13 @@ public class GVRVertexBuffer extends GVRHybridObject implements PrettyPrint
         }
         else if (data.hasArray())
         {
+        }
+        else
+        {
             if (!NativeVertexBuffer.setFloatArray(getNative(), attributeName, data.array(), stride, offset))
             {
                 throw new IllegalArgumentException("Attribute name " + attributeName + " cannot be updated");
             }
-        }
-        else
-        {
             throw new UnsupportedOperationException("FloatBuffer type not supported. must be direct or have backing array");
         }
     }
