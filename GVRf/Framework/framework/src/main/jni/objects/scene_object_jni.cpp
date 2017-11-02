@@ -92,14 +92,15 @@ extern "C" {
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeSceneObject_ctor(JNIEnv * env,
         jobject obj) {
-    return reinterpret_cast<jlong>(new SceneObject());
+    HybridObject2<SceneObject>* result = new HybridObject2<SceneObject>;
+    return reinterpret_cast<jlong>(result);
 }
 
 JNIEXPORT jstring JNICALL
 Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
         jobject obj, jlong jscene_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    std::string name = scene_object->name();
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    std::string name = scene_object->get().name();
     jstring jname = env->NewStringUTF(name.c_str());
     return jname;
 }
@@ -107,9 +108,9 @@ Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
         jobject obj, jlong jscene_object, jstring name) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
     const char* native_name = env->GetStringUTFChars(name, 0);
-    scene_object->set_name(std::string(native_name));
+    scene_object->get().set_name(std::string(native_name));
     env->ReleaseStringUTFChars(name, native_name);
 }
 
@@ -117,24 +118,24 @@ Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
 JNIEXPORT bool JNICALL
 Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong jcomponent) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
     Component* component = reinterpret_cast<Component*>(jcomponent);
-    return scene_object->attachComponent(component);
+    return scene_object->get().attachComponent(component);
 }
 
 JNIEXPORT bool JNICALL
 Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong type) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    return scene_object->detachComponent(type) != NULL;
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    return scene_object->get().detachComponent(type) != NULL;
 }
 
 
 JNIEXPORT long JNICALL
 Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong type) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    Component* component = scene_object->getComponent(type);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    Component* component = scene_object->get().getComponent(type);
     return (long) component;
 }
 
@@ -142,25 +143,25 @@ Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv * env,
         jobject obj, jlong jscene_object, jlong jchild) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    scene_object->addChildObject(scene_object, child);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    HybridObject2<SceneObject>* child = reinterpret_cast<HybridObject2<SceneObject>*>(jchild);
+    scene_object->get().addChildObject(scene_object->getPtr(), child->getPtr());
 }
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeSceneObject_removeChildObject(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jchild) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    scene_object->removeChildObject(child);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    HybridObject2<SceneObject>* child = reinterpret_cast<HybridObject2<SceneObject>*>(jchild);
+    scene_object->get().removeChildObject(child->getPtr());
 }
 
 JNIEXPORT bool JNICALL
 Java_org_gearvrf_NativeSceneObject_isColliding(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    SceneObject* other_object = reinterpret_cast<SceneObject*>(jother_object);
-    return scene_object->isColliding(other_object);
+    HybridObject2<SceneObject>* scene_object = reinterpret_cast<HybridObject2<SceneObject>*>(jscene_object);
+    HybridObject2<SceneObject>* other_object = reinterpret_cast<HybridObject2<SceneObject>*>(jother_object);
+    return scene_object->get().isColliding(&other_object->get());
 }
 
 

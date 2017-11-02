@@ -37,7 +37,7 @@ namespace gvr {
 class Camera;
 class CameraRig;
 
-class SceneObject: public HybridObject {
+class SceneObject {
 public:
     SceneObject();
     virtual ~SceneObject();

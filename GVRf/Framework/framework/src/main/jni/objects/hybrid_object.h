@@ -34,5 +34,32 @@ public:
     virtual ~HybridObject() {
     }
 };
+
+
+template <class T> class HybridObject2 {
+    T t;
+public:
+    HybridObject2() {
+    }
+
+    /**
+     * The dtor is always called on the drawing thread
+     */
+    virtual ~HybridObject2() {
+    }
+
+    T* getPtr() {
+        return &t;
+    }
+
+    T& get() {
+        return t;
+    }
+
+    const T& get() const {
+        return t;
+    }
+};
+
 }
 #endif
