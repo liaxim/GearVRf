@@ -123,8 +123,7 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
      * @see GVRVertexBuffer#getFloatVec(String)
      */
     public float[] getVertices() {
-        final FloatBuffer a_position = mVertices.getFloatVec(KEY_POSITION);
-        return GVRMesh.floatBufferToArray(a_position);
+        return mVertices.getFloatArray(KEY_POSITION);
     }
 
     /**
@@ -132,16 +131,6 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
      */
     public FloatBuffer getVerticesAsFloatBuffer() {
         return mVertices.getFloatVec(KEY_POSITION).asReadOnlyBuffer();
-    }
-
-    private static final float[] floatBufferToArray(final FloatBuffer buffer) {
-        if (buffer.hasArray()) {
-            return buffer.array();
-        } else {
-            float[] result = new float[buffer.limit()];
-            buffer.get(result);
-            return result;
-        }
     }
 
     /**
@@ -220,8 +209,7 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
      * @see GVRVertexBuffer#getFloatArray(String)
      */
     public float[] getNormals() {
-        final FloatBuffer buffer = mVertices.getFloatVec(KEY_NORMAL);
-        return GVRMesh.floatBufferToArray(buffer);
+        return mVertices.getFloatArray(KEY_NORMAL);
     }
 
     /**
@@ -262,8 +250,7 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
     public float[] getTexCoords(int index)
     {
         final String key = (index > 0) ? (KEY_TEXCOORD + index) : KEY_TEXCOORD;
-        final FloatBuffer buffer = mVertices.getFloatVec(key);
-        return GVRMesh.floatBufferToArray(buffer);
+        return mVertices.getFloatArray(key);
     }
 
     /**
@@ -284,8 +271,7 @@ public class GVRMesh extends GVRHybridObject implements PrettyPrint {
      * @see GVRVertexBuffer#getFloatArray(String)
      */
     public float[] getTexCoords() {
-        final FloatBuffer buffer = mVertices.getFloatVec(KEY_TEXCOORD);
-        return GVRMesh.floatBufferToArray(buffer);
+        return mVertices.getFloatArray(KEY_TEXCOORD);
     }
 
     /**
