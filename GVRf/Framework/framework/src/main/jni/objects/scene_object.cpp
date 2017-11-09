@@ -30,9 +30,9 @@
 namespace gvr {
 
 SceneObject::SceneObject() :
-        HybridObject(), name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(
-                false),  enabled_(true),query_currently_issued_(false), vis_count_(0),
-                cull_status_(false), bounding_volume_dirty_(true) {
+        name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(false),
+        enabled_(true),query_currently_issued_(false), vis_count_(0),
+        cull_status_(false), bounding_volume_dirty_(true) {
 
     // Occlusion query setup
     queries_ = new GLuint[1];

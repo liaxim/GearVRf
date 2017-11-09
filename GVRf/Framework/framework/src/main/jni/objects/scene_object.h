@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <mutex>
 
-#include "objects/hybrid_object.h"
 #include "objects/components/component.h"
 #include "objects/components/render_data.h"
 #include "objects/components/transform.h"
@@ -37,7 +36,7 @@ namespace gvr {
 class Camera;
 class CameraRig;
 
-class SceneObject: public HybridObject {
+class SceneObject {
 public:
     SceneObject();
     virtual ~SceneObject();

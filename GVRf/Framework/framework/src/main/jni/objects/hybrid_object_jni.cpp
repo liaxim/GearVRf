@@ -21,14 +21,21 @@
 namespace gvr {
 extern "C" {
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeHybridObject_delete(JNIEnv * env,
-        jobject obj, jlong jhybrid_object);
+Java_org_gearvrf_NativeHybridObject_delete(JNIEnv * env, jobject obj, jlong jhybrid_object);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeHybridObject_deleteSharedPtr(JNIEnv * env, jobject obj, jlong jhybrid_object);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeHybridObject_delete(JNIEnv * env,
-        jobject obj, jlong jhybrid_object) {
+Java_org_gearvrf_NativeHybridObject_delete(JNIEnv *, jobject, jlong jhybrid_object) {
     delete reinterpret_cast<HybridObject*>(jhybrid_object);
 }
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeHybridObject_deleteSharedPtr(JNIEnv *, jobject, jlong jhybrid_object) {
+    //delete reinterpret_cast<std::shared_ptr*>(jhybrid_object);
+}
+
 }
 

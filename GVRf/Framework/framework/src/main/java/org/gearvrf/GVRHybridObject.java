@@ -31,6 +31,9 @@ import java.util.Map;
  * manages the native lifecycles.
  */
 public abstract class GVRHybridObject {
+    interface UsesSharedPtr {
+
+    }
 
     private static final String TAG = Log.tag(GVRHybridObject.class);
 
@@ -59,7 +62,16 @@ public abstract class GVRHybridObject {
      *            The native pointer, returned by the native constructor
      */
     protected GVRHybridObject(GVRContext gvrContext, long nativePointer) {
-        this(gvrContext, nativePointer, null);
+        this(gvrContext, nativePointer, (List<NativeCleanupHandler>)null);
+        Class<? extends GVRHybridObject> aClass = this.getClass();
+        android.util.Log.i("mmarinov", " "+aClass);
+    }
+
+    protected GVRHybridObject(GVRContext gvrContext, long nativePointer, Class clazz) {
+        mGVRContext = gvrContext;
+        mNativePointer = nativePointer;
+
+        gvrContext.registerHybridObject(this,nativePointer, clazz);
     }
 
     /**
@@ -120,7 +132,7 @@ public abstract class GVRHybridObject {
         if (mNativePointer == 0)
         {
             mNativePointer = nativePtr;
-            getGVRContext().registerHybridObject(this, mNativePointer, null);
+            getGVRContext().registerHybridObject(this, mNativePointer, (List<NativeCleanupHandler>)null);
         }
     }
 
@@ -245,4 +257,5 @@ public abstract class GVRHybridObject {
 
 class NativeHybridObject {
     static native void delete(long nativePointer);
+    static native void deleteSharedPtr(long mNativePointer);
 }

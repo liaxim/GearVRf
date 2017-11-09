@@ -15,6 +15,7 @@
 
 package org.gearvrf;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,7 +60,7 @@ import org.joml.Vector3f;
  *     getEventReceiver().addListener(myEventListener);
  * </pre>
  */
-public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScriptable, IEventReceiver {
+public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScriptable, IEventReceiver, GVRHybridObject.UsesSharedPtr {
     private Map<Long, GVRComponent> mComponents = new HashMap<Long, GVRComponent>();
     private GVRSceneObject mParent;
     private GVRBaseSensor mSensor;
@@ -127,7 +128,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      */
     public GVRSceneObject(GVRContext gvrContext, GVRMesh mesh,
                           GVRTexture texture, GVRShaderId shaderId) {
-        super(gvrContext, NativeSceneObject.ctor());
+        super(gvrContext, NativeSceneObject.ctor(), NativeSceneObject.class);
         attachComponent(new GVRTransform(getGVRContext()));
 
         if ((mesh == null) && (texture == null)) {
@@ -1250,6 +1251,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
 
 class NativeSceneObject {
     static native long ctor();
+
+    static native long dtor();
 
     static native String getName(long sceneObject);
 
