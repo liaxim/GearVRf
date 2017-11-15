@@ -133,17 +133,17 @@ namespace gvr {
         }
     }
 
-    void Light::onAddedToScene(Scene *scene)
+    void Light::onAddedToScene(std::shared_ptr<Scene> scene)
     {
         scene->addLight(this);
     }
 
-    void Light::onRemovedFromScene(Scene *scene)
+    void Light::onRemovedFromScene(std::shared_ptr<Scene> scene)
     {
         scene->removeLight(this);
     }
 
-    bool Light::makeShadowMap(Scene* scene, ShaderManager* shader_manager, int texIndex)
+    bool Light::makeShadowMap(std::shared_ptr<Scene> scene, ShaderManager* shader_manager, int texIndex)
     {
         ShadowMap* shadowMap = getShadowMap();
         if ((shadowMap == nullptr) || !shadowMap->hasTexture())

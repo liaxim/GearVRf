@@ -19,7 +19,7 @@ public:
     explicit GLRenderTarget(RenderTexture* renderTexture, bool is_multiview): RenderTarget(renderTexture, is_multiview){
 
     }
-    explicit GLRenderTarget(Scene* scene): RenderTarget(scene){
+    explicit GLRenderTarget(std::shared_ptr<Scene> scene): RenderTarget(scene){
     }
     explicit GLRenderTarget(RenderTexture* renderTexture, const RenderTarget* source): RenderTarget(renderTexture, source){}
     GLRenderTarget(){}

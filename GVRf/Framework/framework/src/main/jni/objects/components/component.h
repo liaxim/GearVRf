@@ -39,8 +39,8 @@ public:
     SceneObject* owner_object() const;
 
     virtual void set_owner_object(SceneObject* owner_object);
-    virtual void onAddedToScene(Scene* scene) { }
-    virtual void onRemovedFromScene(Scene* scene) { }
+    virtual void onAddedToScene(std::shared_ptr<Scene> scene) { }
+    virtual void onRemovedFromScene(std::shared_ptr<Scene> scene) { }
     virtual void onAttach(SceneObject* owner) { }
     virtual void onDetach(SceneObject* owner) { }
 

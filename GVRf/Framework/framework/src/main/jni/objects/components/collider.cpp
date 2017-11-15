@@ -43,12 +43,12 @@ void Collider::transformRay(const glm::mat4& model_matrix, glm::vec3& rayStart, 
     rayStart = glm::vec3(start);
 }
 
-void Collider::onAddedToScene(Scene* scene)
+void Collider::onAddedToScene(std::shared_ptr<Scene> scene)
 {
     scene->addCollider(this);
 }
 
-void Collider::onRemovedFromScene(Scene* scene)
+void Collider::onRemovedFromScene(std::shared_ptr<Scene> scene)
 {
     scene->removeCollider(this);
 }

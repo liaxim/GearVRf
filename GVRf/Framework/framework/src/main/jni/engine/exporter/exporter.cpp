@@ -113,7 +113,7 @@ void gvr2aiMesh(Mesh &gvrmesh, aiMesh &aimesh) {
 }
 
 /* Converts the given GVRScene to aiScene */
-void gvr2aiScene(Scene &gvrscene, aiScene &aiscene) {
+void gvr2aiScene(const Scene& gvrscene, aiScene &aiscene) {
     std::vector<SceneObject*> scene_objects(gvrscene.getWholeSceneObjects());
 
     aiscene.mRootNode = new aiNode();
@@ -161,9 +161,9 @@ void gvr2aiScene(Scene &gvrscene, aiScene &aiscene) {
 }
 
 /* Exports the scene to the given filename */
-int Exporter::writeToFile(Scene *scene, const std::string filename) {
-    if (!scene || filename.empty()) {
-        LOGW("Exporting to invalid filename or current scene is invalid.");
+int Exporter::writeToFile(const Scene& scene, const std::string filename) {
+    if (filename.empty()) {
+        LOGW("Exporting to invalid filename.");
         return -1;
     }
 
@@ -177,7 +177,7 @@ int Exporter::writeToFile(Scene *scene, const std::string filename) {
 
     aiScene aiscene;
 
-    gvr2aiScene(*scene, aiscene);
+    gvr2aiScene(scene, aiscene);
 
     if (aiscene.mNumMeshes > 0) {
         LOGD("Exporting scene to %s\n", filename.c_str());

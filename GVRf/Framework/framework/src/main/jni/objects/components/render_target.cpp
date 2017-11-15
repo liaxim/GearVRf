@@ -57,7 +57,7 @@ void RenderTarget::beginRendering(Renderer *renderer) {
 void RenderTarget::endRendering(Renderer *renderer) {
     mRenderTexture->endRendering(renderer);
 }
-RenderTarget::RenderTarget(Scene* scene)
+RenderTarget::RenderTarget(std::shared_ptr<Scene> scene)
 : Component(RenderTarget::getComponentType()), mNextRenderTarget(nullptr), mRenderTexture(nullptr),mRenderDataVector(std::make_shared< std::vector<RenderData*>>()){
     mRenderState.shadow_map = false;
     mRenderState.material_override = NULL;
@@ -86,7 +86,7 @@ RenderTarget::RenderTarget()
     mRenderState.shadow_map = false;
     mRenderState.material_override = NULL;
 }
- void RenderTarget::cullFromCamera(Scene* scene, Camera* camera, Renderer* renderer, ShaderManager* shader_manager){
+ void RenderTarget::cullFromCamera(std::shared_ptr<Scene> scene, Camera* camera, Renderer* renderer, ShaderManager* shader_manager){
 
      renderer->cullFromCamera(scene, camera,shader_manager, mRenderDataVector.get(),mRenderState.is_multiview);
      renderer->state_sort(mRenderDataVector.get());

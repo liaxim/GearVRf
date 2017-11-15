@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-/***************************************************************************
- * Exports a scene to file.
- ***************************************************************************/
+package org.gearvrf;
 
-#ifndef EXPORTER_H_
-#define EXPORTER_H_
+import java.lang.reflect.Method;
+import java.util.List;
 
-#include "objects/scene.h"
+class NativeObject extends GVRHybridObject {
 
-namespace gvr {
-    namespace Exporter {
-        int writeToFile(const Scene& scene, const std::string filename);
-    };
+    NativeObject(GVRContext gvrContext, long nativePointer) {
+        super(gvrContext, nativePointer);
+    }
+
+    NativeObject(GVRContext gvrContext, long nativePointer, Method dtor) {
+        super(gvrContext, nativePointer, dtor);
+    }
+
+    NativeObject(GVRContext gvrContext, long nativePointer, List<NativeCleanupHandler> cleanupHandlers) {
+        super(gvrContext, nativePointer, cleanupHandlers);
+    }
 }
-#endif

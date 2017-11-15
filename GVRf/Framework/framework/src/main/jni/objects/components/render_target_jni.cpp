@@ -49,17 +49,17 @@ JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget, jlong camera,
                                            jlong shader_manager, jlong posteffectrenderTextureA, jlong posteffectRenderTextureB, jlong jscene){
     RenderTarget* target = reinterpret_cast<RenderTarget*>(renderTarget);
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     // Do not remote this: need it for screenshot capturer, center camera rendering
     target->setCamera(reinterpret_cast<Camera*>(camera));
-    gRenderer->getInstance()->renderRenderTarget(scene, target, reinterpret_cast<ShaderManager*>(shader_manager),
+    gRenderer->getInstance()->renderRenderTarget(*scene, target, reinterpret_cast<ShaderManager*>(shader_manager),
                                                  reinterpret_cast<RenderTexture*>(posteffectrenderTextureA), reinterpret_cast<RenderTexture*>(posteffectRenderTextureB));
 }
 
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeRenderTarget_defaultCtr(JNIEnv *env, jobject obj, jlong jscene){
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(scene));
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    return reinterpret_cast<jlong>(Renderer::getInstance()->createRenderTarget(*scene));
 
 }
 JNIEXPORT jlong JNICALL
@@ -79,8 +79,8 @@ Java_org_gearvrf_NativeRenderTarget_ctor(JNIEnv *env, jobject obj, jlong jtextur
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeRenderTarget_setMainScene(JNIEnv *env, jobject obj, jlong ptr, jlong Sceneptr){
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
-    Scene* scene = reinterpret_cast<Scene*>(Sceneptr);
-    target->setMainScene(scene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(Sceneptr);
+    target->setMainScene(*scene);
 }
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget){
@@ -108,9 +108,9 @@ Java_org_gearvrf_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlo
 
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     ShaderManager* shaderManager = reinterpret_cast<ShaderManager*> (jshaderManager);
-    target->cullFromCamera(scene, camera,gRenderer->getInstance(), shaderManager);
+    target->cullFromCamera(*scene, camera,gRenderer->getInstance(), shaderManager);
 }
 
 JNIEXPORT void JNICALL

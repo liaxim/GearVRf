@@ -50,7 +50,7 @@ namespace gvr
     {
         return new RenderPass();
     }
-    RenderTarget* GLRenderer::createRenderTarget(Scene* scene) {
+    RenderTarget* GLRenderer::createRenderTarget(std::shared_ptr<Scene> scene) {
         return new GLRenderTarget(scene);
     }
     RenderTarget* GLRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview){
@@ -191,7 +191,7 @@ namespace gvr
     }
 
 
-    void GLRenderer::renderRenderTarget(Scene* scene, RenderTarget* renderTarget,
+    void GLRenderer::renderRenderTarget(std::shared_ptr<Scene> scene, RenderTarget* renderTarget,
                             ShaderManager* shader_manager,
                             RenderTexture* post_effect_render_texture_a,
                             RenderTexture* post_effect_render_texture_b)
@@ -408,7 +408,7 @@ namespace gvr
      * special depth shader (GVRDepthShader) to create the shadow map.
      * @see Renderer::renderShadowMap Light::makeShadowMap
      */
-    void GLRenderer::makeShadowMaps(Scene* scene, ShaderManager* shader_manager)
+    void GLRenderer::makeShadowMaps(std::shared_ptr<Scene> scene, ShaderManager* shader_manager)
     {
         checkGLError("makeShadowMaps");
         const std::vector<Light*> lights = scene->getLightList();

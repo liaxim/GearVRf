@@ -30,11 +30,11 @@ extern "C" {
     void Java_org_gearvrf_GVRViewManager_makeShadowMaps(JNIEnv *jni, jclass clazz,
                                                         jlong jscene, jlong jshader_manager,
                                                         jint width, jint height) {
-        Scene *scene = reinterpret_cast<Scene *>(jscene);
+        std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
 
         ShaderManager *shader_manager = reinterpret_cast<ShaderManager *>(jshader_manager);
         gRenderer = Renderer::getInstance();
-        gRenderer->makeShadowMaps(scene, shader_manager);
+        gRenderer->makeShadowMaps(*scene, shader_manager);
     }
 
     void Java_org_gearvrf_GVRViewManager_cullAndRender(JNIEnv *jni, jclass clazz,
@@ -44,7 +44,7 @@ extern "C" {
                                                       jlong jpost_effect_render_texture_a,
                                                       jlong jpost_effect_render_texture_b)
     {
-        Scene *scene = reinterpret_cast<Scene *>(jscene);
+        std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
         RenderTarget *renderTarget = reinterpret_cast<RenderTarget *>(jrenderTarget);
         ShaderManager *shader_manager =
                 reinterpret_cast<ShaderManager *>(jshader_manager);
@@ -56,10 +56,10 @@ extern "C" {
                 reinterpret_cast<RenderTexture *>(jpost_effect_render_texture_b);
 
 
-        renderTarget->cullFromCamera(scene, renderTarget->getCamera(),gRenderer,shader_manager);
+        renderTarget->cullFromCamera(*scene, renderTarget->getCamera(),gRenderer,shader_manager);
         if(!gRenderer->isVulkanInstance())
             renderTarget->beginRendering(gRenderer);
-        gRenderer->renderRenderTarget(scene, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
+        gRenderer->renderRenderTarget(*scene, renderTarget,shader_manager,post_effect_render_texture_a,post_effect_render_texture_b);
         if(!gRenderer->isVulkanInstance())
             renderTarget->endRendering(gRenderer);
     }

@@ -75,9 +75,9 @@ public:
     virtual IndexBuffer* createIndexBuffer(int bytesPerIndex, int icount);
     virtual VertexBuffer* createVertexBuffer(const char* descriptor, int vcount);
 
-    virtual void renderRenderTarget(Scene*, RenderTarget* renderTarget, ShaderManager* shader_manager,
+    virtual void renderRenderTarget(std::shared_ptr<Scene>, RenderTarget* renderTarget, ShaderManager* shader_manager,
             RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
-    void makeShadowMaps(Scene* scene, ShaderManager* shader_manager);
+    void makeShadowMaps(std::shared_ptr<Scene> scene, ShaderManager* shader_manager);
 
     void set_face_culling(int cull_face);
     virtual RenderPass* createRenderPass();
@@ -87,7 +87,7 @@ public:
     virtual GLUniformBlock* createUniformBlock(const char* desc, int binding, const char* name, int maxelems);
     virtual Image* createImage(int type, int format);
     virtual Texture* createTexture(int target = GL_TEXTURE_2D);
-    virtual RenderTarget* createRenderTarget(Scene*) ;
+    virtual RenderTarget* createRenderTarget(std::shared_ptr<Scene>) ;
     virtual RenderTarget* createRenderTarget(RenderTexture*, bool);
     virtual RenderTarget* createRenderTarget(RenderTexture*, const RenderTarget*);
     virtual RenderTexture* createRenderTexture(const RenderTextureInfo&);

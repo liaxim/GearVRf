@@ -84,7 +84,7 @@ struct RenderState {
     int                     viewportWidth;
     int                     viewportHeight;
     bool                    invalidateShaders;
-    Scene*                  scene;
+    std::shared_ptr<Scene>  scene;
     ShaderData*             material_override;
     ShaderUniformsPerObject uniforms;
     ShaderManager*          shader_manager;
@@ -149,23 +149,23 @@ public:
     virtual IndexBuffer* createIndexBuffer(int bytesPerIndex, int icount) = 0;
     void updateTransforms(RenderState& rstate, UniformBlock* block, RenderData*);
     virtual void initializeStats();
-    virtual void cullFromCamera(Scene *scene, Camera* camera,
+    virtual void cullFromCamera(std::shared_ptr<Scene> scene, Camera* camera,
                                 ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector,bool);
     virtual void set_face_culling(int cull_face) = 0;
 
     virtual void renderRenderData(RenderState& rstate, RenderData* render_data);
-    virtual RenderTarget* createRenderTarget(Scene*) = 0;
+    virtual RenderTarget* createRenderTarget(std::shared_ptr<Scene>) = 0;
     virtual RenderTarget* createRenderTarget(RenderTexture*, bool) = 0;
     virtual RenderTarget* createRenderTarget(RenderTexture*, const RenderTarget*) = 0;
 
-    virtual void renderRenderTarget(Scene*, RenderTarget* renderTarget, ShaderManager* shader_manager,
+    virtual void renderRenderTarget(std::shared_ptr<Scene>, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                     RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b)=0;
     virtual void restoreRenderStates(RenderData* render_data) = 0;
     virtual void setRenderStates(RenderData* render_data, RenderState& rstate) = 0;
     virtual Texture* createSharedTexture(int id) = 0;
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int) = 0;
 
-    virtual void makeShadowMaps(Scene* scene, ShaderManager* shader_manager) = 0;
+    virtual void makeShadowMaps(std::shared_ptr<Scene> scene, ShaderManager* shader_manager) = 0;
     virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
     virtual void updatePostEffectMesh(Mesh*) = 0;
     void addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList);

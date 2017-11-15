@@ -95,140 +95,131 @@ extern "C" {
     JNIEXPORT void JNICALL
     Java_org_gearvrf_NativeScene_deleteLightsAndDepthTextureOnRenderThread(JNIEnv * env,
                                                        jobject obj, jlong jscene) {
-        Scene* scene = reinterpret_cast<Scene*>(jscene);
-        scene->deleteLightsAndDepthTextureOnRenderThread();
+        std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+        (*scene)->deleteLightsAndDepthTextureOnRenderThread();
     }
 };
 
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeScene_dtor(JNIEnv*, jclass, jlong jscene) {
+    LOGI("mmarinov: scene_jni.cpp dtor");
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    delete scene;
+}
+
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeScene_ctor(JNIEnv* env, jobject obj) {
-    return reinterpret_cast<jlong>(new Scene());
+Java_org_gearvrf_NativeScene_ctor(JNIEnv*, jobject) {
+    std::shared_ptr<Scene>* result = new std::shared_ptr<Scene>(new Scene);
+    return reinterpret_cast<jlong>(result);
 }
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_setJava(JNIEnv* env, jlong nativeScene, jobject javaScene) {
     JavaVM* jvm;
     env->GetJavaVM(&jvm);
-    Scene* scene = reinterpret_cast<Scene*>(nativeScene);
-    scene->set_java(jvm, javaScene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(nativeScene);
+    (*scene)->set_java(jvm, javaScene);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_invalidateShadowMap(JNIEnv * env,
-        jobject obj, jlong jscene){
-	 Scene* scene = reinterpret_cast<Scene*>(jscene);
-	 scene->invalidateShadowMaps();
+Java_org_gearvrf_NativeScene_invalidateShadowMap(JNIEnv *, jobject, jlong jscene){
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->invalidateShadowMaps();
 }
+
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jscene_object) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv *, jobject, jlong jscene, jlong jscene_object) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    scene->addSceneObject(scene_object);
+    (*scene)->addSceneObject(scene_object);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_removeSceneObject(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jscene_object) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_removeSceneObject(JNIEnv *, jobject, jlong jscene, jlong jscene_object) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    scene->removeSceneObject(scene_object);
+    (*scene)->removeSceneObject(scene_object);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_removeAllSceneObjects(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->removeAllSceneObjects();
+Java_org_gearvrf_NativeScene_removeAllSceneObjects(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->removeAllSceneObjects();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setMainCameraRig(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jcamera_rig) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_setMainCameraRig(JNIEnv *, jobject, jlong jscene, jlong jcamera_rig) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     CameraRig* camera_rig = reinterpret_cast<CameraRig*>(jcamera_rig);
-    scene->set_main_camera_rig(camera_rig);
+    (*scene)->set_main_camera_rig(camera_rig);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setFrustumCulling(JNIEnv * env,
-        jobject obj, jlong jscene, jboolean flag) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->set_frustum_culling(static_cast<bool>(flag));
+Java_org_gearvrf_NativeScene_setFrustumCulling(JNIEnv *, jobject, jlong jscene, jboolean flag) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->set_frustum_culling(static_cast<bool>(flag));
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setPickVisible(JNIEnv * env,
-        jobject obj, jlong jscene, jboolean flag) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->setPickVisible(static_cast<bool>(flag));
+Java_org_gearvrf_NativeScene_setPickVisible(JNIEnv *, jobject, jlong jscene, jboolean flag) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->setPickVisible(static_cast<bool>(flag));
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setOcclusionQuery(JNIEnv * env,
-        jobject obj, jlong jscene, jboolean flag) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->set_occlusion_culling(static_cast<bool>(flag));
+Java_org_gearvrf_NativeScene_setOcclusionQuery(JNIEnv *, jobject, jlong jscene, jboolean flag) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->set_occlusion_culling(static_cast<bool>(flag));
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_resetStats(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->resetStats();
+Java_org_gearvrf_NativeScene_resetStats(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->resetStats();
 }
-
 
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeScene_getNumberDrawCalls(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    return scene->getNumberDrawCalls();
+Java_org_gearvrf_NativeScene_getNumberDrawCalls(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    return (*scene)->getNumberDrawCalls();
 }
 
-
 JNIEXPORT int JNICALL
-Java_org_gearvrf_NativeScene_getNumberTriangles(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    return scene->getNumberTriangles();
+Java_org_gearvrf_NativeScene_getNumberTriangles(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    return (*scene)->getNumberTriangles();
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_exportToFile(JNIEnv * env,
-        jobject obj, jlong jscene, jstring filepath) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_exportToFile(JNIEnv * env, jobject, jlong jscene, jstring filepath) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     const char* native_filepath = env->GetStringUTFChars(filepath, 0);
-
-    scene->exportToFile(std::string(native_filepath));
-
+    (*scene)->exportToFile(std::string(native_filepath));
     env->ReleaseStringUTFChars(filepath, native_filepath);
 }
 
-
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeScene_addLight(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jlight) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_addLight(JNIEnv *, jobject, jlong jscene, jlong jlight) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     if (jlight != 0) {
         Light* light = reinterpret_cast<Light*>(jlight);
-        return scene->addLight(light);
+        return (*scene)->addLight(light);
     }
     return false;
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_clearLights(JNIEnv * env,
-        jobject obj, jlong jscene) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    scene->clearLights();
+Java_org_gearvrf_NativeScene_clearLights(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    (*scene)->clearLights();
 }
 
 JNIEXPORT jobjectArray JNICALL
-        Java_org_gearvrf_NativeScene_getLightList(JNIEnv* env, jobject obj, jlong jscene)
+Java_org_gearvrf_NativeScene_getLightList(JNIEnv* env, jobject, jlong jscene)
 {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
-    const std::vector<Light*> lights = scene->getLightList();
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    const std::vector<Light*> lights = (*scene)->getLightList();
     int nlights = lights.size();
     jclass elemClass = env->FindClass("org/gearvrf/GVRLightBase");
 
@@ -246,16 +237,16 @@ JNIEXPORT jobjectArray JNICALL
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_addCollider(JNIEnv * env,
-        jobject obj, jlong jscene, jlong jcollider) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+Java_org_gearvrf_NativeScene_addCollider(JNIEnv *, jobject, jlong jscene, jlong jcollider) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     Collider* collider = reinterpret_cast<Collider*>(jcollider);
-    scene->addCollider(collider);
+    (*scene)->addCollider(collider);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeScene_setMainScene(JNIEnv * env, jobject obj, jlong jscene) {
-    Scene::set_main_scene(reinterpret_cast<Scene*>(jscene));
+Java_org_gearvrf_NativeScene_setMainScene(JNIEnv *, jobject, jlong jscene) {
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
+    Scene::set_main_scene(*scene);
 }
 
 }

@@ -98,11 +98,11 @@ public:
     void renderRenderDataVector(RenderState&, std::vector<RenderData*>& render_data_vector, std::vector<RenderData*>&);
     void restoreRenderStates(RenderData* render_data){}
     void setRenderStates(RenderData* render_data, RenderState& rstate){}
-    virtual void cullAndRender(RenderTarget* renderTarget, Scene* scene,
+    virtual void cullAndRender(RenderTarget* renderTarget, std::shared_ptr<Scene> scene,
                         ShaderManager* shader_manager, PostEffectShaderManager* post_effect_shader_manager,
                         RenderTexture* post_effect_render_texture_a,
                         RenderTexture* post_effect_render_texture_b) {};
-    void makeShadowMaps(Scene* scene, ShaderManager* shader_manager){}
+    void makeShadowMaps(std::shared_ptr<Scene> scene, ShaderManager* shader_manager){}
     void set_face_culling(int cull_face){}
     virtual ShaderData* createMaterial(const char* uniform_desc, const char* texture_desc);
     virtual RenderData* createRenderData();
@@ -110,7 +110,7 @@ public:
     virtual RenderPass* createRenderPass();
     virtual UniformBlock* createUniformBlock(const char* desc, int binding, const char* name, int maxelems);
     Image* createImage(int type, int format);
-    virtual RenderTarget* createRenderTarget(Scene*);
+    virtual RenderTarget* createRenderTarget(std::shared_ptr<Scene>);
     virtual RenderTarget* createRenderTarget(RenderTexture*, bool);
     virtual RenderTarget* createRenderTarget(RenderTexture*, const RenderTarget*);
     virtual Texture* createTexture(int target = GL_TEXTURE_2D);
@@ -125,7 +125,7 @@ public:
                                  const char* uniformDescriptor, const char* textureDescriptor,
                                  const char* vertexDescriptor, const char* vertexShader,
                                  const char* fragmentShader);
-    virtual void renderRenderTarget(Scene*, RenderTarget* renderTarget, ShaderManager* shader_manager,
+    virtual void renderRenderTarget(std::shared_ptr<Scene>, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                     RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b);
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int);
     virtual void updatePostEffectMesh(Mesh*);

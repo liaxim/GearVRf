@@ -152,7 +152,7 @@ bool isRenderPassEqual(RenderData* rdata1, RenderData* rdata2){
 /*
  * Perform view frustum culling from a specific camera viewpoint
  */
-void Renderer::cullFromCamera(Scene *scene, Camera* camera,
+void Renderer::cullFromCamera(std::shared_ptr<Scene> scene, Camera* camera,
         ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector, bool is_multiview)
 {
     std::vector<SceneObject*> scene_objects;

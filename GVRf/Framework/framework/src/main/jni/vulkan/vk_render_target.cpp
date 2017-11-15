@@ -31,7 +31,7 @@ VkRenderTarget::VkRenderTarget(RenderTexture* renderTexture, bool is_multiview):
     static_cast<VkRenderTexture*>(mRenderTexture)->initVkData();
 }
 
-VkRenderTarget::VkRenderTarget(Scene* scene): RenderTarget(scene){
+VkRenderTarget::VkRenderTarget(std::shared_ptr<Scene> scene): RenderTarget(scene){
     static_cast<VkRenderTexture*>(mRenderTexture)->initVkData();
 }
 VkRenderTarget::VkRenderTarget(RenderTexture* renderTexture, const RenderTarget* source): RenderTarget(renderTexture, source){

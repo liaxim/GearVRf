@@ -18,6 +18,7 @@ package org.gearvrf;
 import org.gearvrf.utility.Log;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -30,20 +31,11 @@ import java.util.Map;
  * Descendant classes all have native (JNI) implementations; this base class
  * manages the native lifecycles.
  */
-public abstract class GVRHybridObject {
+public class GVRHybridObject {
 
-    private static final String TAG = Log.tag(GVRHybridObject.class);
-
-    /*
-     * Instance fields
-     */
+    private static final String TAG = "GVRHybridObject";
 
     private final GVRContext mGVRContext;
-    /**
-     * This is not {@code final}: the first call to {@link #close()} sets
-     * {@link #mNativePointer} to 0, so that {@link #close()} can safely be
-     * called multiple times.
-     */
     private long mNativePointer;
 
     /*
@@ -59,7 +51,15 @@ public abstract class GVRHybridObject {
      *            The native pointer, returned by the native constructor
      */
     protected GVRHybridObject(GVRContext gvrContext, long nativePointer) {
-        this(gvrContext, nativePointer, null);
+        this(gvrContext, nativePointer, (List<NativeCleanupHandler>)null);
+        Class<? extends GVRHybridObject> aClass = this.getClass();
+    }
+
+    protected GVRHybridObject(GVRContext gvrContext, long nativePointer, Method dtor) {
+        mGVRContext = gvrContext;
+        mNativePointer = nativePointer;
+
+        gvrContext.registerHybridObject(this,nativePointer, dtor);
     }
 
     /**
@@ -120,7 +120,7 @@ public abstract class GVRHybridObject {
         if (mNativePointer == 0)
         {
             mNativePointer = nativePtr;
-            getGVRContext().registerHybridObject(this, mNativePointer, null);
+            getGVRContext().registerHybridObject(this, mNativePointer, (List<NativeCleanupHandler>)null);
         }
     }
 

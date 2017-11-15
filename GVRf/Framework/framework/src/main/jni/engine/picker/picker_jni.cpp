@@ -52,10 +52,10 @@ JNIEXPORT jlongArray JNICALL
 Java_org_gearvrf_NativePicker_pickScene(JNIEnv * env,
         jobject obj, jlong jscene, jfloat ox, jfloat oy, jfloat oz, jfloat dx,
         jfloat dy, jfloat dz) {
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     std::vector<ColliderData> colliders;
-    Transform* t = scene->main_camera_rig()->getHeadTransform();
-    Picker::pickScene(scene, colliders, t, ox, oy, oz, dx, dy, dz);
+    Transform* t = (*scene)->main_camera_rig()->getHeadTransform();
+    Picker::pickScene((**scene), colliders, t, ox, oy, oz, dx, dy, dz);
     jlongArray jcolliders = env->NewLongArray(colliders.size());
     jlong* ptrArray = env->GetLongArrayElements(jcolliders, 0);
     jlong* ptrs = ptrArray;
@@ -78,14 +78,14 @@ Java_org_gearvrf_NativePicker_pickObjects(JNIEnv * env,
     jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
     jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
 
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     std::vector<ColliderData> colliders;
     Transform* t = reinterpret_cast<Transform*>(jtransform);
 
     if (t == NULL) {
-        t = scene->main_camera_rig()->getHeadTransform();
+        t = (*scene)->main_camera_rig()->getHeadTransform();
     }
-    Picker::pickScene(scene, colliders, t, ox, oy, oz, dx, dy, dz);
+    Picker::pickScene((**scene), colliders, t, ox, oy, oz, dx, dy, dz);
 
     int i = 0;
     int size = colliders.size();
@@ -183,19 +183,18 @@ Java_org_gearvrf_NativePicker_pickSceneObjectAgainstBoundingBox(JNIEnv * env,
 }
 
 JNIEXPORT jobjectArray JNICALL
-Java_org_gearvrf_NativePicker_pickVisible(JNIEnv * env,
-        jobject obj, jlong jscene)
+Java_org_gearvrf_NativePicker_pickVisible(JNIEnv * env, jobject obj, jlong jscene)
 {
     jclass pickerClass = env->FindClass("org/gearvrf/GVRPicker");
     jclass hitClass = env->FindClass("org/gearvrf/GVRPicker$GVRPickedObject");
     jmethodID makeHitMesh = env->GetStaticMethodID(pickerClass, "makeHitMesh", "(JFFFFIFFFFFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
     jmethodID makeHit = env->GetStaticMethodID(pickerClass, "makeHit", "(JFFFF)Lorg/gearvrf/GVRPicker$GVRPickedObject;");
 
-    Scene* scene = reinterpret_cast<Scene*>(jscene);
+    std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
     std::vector<ColliderData> colliders;
-    Transform* t = scene->main_camera_rig()->getHeadTransform();
+    Transform* t = (*scene)->main_camera_rig()->getHeadTransform();
 
-    Picker::pickVisible(scene, t, colliders);
+    Picker::pickVisible((**scene), t, colliders);
 
     int i = 0;
     int size = colliders.size();

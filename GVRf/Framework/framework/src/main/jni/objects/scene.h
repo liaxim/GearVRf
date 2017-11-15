@@ -46,13 +46,13 @@ public:
     void removeAllSceneObjects();
     void deleteLightsAndDepthTextureOnRenderThread();
 
-    const CameraRig* main_camera_rig() {
+    const CameraRig* main_camera_rig() const {
         return main_camera_rig_;
     }
     void set_main_camera_rig(CameraRig* camera_rig) {
         main_camera_rig_ = camera_rig;
     }
-    std::vector<SceneObject*> getWholeSceneObjects();
+    std::vector<SceneObject*> getWholeSceneObjects() const;
 
     int getSceneDirtyFlag() { return 1 || dirtyFlag_;  /* force to be true */}
     void setSceneDirtyFlag(int dirtyBits) { dirtyFlag_ |= dirtyBits; }
@@ -165,7 +165,7 @@ public:
      * is returned. Otherwise the list of all colliders is returned.
      * You should call unlockColliders after you are done with the list.
      */
-    const std::vector<Component*> lockColliders() {
+    const std::vector<Component*> lockColliders() const {
         collider_mutex_.lock();
         return pick_visible_ ? visibleColliders : allColliders;
     }
@@ -174,7 +174,7 @@ public:
      * Unlock the collider list.
      * Don't call this unless you have called lockColliders first.
      */
-    void unlockColliders() {
+    void unlockColliders() const {
         collider_mutex_.unlock();
     }
 
@@ -187,11 +187,11 @@ public:
 
     int get_java_env(JNIEnv** envptr);
 
-    static Scene* main_scene() {
+    static std::shared_ptr<Scene> main_scene() {
         return main_scene_;
     }
 
-    static void set_main_scene(Scene* scene);
+    static void set_main_scene(std::shared_ptr<Scene> scene);
 
     void detach_java_env() {
         javaVM_->DetachCurrentThread();
@@ -207,7 +207,7 @@ private:
 
 private:
     std::string uniform_desc_;
-    static Scene* main_scene_;
+    static std::shared_ptr<Scene> main_scene_;
     JavaVM* javaVM_;
     jobject javaObj_;
     jmethodID bindShadersMethod_;
@@ -217,7 +217,7 @@ private:
     bool frustum_flag_;
     bool occlusion_flag_;
     bool pick_visible_;
-    std::mutex collider_mutex_;
+    mutable std::mutex collider_mutex_;
     std::vector<Light*> lightList;
     std::vector<Component*> allColliders;
     std::vector<Component*> visibleColliders;

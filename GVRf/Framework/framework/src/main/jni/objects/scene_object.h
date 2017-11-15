@@ -134,7 +134,7 @@ public:
 
     void addChildObject(SceneObject* self, SceneObject* child);
     void removeChildObject(SceneObject* child);
-    void getDescendants(std::vector<SceneObject*>& descendants);
+    void getDescendants(std::vector<SceneObject*>& descendants) const;
     void clear();
     int getChildrenCount() const;
     SceneObject* getChildByIndex(int index);
@@ -151,8 +151,8 @@ public:
     void onTransformChanged();
     bool onAddChild(SceneObject* addme, SceneObject* root);
     bool onRemoveChild(SceneObject* removeme, SceneObject* root);
-    void onAddedToScene(Scene* scene);
-    void onRemovedFromScene(Scene* scene);
+    void onAddedToScene(std::shared_ptr<Scene> scene);
+    void onRemovedFromScene(std::shared_ptr<Scene> scene);
     int frustumCull(glm::vec3 camera_position, const float frustum[6][4], int& planeMask);
 
 private:
@@ -189,7 +189,7 @@ private:
     bool checkAABBVsFrustumBasic(const float frustum[6][4],
             BoundingVolume &bounding_volume);
 
-    std::mutex children_mutex_;
+    mutable std::mutex children_mutex_;
 };
 
 }

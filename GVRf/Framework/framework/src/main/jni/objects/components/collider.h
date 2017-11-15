@@ -92,8 +92,8 @@ public:
         return pick_distance_;
     }
     static void transformRay(const glm::mat4& matrix, glm::vec3& rayStart, glm::vec3& rayDir);
-    virtual void onAddedToScene(Scene* scene);
-    virtual void onRemovedFromScene(Scene* scene);
+    virtual void onAddedToScene(std::shared_ptr<Scene> scene);
+    virtual void onRemovedFromScene(std::shared_ptr<Scene> scene);
 
 protected:
     float pick_distance_;

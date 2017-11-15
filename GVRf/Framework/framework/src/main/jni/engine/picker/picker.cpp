@@ -39,11 +39,11 @@ namespace gvr {
  * This function is not thread-safe because it relies on a static
  * array of colliders which could be updated by a different thread.
  */
-void Picker::pickScene(Scene* scene, std::vector<ColliderData>& picklist, Transform* t,
+void Picker::pickScene(const Scene& scene, std::vector<ColliderData>& picklist, Transform* t,
                        float ox, float oy, float oz, float dx, float dy, float dz) {
     glm::vec3 ray_start(ox, oy, oz);
     glm::vec3 ray_dir(dx, dy, dz);
-    const std::vector<Component*>& colliders = scene->lockColliders();
+    const std::vector<Component*>& colliders = scene.lockColliders();
     const glm::mat4& model_matrix = t->getModelMatrix();
 
     Collider::transformRay(model_matrix, ray_start, ray_dir);
@@ -61,11 +61,11 @@ void Picker::pickScene(Scene* scene, std::vector<ColliderData>& picklist, Transf
         }
     }
     std::sort(picklist.begin(), picklist.end(), compareColliderData);
-    scene->unlockColliders();
+    scene.unlockColliders();
 }
 
-void Picker::pickScene(Scene* scene, std::vector<ColliderData>& pickList) {
-    Transform* t = scene->main_camera_rig()->getHeadTransform();
+void Picker::pickScene(const Scene& scene, std::vector<ColliderData>& pickList) {
+    Transform* t = scene.main_camera_rig()->getHeadTransform();
     pickScene(scene, pickList, t, 0, 0, 0, 0, 0, -1.0f);
 }
 
@@ -120,8 +120,8 @@ glm::vec3 Picker::pickSceneObjectAgainstBoundingBox(const SceneObject* scene_obj
  * This function is not thread-safe because it relies on a static
  * array of colliders which could be updated by a different thread.
  */
-void Picker::pickVisible(Scene* scene, Transform* t, std::vector<ColliderData>& picklist) {
-    const std::vector<Component*>& colliders = scene->lockColliders();
+void Picker::pickVisible(const Scene& scene, Transform* t, std::vector<ColliderData>& picklist) {
+    const std::vector<Component*>& colliders = scene.lockColliders();
 
     for (auto it = colliders.begin(); it != colliders.end(); ++it) {
         Collider* collider = static_cast<Collider*>(*it);
@@ -137,6 +137,6 @@ void Picker::pickVisible(Scene* scene, Transform* t, std::vector<ColliderData>& 
         }
     }
     std::sort(picklist.begin(), picklist.end(), compareColliderData);
-    scene->unlockColliders();
+    scene.unlockColliders();
 }
 }

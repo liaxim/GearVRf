@@ -53,7 +53,7 @@ bool SceneObject::attachComponent(Component* component) {
     SceneObject* par = parent();
     if (par)
     {
-        Scene* scene = Scene::main_scene();
+        std::shared_ptr<Scene> scene = Scene::main_scene();
         SceneObject* root = scene->getRoot();
         if (scene != NULL)
         {
@@ -78,7 +78,7 @@ bool SceneObject::detachComponent(Component* component) {
     SceneObject* par = parent();
     if (par)
     {
-        Scene* scene = Scene::main_scene();
+        std::shared_ptr<Scene> scene = Scene::main_scene();
         SceneObject* root = scene->getRoot();
         if (scene != NULL)
         {
@@ -137,7 +137,7 @@ void SceneObject::getAllComponents(std::vector<Component*>& components, long lon
 }
 
 void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
-    Scene* scene = Scene::main_scene();
+    std::shared_ptr<Scene> scene = Scene::main_scene();
     if (scene != NULL)
     {
         if (onAddChild(child, scene->getRoot()))
@@ -160,7 +160,7 @@ void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
 /**
  * Called when a scene object is added to the current scene.
  */
-void SceneObject::onAddedToScene(Scene* scene)
+void SceneObject::onAddedToScene(std::shared_ptr<Scene> scene)
 {
     for (auto it = components_.begin(); it != components_.end(); ++it)
     {
@@ -215,7 +215,7 @@ bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
 /**
  * Called when a scene object is removed from the current scene.
  */
-void SceneObject::onRemovedFromScene(Scene* scene)
+void SceneObject::onRemovedFromScene(std::shared_ptr<Scene> scene)
 {
     for (auto it = components_.begin(); it != components_.end(); ++it)
     {
@@ -229,7 +229,7 @@ void SceneObject::onRemovedFromScene(Scene* scene)
 }
 
 void SceneObject::removeChildObject(SceneObject* child) {
-    Scene* scene = Scene::main_scene();
+    std::shared_ptr<Scene> scene = Scene::main_scene();
 
     if (child->parent_ == this)
     {
@@ -267,7 +267,7 @@ void SceneObject::onTransformChanged() {
 }
 
 void SceneObject::clear() {
-    Scene* scene = Scene::main_scene();
+    std::shared_ptr<Scene> scene = Scene::main_scene();
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it) {
         SceneObject* child = *it;
@@ -301,7 +301,7 @@ SceneObject* SceneObject::getChildByIndex(int index) {
     }
 }
 
-void SceneObject::getDescendants(std::vector<SceneObject*>& descendants) {
+void SceneObject::getDescendants(std::vector<SceneObject*>& descendants) const {
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it) {
         SceneObject* obj = *it;

@@ -42,7 +42,7 @@ class RenderTarget : public Component
 {
 public:
     explicit RenderTarget(RenderTexture*, bool is_multiview);
-    explicit RenderTarget(Scene*);
+    explicit RenderTarget(std::shared_ptr<Scene>);
     explicit RenderTarget(RenderTexture*, const RenderTarget* source);
     RenderTarget();
     virtual ~RenderTarget();
@@ -52,7 +52,7 @@ public:
     RenderTarget*   getNextRenderTarget(){
         return mNextRenderTarget;
     }
-    void            setMainScene(Scene* scene){mRenderState.scene = scene;}
+    void            setMainScene(std::shared_ptr<Scene> scene){mRenderState.scene = scene;}
     void            setCamera(Camera* cam) { mRenderState.camera= cam; }
     Camera*         getCamera() const { return mRenderState.camera; }
     bool            hasTexture() const { return (mRenderTexture != nullptr); }\
@@ -65,7 +65,7 @@ public:
     std::vector<RenderData*>* getRenderDataVector(){
         return mRenderDataVector.get();
     }
-    virtual void cullFromCamera(Scene*, Camera* camera, Renderer* renderer, ShaderManager* shader_manager);
+    virtual void cullFromCamera(std::shared_ptr<Scene>, Camera* camera, Renderer* renderer, ShaderManager* shader_manager);
 private:
     RenderTarget(const RenderTarget& render_texture) = delete;
     RenderTarget(RenderTarget&& render_texture) = delete;

@@ -51,7 +51,7 @@ RenderTexture* VulkanRenderer::createRenderTexture(const RenderTextureInfo& rend
         return new VulkanRenderData(*data);
     }
 
-RenderTarget* VulkanRenderer::createRenderTarget(Scene* scene) {
+RenderTarget* VulkanRenderer::createRenderTarget(std::shared_ptr<Scene> scene) {
     return new VkRenderTarget(scene);
 }
 RenderTarget* VulkanRenderer::createRenderTarget(RenderTexture* renderTexture, bool isMultiview){
@@ -195,7 +195,7 @@ void VulkanRenderer::renderRenderDataVector(RenderState& rstate,std::vector<Rend
         }
     }
 }
-void VulkanRenderer::renderRenderTarget(Scene* scene, RenderTarget* renderTarget, ShaderManager* shader_manager,
+void VulkanRenderer::renderRenderTarget(std::shared_ptr<Scene> scene, RenderTarget* renderTarget, ShaderManager* shader_manager,
                                 RenderTexture* post_effect_render_texture_a, RenderTexture* post_effect_render_texture_b){
 
 

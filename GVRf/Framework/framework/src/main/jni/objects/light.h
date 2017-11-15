@@ -167,7 +167,7 @@ public:
      * Internal function called at the start of each frame
      * to update the shadow map.
      */
-    bool makeShadowMap(Scene* scene, ShaderManager* shader_manager, int texIndex);
+    bool makeShadowMap(std::shared_ptr<Scene> scene, ShaderManager* shader_manager, int texIndex);
     /**
      * Internal function called at the start of each shader
      * to update the light uniforms (if necessary).
@@ -189,8 +189,8 @@ public:
         lightID_ = lightid;
     };
 
-    virtual void onAddedToScene(Scene* scene);
-    virtual void onRemovedFromScene(Scene* scene);
+    virtual void onAddedToScene(std::shared_ptr<Scene> scene);
+    virtual void onRemovedFromScene(std::shared_ptr<Scene> scene);
 
 private:
     Light(const Light& light) = delete;

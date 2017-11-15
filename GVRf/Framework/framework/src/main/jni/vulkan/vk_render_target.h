@@ -26,7 +26,7 @@ class VkRenderTarget: public  RenderTarget
 {
 public:
     explicit VkRenderTarget(RenderTexture* renderTexture, bool is_multiview);
-    explicit VkRenderTarget(Scene* scene);
+    explicit VkRenderTarget(std::shared_ptr<Scene> scene);
     explicit VkRenderTarget(RenderTexture* renderTexture, const RenderTarget* source);
     explicit  VkRenderTarget(){}
     virtual ~VkRenderTarget(){}

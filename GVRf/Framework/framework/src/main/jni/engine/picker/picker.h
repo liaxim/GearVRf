@@ -34,10 +34,10 @@ namespace gvr {
     class Transform;
 
     namespace Picker {
-        void pickVisible(Scene* scene, Transform* t, std::vector<ColliderData>& pickList);
-        void pickScene(Scene* scene, std::vector<ColliderData>& pickList);
+        void pickVisible(const Scene& scene, Transform* t, std::vector<ColliderData>& pickList);
+        void pickScene(const Scene& scene, std::vector<ColliderData>& pickList);
         void pickScene(
-                Scene* scene, std::vector<ColliderData>& pickList,
+                const Scene& scene, std::vector<ColliderData>& pickList,
                 Transform* t,
                 float ox, float oy, float oz,
                 float dx, float dy, float dz);

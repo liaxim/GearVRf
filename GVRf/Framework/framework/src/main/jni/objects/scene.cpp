@@ -26,7 +26,7 @@
 
 namespace gvr {
 
-Scene* Scene::main_scene_ = NULL;
+std::shared_ptr<Scene> Scene::main_scene_ = std::shared_ptr<Scene>();
 
 Scene::Scene() :
         HybridObject(),
@@ -43,6 +43,7 @@ Scene::Scene() :
 }
 
 Scene::~Scene() {
+    LOGI("mmarinov: scene.cpp ~~");
     if (javaVM_ && javaObj_)
     {
         JNIEnv* env;
@@ -172,21 +173,21 @@ void Scene::removeCollider(Collider* collider) {
 /**
  * Called when the main scene is first presented for render.
  */
-void Scene::set_main_scene(Scene* scene) {
+void Scene::set_main_scene(std::shared_ptr<Scene> scene) {
     main_scene_ = scene;
     scene->getRoot()->onAddedToScene(scene);
     scene->bindShaders();
 }
 
 
-std::vector<SceneObject*> Scene::getWholeSceneObjects() {
+std::vector<SceneObject*> Scene::getWholeSceneObjects() const {
     std::vector<SceneObject*> scene_objects;
     scene_root_.getDescendants(scene_objects);
     return scene_objects;
 }
 
 void Scene::exportToFile(std::string filepath) {
-    Exporter::writeToFile(this, filepath);
+    Exporter::writeToFile(*this, filepath);
 }
 
 bool Scene::addLight(Light* light) {
