@@ -41,6 +41,8 @@ import org.gearvrf.utility.Threads;
 import java.io.IOException;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -813,6 +815,7 @@ public abstract class GVRContext implements IEventReceiver {
     final class GVRReference extends PhantomReference<GVRHybridObject> {
         private long mNativePointer;
         private final List<NativeCleanupHandler> mCleanupHandlers;
+        private Method m;
 
         private GVRReference(GVRHybridObject object, long nativePointer,
                 List<NativeCleanupHandler> cleanupHandlers) {
@@ -820,6 +823,18 @@ public abstract class GVRContext implements IEventReceiver {
 
             mNativePointer = nativePointer;
             mCleanupHandlers = cleanupHandlers;
+        }
+
+        private GVRReference(GVRHybridObject object, long nativePointer, Class clazz) {
+            super(object, mReferenceQueue);
+
+            mCleanupHandlers=null;
+            mNativePointer = nativePointer;
+            try {
+                m = clazz.getDeclaredMethod("dtor", new Class[0]);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
         }
 
         private void close() {
@@ -834,7 +849,15 @@ public abstract class GVRContext implements IEventReceiver {
                             handler.nativeCleanup(mNativePointer);
                         }
                     }
-                    NativeHybridObject.delete(mNativePointer);
+                    if (null == m) {
+                        NativeHybridObject.delete(mNativePointer);
+                    } else {
+                        try {
+                            m.invoke(null, new Object[] {mNativePointer});
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                     mNativePointer = 0;
                 }
 
@@ -848,6 +871,12 @@ public abstract class GVRContext implements IEventReceiver {
     final void registerHybridObject(GVRHybridObject gvrHybridObject, long nativePointer, List<NativeCleanupHandler> cleanupHandlers) {
         synchronized (mReferenceSet) {
             mReferenceSet.add(new GVRReference(gvrHybridObject, nativePointer, cleanupHandlers));
+        }
+    }
+
+    final void registerHybridObject(GVRHybridObject gvrHybridObject, long nativePointer, Class clazz) {
+        synchronized (mReferenceSet) {
+            mReferenceSet.add(new GVRReference(gvrHybridObject, nativePointer, clazz));
         }
     }
 

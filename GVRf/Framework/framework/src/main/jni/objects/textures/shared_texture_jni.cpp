@@ -29,8 +29,11 @@ Java_org_gearvrf_NativeSharedTexture_ctor(JNIEnv * env,
 
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeSharedTexture_ctor(JNIEnv * env,
-    jobject obj, jint id) {
-return reinterpret_cast<jlong>(Renderer::getInstance()->createSharedTexture(id));
+    jobject obj, jint id)
+{
+    Texture* t = Renderer::getInstance()->createSharedTexture(id);
+    std::shared_ptr<Texture>* result = new std::shared_ptr<Texture>(t);
+    return reinterpret_cast<jlong>(result);
 }
 
 }

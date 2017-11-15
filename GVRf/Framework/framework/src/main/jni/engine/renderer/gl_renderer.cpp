@@ -105,7 +105,7 @@ namespace gvr
         return NULL;
     }
 
-    Texture *GLRenderer::createTexture(int type)
+    Texture *GLRenderer::creeZEateTexture(int type)
     {
         Texture *tex = new Texture(type);
         Image *gltex = NULL;

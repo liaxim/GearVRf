@@ -313,6 +313,7 @@ public class GVRTexture extends GVRHybridObject implements GVRAndroidResource.Te
 
 class NativeTexture {
     static native long constructor();
+    static native void dtor(long ptr);
     static native int getId(long texture);
     static native boolean isReady(long texture);
     static native void updateTextureParameters(long texture, int[] textureParametersValues);

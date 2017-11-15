@@ -108,7 +108,7 @@ protected:
     float MaxAnisotropy;
 };
 
-class Texture : public HybridObject
+class Texture
 {
 public:
     /*

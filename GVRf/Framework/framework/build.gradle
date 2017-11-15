@@ -7,7 +7,7 @@ repositories {
 }
 
 android {
-    //defaultPublishConfig "debug"
+    defaultPublishConfig "debug"
     publishNonDefault !gradle.getStartParameter().taskNames.contains('uploadArchives')
     compileSdkVersion 24
     buildToolsVersion '25.0.2'

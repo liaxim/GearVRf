@@ -48,7 +48,8 @@ JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeTexture_constructor(JNIEnv * env, jobject obj)
 {
     Texture* tex = Renderer::getInstance()->createTexture(0);
-    return reinterpret_cast<jlong>(tex);
+    std::shared_ptr<Texture>* result = new std::shared_ptr<Texture>(tex);
+    return reinterpret_cast<jlong>(result);
 }
 
 JNIEXPORT jint JNICALL

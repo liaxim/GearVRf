@@ -23,7 +23,9 @@ Java_org_gearvrf_NativeExternalRendererTexture_getData(JNIEnv * env,
 
 JNIEXPORT jlong JNICALL
 Java_org_gearvrf_NativeExternalRendererTexture_ctor(JNIEnv * env, jobject obj) {
-    return reinterpret_cast<jlong>(Renderer::getInstance()->createTexture(Texture::TextureType::TEXTURE_EXTERNAL_RENDERER));
+    Texture* tex = Renderer::getInstance()->createTexture(Texture::TextureType::TEXTURE_EXTERNAL_RENDERER);
+    std::shared_ptr<Texture>* result = new std::shared_ptr<Texture>(tex);
+    return reinterpret_cast<jlong>(result);
 }
 
 JNIEXPORT void JNICALL
