@@ -96,7 +96,7 @@ public abstract class GVRAnimation {
     public static final int DEFAULT_REPEAT_COUNT = 2;
 
     // Immutable values, passed to constructor
-    private final GVRHybridObject mTarget;
+    private final Object mTarget;
     private final float mDuration;
 
     // Defaulted values, which should be set before start()
@@ -131,7 +131,7 @@ public abstract class GVRAnimation {
      * @param duration
      *            The animation duration, in seconds.
      */
-    protected GVRAnimation(GVRHybridObject target, float duration) {
+    protected GVRAnimation(Object target, float duration) {
         mTarget = target;
         mDuration = duration;
     }
@@ -157,7 +157,7 @@ public abstract class GVRAnimation {
      *             If {@code target} is not an instance of any of the
      *             {@code supported} types
      */
-    protected static Class<?> checkTarget(GVRHybridObject target,
+    protected static Class<?> checkTarget(Object target,
             Class<?>... supported) {
         for (Class<?> type : supported) {
             if (type.isInstance(target)) {
@@ -470,5 +470,5 @@ public abstract class GVRAnimation {
      * @param ratio
      *            The start state is 0; the stop state is 1.
      */
-    protected abstract void animate(GVRHybridObject target, float ratio);
+    protected abstract void animate(Object target, float ratio);
 }

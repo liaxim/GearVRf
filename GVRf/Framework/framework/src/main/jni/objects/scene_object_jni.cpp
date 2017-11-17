@@ -90,108 +90,100 @@ extern "C" {
 } // extern "C"
 
 JNIEXPORT jlong JNICALL
-Java_org_gearvrf_NativeSceneObject_ctor(JNIEnv * env,
-        jobject obj) {
-    return reinterpret_cast<jlong>(new SceneObject());
+Java_org_gearvrf_NativeSceneObject_ctor(JNIEnv *, jobject) {
+    std::shared_ptr<SceneObject>* sceneObject = new std::shared_ptr<SceneObject>(new SceneObject);
+    return reinterpret_cast<jlong>(sceneObject);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeSceneObject_dtor(JNIEnv*, jclass, jlong jsceneObject) {
+    LOGI("mmarinov: scene_object_jni.cpp dtor");
+    std::shared_ptr<SceneObject>* sceneObject = reinterpret_cast<std::shared_ptr<SceneObject>*>(jsceneObject);
+    delete sceneObject;
 }
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env,
-        jobject obj, jlong jscene_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    std::string name = scene_object->name();
+Java_org_gearvrf_NativeSceneObject_getName(JNIEnv * env, jobject, jlong jscene_object) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    std::string name = (*scene_object)->name();
     jstring jname = env->NewStringUTF(name.c_str());
     return jname;
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env,
-        jobject obj, jlong jscene_object, jstring name) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+Java_org_gearvrf_NativeSceneObject_setName(JNIEnv * env, jobject, jlong jscene_object, jstring name) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
     const char* native_name = env->GetStringUTFChars(name, 0);
-    scene_object->set_name(std::string(native_name));
+    (*scene_object)->set_name(std::string(native_name));
     env->ReleaseStringUTFChars(name, native_name);
 }
 
-
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv * env,
-        jobject obj, jlong jscene_object, jlong jcomponent) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+Java_org_gearvrf_NativeSceneObject_attachComponent(JNIEnv *, jobject, jlong jscene_object, jlong jcomponent) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
     Component* component = reinterpret_cast<Component*>(jcomponent);
-    return scene_object->attachComponent(component);
+    return (*scene_object)->attachComponent(component);
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv * env,
-        jobject obj, jlong jscene_object, jlong type) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    return scene_object->detachComponent(type) != NULL;
+Java_org_gearvrf_NativeSceneObject_detachComponent(JNIEnv *, jobject, jlong jscene_object, jlong type) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    return (*scene_object)->detachComponent(type) != NULL;
 }
-
 
 JNIEXPORT long JNICALL
-Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv * env,
-        jobject obj, jlong jscene_object, jlong type) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    Component* component = scene_object->getComponent(type);
+Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv *, jobject, jlong jscene_object, jlong type) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    Component* component = (*scene_object)->getComponent(type);
     return (long) component;
 }
 
-
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv * env,
-        jobject obj, jlong jscene_object, jlong jchild) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv *, jobject, jlong jscene_object, jlong jchild) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
     SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    scene_object->addChildObject(scene_object, child);
+    (*scene_object)->addChildObject(*scene_object, child);
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeSceneObject_removeChildObject(
-        JNIEnv * env, jobject obj, jlong jscene_object, jlong jchild) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
+Java_org_gearvrf_NativeSceneObject_removeChildObject(JNIEnv *, jobject, jlong jscene_object, jlong jchild) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
     SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    scene_object->removeChildObject(child);
+    (*scene_object)->removeChildObject(child);
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_isColliding(
-        JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    SceneObject* other_object = reinterpret_cast<SceneObject*>(jother_object);
-    return scene_object->isColliding(other_object);
-}
-
-
-JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_isEnabled(
-        JNIEnv * env, jobject obj, jlong jscene_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    return scene_object->enabled();
+Java_org_gearvrf_NativeSceneObject_isColliding(JNIEnv *, jobject, jlong jscene_object, jlong jother_object) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    std::shared_ptr<SceneObject>* other_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jother_object);
+    return (*scene_object)->isColliding((**other_object));
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_setEnable(
-        JNIEnv * env, jobject obj, jlong jscene_object, bool flag) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    scene_object->set_enable(flag);
+Java_org_gearvrf_NativeSceneObject_isEnabled(JNIEnv *, jobject, jlong jscene_object) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    return (*scene_object)->enabled();
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv * env,
-        jobject obj, jlong jscene_object, jfloat rox, jfloat roy, jfloat roz,
+Java_org_gearvrf_NativeSceneObject_setEnable(JNIEnv *, jobject, jlong jscene_object, bool flag) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    (*scene_object)->set_enable(flag);
+}
+
+JNIEXPORT bool JNICALL
+Java_org_gearvrf_NativeSceneObject_rayIntersectsBoundingVolume(JNIEnv *,
+        jobject, jlong jscene_object, jfloat rox, jfloat roy, jfloat roz,
         jfloat rdx, jfloat rdy, jfloat rdz) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    return scene_object->intersectsBoundingVolume(rox, roy, roz, rdx, rdy, rdz);
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    return (*scene_object)->intersectsBoundingVolume(rox, roy, roz, rdx, rdy, rdz);
 }
 
 JNIEXPORT bool JNICALL
-Java_org_gearvrf_NativeSceneObject_objectIntersectsBoundingVolume(
-        JNIEnv * env, jobject obj, jlong jscene_object, jlong jother_object) {
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    SceneObject* other_object = reinterpret_cast<SceneObject*>(jother_object);
-    return scene_object->intersectsBoundingVolume(other_object);
+Java_org_gearvrf_NativeSceneObject_objectIntersectsBoundingVolume(JNIEnv *, jobject, jlong jscene_object, jlong jother_object) {
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    std::shared_ptr<SceneObject>* other_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jother_object);
+    return (*scene_object)->intersectsBoundingVolume((**other_object));
 }
 
 jfloatArray boundingVolumeToArray(JNIEnv* env, const BoundingVolume& bvol) {
@@ -213,19 +205,18 @@ jfloatArray boundingVolumeToArray(JNIEnv* env, const BoundingVolume& bvol) {
 }
 
 JNIEXPORT jfloatArray JNICALL
-Java_org_gearvrf_NativeSceneObject_getBoundingVolume(JNIEnv * env,
-        jobject obj, jlong jSceneObject) {
-    SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
-    const BoundingVolume& bvol = sceneObject->getBoundingVolume();
+Java_org_gearvrf_NativeSceneObject_getBoundingVolume(JNIEnv * env, jobject, jlong jSceneObject) {
+    std::shared_ptr<SceneObject>* sceneObject = reinterpret_cast<std::shared_ptr<SceneObject>*>(jSceneObject);
+    const BoundingVolume& bvol = (*sceneObject)->getBoundingVolume();
     return boundingVolumeToArray(env, bvol);
 }
 
 JNIEXPORT jfloatArray JNICALL
 Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
-        jobject obj, jlong jSceneObject, jfloat pointX, jfloat pointY, jfloat pointZ) {
+        jobject, jlong jSceneObject, jfloat pointX, jfloat pointY, jfloat pointZ) {
 
-    SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
-    BoundingVolume& bvol = sceneObject->getBoundingVolume();
+    std::shared_ptr<SceneObject>* sceneObject = reinterpret_cast<std::shared_ptr<SceneObject>*>(jSceneObject);
+    BoundingVolume& bvol = (*sceneObject)->getBoundingVolume();
     bvol.expand(glm::vec3(pointX, pointY, pointZ));
 
     return boundingVolumeToArray(env, bvol);
@@ -233,10 +224,10 @@ Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByPoint(JNIEnv * env,
 
 JNIEXPORT jfloatArray JNICALL
 Java_org_gearvrf_NativeSceneObject_expandBoundingVolumeByCenterAndRadius(JNIEnv * env,
-        jobject obj, jlong jSceneObject, jfloat centerX, jfloat centerY, jfloat centerZ, jfloat radius) {
+        jobject, jlong jSceneObject, jfloat centerX, jfloat centerY, jfloat centerZ, jfloat radius) {
 
-    SceneObject* sceneObject = reinterpret_cast<SceneObject*>(jSceneObject);
-    BoundingVolume& bvol = sceneObject->getBoundingVolume();
+    std::shared_ptr<SceneObject>* sceneObject = reinterpret_cast<std::shared_ptr<SceneObject>*>(jSceneObject);
+    BoundingVolume& bvol = (*sceneObject)->getBoundingVolume();
     bvol.expand(glm::vec3(centerX, centerY, centerZ), radius);
 
     return boundingVolumeToArray(env, bvol);

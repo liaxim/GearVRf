@@ -50,7 +50,7 @@ public abstract class GVRTransformAnimation extends GVRAnimation {
      *             is more expensive <em>and</em> can miss errors in code if you
      *             don't test every path through your code.
      */
-    protected GVRTransformAnimation(GVRHybridObject target, float duration) {
+    protected GVRTransformAnimation(Object target, float duration) {
         super(target, duration);
         Class<?> type = checkTarget(target, SUPPORTED);
         if (type == GVRTransform.class) {

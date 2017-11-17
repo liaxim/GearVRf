@@ -100,7 +100,6 @@ extern "C" {
     }
 };
 
-
 extern "C" JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_dtor(JNIEnv*, jclass, jlong jscene) {
     LOGI("mmarinov: scene_jni.cpp dtor");

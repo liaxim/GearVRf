@@ -28,10 +28,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 
 /**
  * Contains a the hierarchy of visible objects, a camera and processes events.
@@ -65,7 +63,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
     private StringBuilder mStatMessage = new StringBuilder();
     private GVREventReceiver mEventReceiver = new GVREventReceiver(this);
     private GVRSceneObject mSceneRoot;
-    private final NativeObject mNativeSceneObject;
+    private final NativeObject mNativeScene;
 
     static final Method sDestructor;
     static {
@@ -83,15 +81,15 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      *            {@link GVRContext} the app is using.
      */
     public GVRScene(GVRContext gvrContext) {
-        mNativeSceneObject = new NativeObject(gvrContext, NativeScene.ctor(), sDestructor);
-        NativeScene.setJava(mNativeSceneObject.getNative(), this);
+        mNativeScene = new NativeObject(gvrContext, NativeScene.ctor(), sDestructor);
+        NativeScene.setJava(mNativeScene.getNative(), this);
 
         if(MAX_LIGHTS == 0) {
             MAX_LIGHTS = gvrContext.getActivity().getConfigurationManager().getMaxLights();
         }
 
         mSceneRoot = new GVRSceneObject(gvrContext);
-        NativeScene.addSceneObject(mNativeSceneObject.getNative(), mSceneRoot.getNative());
+        NativeScene.addSceneObject(mNativeScene.getNative(), mSceneRoot.getNative());
         GVRCamera leftCamera = new GVRPerspectiveCamera(gvrContext);
         leftCamera.setRenderMask(GVRRenderMaskBit.Left);
 
@@ -118,10 +116,10 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
     }
 
     private GVRScene(GVRContext gvrContext, long ptr) {
-        mNativeSceneObject = new NativeObject(gvrContext, ptr, sDestructor);
-        NativeScene.setJava(mNativeSceneObject.getNative(), this);
+        mNativeScene = new NativeObject(gvrContext, ptr, sDestructor);
+        NativeScene.setJava(mNativeScene.getNative(), this);
         mSceneRoot = new GVRSceneObject(gvrContext);
-        NativeScene.addSceneObject(mNativeSceneObject.getNative(), mSceneRoot.getNative());
+        NativeScene.addSceneObject(mNativeScene.getNative(), mSceneRoot.getNative());
         setFrustumCulling(true);
     }
     
@@ -158,15 +156,15 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
         for (GVRSceneObject child : mSceneRoot.getChildren()) {
             child.getParent().removeChildObject(child);
         }
-        NativeScene.removeAllSceneObjects(mNativeSceneObject.getNative());
-        mSceneRoot = new GVRSceneObject(mNativeSceneObject.getGVRContext());
+        NativeScene.removeAllSceneObjects(mNativeScene.getNative());
+        mSceneRoot = new GVRSceneObject(mNativeScene.getGVRContext());
         mSceneRoot.addChildObject(head);
-        NativeScene.addSceneObject(mNativeSceneObject.getNative(), mSceneRoot.getNative());
+        NativeScene.addSceneObject(mNativeScene.getNative(), mSceneRoot.getNative());
 
-        mNativeSceneObject.getGVRContext().runOnGlThread(new Runnable() {
+        mNativeScene.getGVRContext().runOnGlThread(new Runnable() {
             @Override
             public void run() {
-                NativeScene.deleteLightsAndDepthTextureOnRenderThread(mNativeSceneObject.getNative());
+                NativeScene.deleteLightsAndDepthTextureOnRenderThread(mNativeScene.getNative());
             }
         });
     }
@@ -222,9 +220,9 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      */
     public void setMainCameraRig(GVRCameraRig cameraRig) {
         mMainCameraRig = cameraRig;
-        NativeScene.setMainCameraRig(mNativeSceneObject.getNative(), cameraRig.getNative());
+        NativeScene.setMainCameraRig(mNativeScene.getNative(), cameraRig.getNative());
 
-        final GVRContext gvrContext = mNativeSceneObject.getGVRContext();
+        final GVRContext gvrContext = mNativeScene.getGVRContext();
         if (this == gvrContext.getMainScene()) {
             gvrContext.getActivity().setCameraRig(getMainCameraRig());
         }
@@ -287,24 +285,24 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      * @see GVRPicker
      */
     public void setPickVisible(boolean flag) {
-        NativeScene.setPickVisible(mNativeSceneObject.getNative(), flag);
+        NativeScene.setPickVisible(mNativeScene.getNative(), flag);
     }
     
     public void inValidateShadowMap(){
-        NativeScene.invalidateShadowMap(mNativeSceneObject.getNative());
+        NativeScene.invalidateShadowMap(mNativeScene.getNative());
     }
     /**
      * Sets the frustum culling for the {@link GVRScene}.
      */
     public void setFrustumCulling(boolean flag) {
-        NativeScene.setFrustumCulling(mNativeSceneObject.getNative(), flag);
+        NativeScene.setFrustumCulling(mNativeScene.getNative(), flag);
     }
 
     /**
      * Sets the occlusion query for the {@link GVRScene}.
      */
     public void setOcclusionQuery(boolean flag) {
-        NativeScene.setOcclusionQuery(mNativeSceneObject.getNative(), flag);
+        NativeScene.setOcclusionQuery(mNativeScene.getNative(), flag);
     }
 
     private GVRConsole mStatsConsole = null;
@@ -337,7 +335,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
 
         mStatsEnabled = pendingStats;
         if (mStatsEnabled && mStatsConsole == null) {
-            mStatsConsole = new GVRConsole(mNativeSceneObject.getGVRContext(), GVRConsole.EyeMode.BOTH_EYES);
+            mStatsConsole = new GVRConsole(mNativeScene.getGVRContext(), GVRConsole.EyeMode.BOTH_EYES);
             mStatsConsole.setXOffset(250.0f);
             mStatsConsole.setYOffset(350.0f);
         }
@@ -353,14 +351,14 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
         updateStatsEnabled();
         if (mStatsEnabled) {
             mStatsConsole.clear();
-            NativeScene.resetStats(mNativeSceneObject.getNative());
+            NativeScene.resetStats(mNativeScene.getNative());
         }
     }
 
     void updateStats() {
         if (mStatsEnabled) {
-            int numberDrawCalls = NativeScene.getNumberDrawCalls(mNativeSceneObject.getNative());
-            int numberTriangles = NativeScene.getNumberTriangles(mNativeSceneObject.getNative());
+            int numberDrawCalls = NativeScene.getNumberDrawCalls(mNativeScene.getNative());
+            int numberTriangles = NativeScene.getNumberTriangles(mNativeScene.getNative());
 
             mStatsConsole.writeLine("Draw Calls: %d", numberDrawCalls);
             mStatsConsole.writeLine("Triangles: %d", numberTriangles);
@@ -410,7 +408,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      * @param filepath Absolute file path to export the scene.
      */
     public void export(String filepath) {
-        NativeScene.exportToFile(mNativeSceneObject.getNative(), filepath);
+        NativeScene.exportToFile(mNativeScene.getNative(), filepath);
     }
 
     /**
@@ -478,7 +476,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      * Clears all lights of the scene's light list.
      */
     private void clearLights() {
-        NativeScene.clearLights(mNativeSceneObject.getNative());
+        NativeScene.clearLights(mNativeScene.getNative());
     }
     
     /**
@@ -491,7 +489,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
      */
     public GVRLightBase[] getLightList()
     {
-        return NativeScene.getLightList(mNativeSceneObject.getNative());
+        return NativeScene.getLightList(mNativeScene.getNative());
     }
 
     /**
@@ -561,7 +559,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
                 // TODO: Add support to enable and disable light map at run time.
                 continue;
             }
-            GVRMaterial material = new GVRMaterial(mNativeSceneObject.getGVRContext(), shaderId);
+            GVRMaterial material = new GVRMaterial(mNativeScene.getGVRContext(), shaderId);
             material.setTexture(key + "_texture", texture);
             material.setTextureAtlasInfo(key, atlasInfo);
             sceneObject.getRenderData().setMaterial(material);
@@ -604,7 +602,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
             recursivelySendOnInit(mSceneRoot);
         }
         private void recursivelySendOnInit(GVRSceneObject sceneObject) {
-            final GVRContext gvrContext = mNativeSceneObject.getGVRContext();
+            final GVRContext gvrContext = mNativeScene.getGVRContext();
 
             gvrContext.getEventManager().sendEvent(sceneObject, ISceneObjectEvents.class, "onInit", gvrContext, sceneObject);
             GVRScriptBehavior script = (GVRScriptBehavior) sceneObject.getComponent(GVRScriptBehavior.getComponentType());
@@ -622,7 +620,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
         }
 
         private void recursivelySendSimpleEvent(GVRSceneObject sceneObject, String eventName) {
-            mNativeSceneObject.getGVRContext().getEventManager().sendEvent(
+            mNativeScene.getGVRContext().getEventManager().sendEvent(
                     sceneObject, ISceneObjectEvents.class, eventName);
 
             for (GVRSceneObject child : sceneObject.getChildren()) {
@@ -671,7 +669,7 @@ public class GVRScene implements PrettyPrint, IScriptable, IEventReceiver {
     }
 
     long getNative() {
-        return mNativeSceneObject.getNative();
+        return mNativeScene.getNative();
     }
 }
 

@@ -132,7 +132,7 @@ public:
         return std::vector<SceneObject*>(children_);
     }
 
-    void addChildObject(SceneObject* self, SceneObject* child);
+    void addChildObject(std::shared_ptr<SceneObject> self, SceneObject* child);
     void removeChildObject(SceneObject* child);
     void getDescendants(std::vector<SceneObject*>& descendants) const;
     void clear();
@@ -141,10 +141,10 @@ public:
     GLuint *get_occlusion_array() {
         return queries_;
     }
-    bool isColliding(SceneObject* scene_object);
+    bool isColliding(SceneObject& scene_object);
     bool intersectsBoundingVolume(float rox, float roy, float roz, float rdx,
             float rdy, float rdz);
-    bool intersectsBoundingVolume(SceneObject *scene_object);
+    bool intersectsBoundingVolume(SceneObject& scene_object);
 
     void dirtyHierarchicalBoundingVolume();
     BoundingVolume& getBoundingVolume();

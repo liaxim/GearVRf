@@ -106,7 +106,7 @@ public class GVRRotationByAxisWithPivotAnimation extends GVRTransformAnimation {
     }
 
     @Override
-    protected void animate(GVRHybridObject target, float ratio) {
+    protected void animate(Object target, float ratio) {
         // Reset rotation and position (this is pretty cheap - GVRF uses a 'lazy
         // update' policy on the matrix, so three changes don't cost all that
         // much more than one)

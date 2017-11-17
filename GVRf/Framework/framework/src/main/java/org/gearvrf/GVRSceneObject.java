@@ -15,6 +15,7 @@
 
 package org.gearvrf;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -59,13 +60,25 @@ import org.joml.Vector3f;
  *     getEventReceiver().addListener(myEventListener);
  * </pre>
  */
-public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScriptable, IEventReceiver {
+public class GVRSceneObject implements PrettyPrint, IScriptable, IEventReceiver {
     private Map<Long, GVRComponent> mComponents = new HashMap<Long, GVRComponent>();
     private GVRSceneObject mParent;
     private GVRBaseSensor mSensor;
     private Object mTag;
     private final List<GVRSceneObject> mChildren = new CopyOnWriteArrayList<GVRSceneObject>();
     private final GVREventReceiver mEventReceiver = new GVREventReceiver(this);
+    private final NativeObject mNativeSceneObject;
+
+    static final Method sDestructor;
+    static {
+        try {
+            sDestructor = NativeSceneObject.class.getDeclaredMethod("dtor", long.class);
+        } catch (final NoSuchMethodException e) {
+            throw new Error(e);
+        }
+    }
+
+    private org.gearvrf.GVRContext GVRContext;
 
     /**
      * Constructs an empty scene object with a default {@link GVRTransform
@@ -127,8 +140,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      */
     public GVRSceneObject(GVRContext gvrContext, GVRMesh mesh,
                           GVRTexture texture, GVRShaderId shaderId) {
-        super(gvrContext, NativeSceneObject.ctor());
-        attachComponent(new GVRTransform(getGVRContext()));
+        mNativeSceneObject = new NativeObject(gvrContext, NativeSceneObject.ctor(), sDestructor);
+        attachComponent(new GVRTransform(gvrContext));
 
         if ((mesh == null) && (texture == null)) {
             return;
@@ -149,8 +162,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
     }
 
     public GVRSceneObject(GVRContext gvrContext, GVRMesh mesh, GVRMaterial material) {
-        super(gvrContext, NativeSceneObject.ctor());
-        attachComponent(new GVRTransform(getGVRContext()));
+        mNativeSceneObject = new NativeObject(gvrContext, NativeSceneObject.ctor(), sDestructor);
+        attachComponent(new GVRTransform(gvrContext));
 
         GVRRenderData renderData = new GVRRenderData(gvrContext, material);
         attachComponent(renderData);
@@ -291,7 +304,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      *         returned string will be empty.
      */
     public String getName() {
-        return NativeSceneObject.getName(getNative());
+        return NativeSceneObject.getName(mNativeSceneObject.getNative());
     }
 
     /**
@@ -304,7 +317,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      *            Name of the object.
      */
     public void setName(String name) {
-        NativeSceneObject.setName(getNative(), name);
+        NativeSceneObject.setName(mNativeSceneObject.getNative(), name);
     }
 
     /**
@@ -347,7 +360,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      */
     public boolean attachComponent(GVRComponent component) {
         if (component.getNative() != 0) {
-            NativeSceneObject.attachComponent(getNative(), component.getNative());
+            NativeSceneObject.attachComponent(mNativeSceneObject.getNative(), component.getNative());
         }
         synchronized (mComponents) {
             long type = component.getType();
@@ -371,7 +384,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * @see GVRSceneObject#attachComponent(GVRComponent)
      */
     public GVRComponent detachComponent(long type) {
-        NativeSceneObject.detachComponent(getNative(), type);
+        NativeSceneObject.detachComponent(mNativeSceneObject.getNative(), type);
         synchronized (mComponents) {
             GVRComponent component = mComponents.remove(type);
             if (component != null) {
@@ -635,7 +648,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
     public void setPickingEnabled(boolean enabled) {
         if (enabled != getPickingEnabled()) {
             if (enabled) {
-                attachComponent(new GVRSphereCollider(getGVRContext()));
+                attachComponent(new GVRSphereCollider(mNativeSceneObject.getGVRContext()));
             } else {
                 detachComponent(GVRCollider.getComponentType());
             }
@@ -683,7 +696,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
         }
         mChildren.add(child);
         child.mParent = this;
-        NativeSceneObject.addChildObject(getNative(), child.getNative());
+        NativeSceneObject.addChildObject(mNativeSceneObject.getNative(), child.mNativeSceneObject.getNative());
         child.onNewParentObject(this);
         return true;
     }
@@ -698,7 +711,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
     public void removeChildObject(GVRSceneObject child) {
         mChildren.remove(child);
         child.mParent = null;
-        NativeSceneObject.removeChildObject(getNative(), child.getNative());
+        NativeSceneObject.removeChildObject(mNativeSceneObject.getNative(), child.mNativeSceneObject.getNative());
         child.onRemoveParentObject(this);
     }
 
@@ -752,6 +765,15 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
         if (childComponent.getOwnerObject() != null) {
             removeChildObject(childComponent.getOwnerObject());
         }
+    }
+
+    long getNative() {
+        return mNativeSceneObject.getNative();
+    }
+
+    @Deprecated
+    public final GVRContext getGVRContext() {
+        return mNativeSceneObject.getGVRContext();
     }
 
     public interface SceneVisitor {
@@ -900,8 +922,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * @return {@code true} if objects collide, {@code false} otherwise
      */
     public boolean isColliding(GVRSceneObject otherObject) {
-        return NativeSceneObject.isColliding(getNative(),
-                otherObject.getNative());
+        return NativeSceneObject.isColliding(mNativeSceneObject.getNative(),
+                otherObject.mNativeSceneObject.getNative());
     }
 
     /**
@@ -914,7 +936,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * @return true if scene object should be displayed, else false.
      */
     public boolean isEnabled() {
-        return NativeSceneObject.isEnabled(getNative());
+        return NativeSceneObject.isEnabled(mNativeSceneObject.getNative());
     }
 
     /**
@@ -925,7 +947,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * @param enable true the object will be displayed, if false it will not be.
      */
     public void setEnable(boolean enable) {
-        NativeSceneObject.setEnable(getNative(), enable);
+        NativeSceneObject.setEnable(mNativeSceneObject.getNative(), enable);
     }
 
     /**
@@ -964,7 +986,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      */
     public boolean intersectsBoundingVolume(float ox, float oy, float oz, float dx,
                                             float dy, float dz) {
-        return NativeSceneObject.rayIntersectsBoundingVolume(getNative(), ox, oy,
+        return NativeSceneObject.rayIntersectsBoundingVolume(mNativeSceneObject.getNative(), ox, oy,
                 oz, dx, dy, dz);
     }
 
@@ -978,8 +1000,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * <code>false</code> otherwise.
      */
     public boolean intersectsBoundingVolume(GVRSceneObject otherObject) {
-        return NativeSceneObject.objectIntersectsBoundingVolume(getNative(), otherObject.getNative
-                ());
+        return NativeSceneObject.objectIntersectsBoundingVolume(mNativeSceneObject.getNative(),
+                otherObject.mNativeSceneObject.getNative());
     }
 
     /**
@@ -1047,7 +1069,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      *
      */
     public void setSensor(GVRBaseSensor sensor) {
-        GVRInputManagerImpl inputManager = (GVRInputManagerImpl) getGVRContext()
+        GVRInputManagerImpl inputManager = (GVRInputManagerImpl) mNativeSceneObject.getGVRContext()
                 .getInputManager();
         // remove the currently attached sensor if there is one already.
         if (mSensor != null) {
@@ -1193,11 +1215,11 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
      * @return The BoundingVolume for this GVRSceneObject.
      */
     public final BoundingVolume getBoundingVolume() {
-        return new BoundingVolume(NativeSceneObject.getBoundingVolume(getNative()));
+        return new BoundingVolume(NativeSceneObject.getBoundingVolume(mNativeSceneObject.getNative()));
     }
 
     float[] getBoundingVolumeRawValues() {
-        return NativeSceneObject.getBoundingVolume(getNative());
+        return NativeSceneObject.getBoundingVolume(mNativeSceneObject.getNative());
     }
 
     /**
@@ -1210,7 +1232,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
     public final BoundingVolume expandBoundingVolume(final float pointX, final float pointY, final float pointZ) {
         return new BoundingVolume(
                 NativeSceneObject.expandBoundingVolumeByPoint(
-                        getNative(), pointX, pointY, pointZ));
+                        mNativeSceneObject.getNative(), pointX, pointY, pointZ));
     }
 
     /**
@@ -1234,7 +1256,7 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
             final float centerX, final float centerY, final float centerZ, final float radius) {
         return new BoundingVolume(
                 NativeSceneObject.expandBoundingVolumeByCenterAndRadius(
-                        getNative(), centerX, centerY, centerZ, radius));
+                        mNativeSceneObject.getNative(), centerX, centerY, centerZ, radius));
     }
 
     /**
@@ -1250,6 +1272,8 @@ public class GVRSceneObject extends GVRHybridObject implements PrettyPrint, IScr
 
 class NativeSceneObject {
     static native long ctor();
+
+    static native void dtor(long scene);
 
     static native String getName(long sceneObject);
 

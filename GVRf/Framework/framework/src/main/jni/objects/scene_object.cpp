@@ -40,6 +40,7 @@ SceneObject::SceneObject() :
 }
 
 SceneObject::~SceneObject() {
+    LOGI("mmarinov: scene_object.cpp ~~");
     delete queries_;
 }
 
@@ -136,7 +137,7 @@ void SceneObject::getAllComponents(std::vector<Component*>& components, long lon
     }
 }
 
-void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
+void SceneObject::addChildObject(std::shared_ptr<SceneObject> self, SceneObject* child) {
     std::shared_ptr<Scene> scene = Scene::main_scene();
     if (scene != NULL)
     {
@@ -345,7 +346,7 @@ void SceneObject::set_visible(bool visibility = true) {
     }
 }
 
-bool SceneObject::isColliding(SceneObject *scene_object) {
+bool SceneObject::isColliding(SceneObject& scene_object) {
 
     //Get the transformed bounding boxes in world coordinates and check if they intersect
     //Transformation is done by the getTransformedBoundingBoxInfo method in the Mesh class
@@ -366,17 +367,17 @@ bool SceneObject::isColliding(SceneObject *scene_object) {
     this->render_data()->mesh()->getTransformedBoundingBoxInfo(
             &this_object_model_matrix, this_object_bounding_box);
 
-    if (nullptr == scene_object->render_data()->mesh()) {
+    if (nullptr == scene_object.render_data()->mesh()) {
         LOGE("isColliding: no mesh for target scene object");
         return false;
     }
-    t = scene_object->render_data()->owner_object()->transform();
+    t = scene_object.render_data()->owner_object()->transform();
     if (nullptr == t) {
         LOGE("isColliding: no transform for target scene object");
         return false;
     }
     glm::mat4 check_object_model_matrix = t->getModelMatrix();
-    scene_object->render_data()->mesh()->getTransformedBoundingBoxInfo(
+    scene_object.render_data()->mesh()->getTransformedBoundingBoxInfo(
             &check_object_model_matrix, check_object_bounding_box);
 
     bool result = (this_object_bounding_box[3] > check_object_bounding_box[0]
@@ -452,7 +453,7 @@ bool SceneObject::intersectsBoundingVolume(float rox, float roy, float roz,
 /**
  * Test this scene object's HBV against the HBV of the provided scene object.
  */
-bool SceneObject::intersectsBoundingVolume(SceneObject *scene_object) {
+bool SceneObject::intersectsBoundingVolume(SceneObject& scene_object) {
     BoundingVolume this_bounding_volume_ = getBoundingVolume();
     BoundingVolume that_bounding_volume = scene_object->getBoundingVolume();
 

@@ -758,7 +758,7 @@ public abstract class GVRContext implements IEventReceiver {
 
         final GVRMaterialAnimation fadeOut = new GVRMaterialAnimation(rd.getMaterial(), duration / 4.0f) {
             @Override
-            protected void animate(GVRHybridObject target, float ratio) {
+            protected void animate(Object target, float ratio) {
                 final GVRMaterial material = (GVRMaterial) target;
                 material.setOpacity(finalOpacity - ratio * finalOpacity);
             }
@@ -772,7 +772,7 @@ public abstract class GVRContext implements IEventReceiver {
 
         final GVRMaterialAnimation fadeIn = new GVRMaterialAnimation(rd.getMaterial(), 3.0f * duration / 4.0f) {
             @Override
-            protected void animate(GVRHybridObject target, float ratio) {
+            protected void animate(Object target, float ratio) {
                 final GVRMaterial material = (GVRMaterial) target;
                 material.setOpacity(ratio * finalOpacity);
             }

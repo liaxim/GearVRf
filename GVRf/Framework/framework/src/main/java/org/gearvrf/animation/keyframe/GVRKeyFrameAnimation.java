@@ -109,7 +109,7 @@ public class GVRKeyFrameAnimation extends GVRAnimation implements PrettyPrint {
     }
 
     @Override
-    protected void animate(GVRHybridObject target, float ratio) {
+    protected void animate(Object target, float ratio) {
         if (mTarget != target) {
             return;
         }
