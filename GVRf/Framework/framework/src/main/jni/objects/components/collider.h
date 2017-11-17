@@ -41,7 +41,7 @@ public:
 
     void CopyHit(const ColliderData& src);
 
-    SceneObject*    ObjectHit;
+    std::shared_ptr<SceneObject>    ObjectHit;
     Collider*       ColliderHit;
     bool            IsHit;
     glm::vec3       HitPosition;
@@ -120,7 +120,7 @@ inline ColliderData::ColliderData(Collider* collider) :
     }
     else
     {
-        ObjectHit = NULL;
+        ObjectHit.reset();
     }
 }
 

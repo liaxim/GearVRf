@@ -146,7 +146,7 @@ public:
 
     ShadowMap* getShadowMap()
     {
-        SceneObject* owner = owner_object();
+        std::shared_ptr<SceneObject> owner = owner_object();
         ShadowMap* shadowMap = nullptr;
 
         if (owner == nullptr)

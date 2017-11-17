@@ -37,7 +37,7 @@ namespace gvr {
 class Camera;
 class CameraRig;
 
-class SceneObject: public HybridObject {
+class SceneObject: public std::enable_shared_from_this<SceneObject> {
 public:
     SceneObject();
     virtual ~SceneObject();
@@ -101,7 +101,7 @@ public:
         return (CameraRig*) getComponent(CameraRig::getComponentType());
     }
 
-    SceneObject* parent() const {
+    std::shared_ptr<SceneObject> parent() const {
         return parent_;
     }
 
@@ -127,17 +127,17 @@ public:
     bool isCulled(){
     	return cull_status_;
     }
-    std::vector<SceneObject*> children() {
+    std::vector<std::shared_ptr<SceneObject>> children() {
         std::lock_guard < std::mutex > lock(children_mutex_);
-        return std::vector<SceneObject*>(children_);
+        return std::vector<std::shared_ptr<SceneObject>>(children_);
     }
 
-    void addChildObject(std::shared_ptr<SceneObject> self, SceneObject* child);
-    void removeChildObject(SceneObject* child);
-    void getDescendants(std::vector<SceneObject*>& descendants) const;
+    void addChildObject(std::shared_ptr<SceneObject> self, std::shared_ptr<SceneObject> child);
+    void removeChildObject(std::shared_ptr<SceneObject> child);
+    void getDescendants(std::vector<std::shared_ptr<SceneObject>>& descendants) const;
     void clear();
     int getChildrenCount() const;
-    SceneObject* getChildByIndex(int index);
+    std::shared_ptr<SceneObject> getChildByIndex(int index);
     GLuint *get_occlusion_array() {
         return queries_;
     }
@@ -149,8 +149,8 @@ public:
     void dirtyHierarchicalBoundingVolume();
     BoundingVolume& getBoundingVolume();
     void onTransformChanged();
-    bool onAddChild(SceneObject* addme, SceneObject* root);
-    bool onRemoveChild(SceneObject* removeme, SceneObject* root);
+    bool onAddChild(std::shared_ptr<SceneObject> addme, std::shared_ptr<SceneObject> root);
+    bool onRemoveChild(std::shared_ptr<SceneObject> removeme, std::shared_ptr<SceneObject> root);
     void onAddedToScene(std::shared_ptr<Scene> scene);
     void onRemovedFromScene(std::shared_ptr<Scene> scene);
     int frustumCull(glm::vec3 camera_position, const float frustum[6][4], int& planeMask);
@@ -158,8 +158,8 @@ public:
 private:
     std::string name_;
     std::vector<Component*> components_;
-    SceneObject* parent_ = nullptr;
-    std::vector<SceneObject*> children_;
+    std::shared_ptr<SceneObject> parent_;
+    std::vector<std::shared_ptr<SceneObject>> children_;
     bool cull_status_;
     bool transform_dirty_;
     BoundingVolume transformed_bounding_volume_;

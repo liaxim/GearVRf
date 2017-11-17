@@ -18,7 +18,7 @@ namespace gvr {
     ColliderData BoxCollider::isHit(const glm::vec3& rayStart, const glm::vec3& rayDir)
     {
         glm::vec3    halfExtent(this->half_extents_);
-        SceneObject* owner = owner_object();
+        std::shared_ptr& owner = owner_object();
         glm::mat4    model_matrix;
 
         /*

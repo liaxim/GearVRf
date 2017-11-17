@@ -100,7 +100,7 @@ public class GVRColorAnimation extends GVRMaterialAnimation {
     }
 
     @Override
-    protected void animate(GVRHybridObject target, float ratio) {
+    protected void animate(Object target, float ratio) {
         mMaterial.setColor(mStartR + ratio * mDeltaR,
                 mStartG + ratio * mDeltaG, mStartB + ratio * mDeltaB);
     }

@@ -41,11 +41,11 @@ inline Component::~Component() {
     owner_object_ = nullptr;
 }
 
-inline SceneObject *Component::owner_object() const {
+inline const std::shared_ptr<SceneObject>& Component::owner_object() const {
     return owner_object_;
 }
 
-inline void Component::set_owner_object(SceneObject *owner_object) {
+inline void Component::set_owner_object(std::shared_ptr<SceneObject> owner_object) {
     if (owner_object_) {
         onDetach(owner_object_);
     }

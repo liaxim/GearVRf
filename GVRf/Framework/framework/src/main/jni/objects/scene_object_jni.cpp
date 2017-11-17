@@ -141,15 +141,15 @@ Java_org_gearvrf_NativeSceneObject_findComponent(JNIEnv *, jobject, jlong jscene
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeSceneObject_addChildObject(JNIEnv *, jobject, jlong jscene_object, jlong jchild) {
     std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
-    SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    (*scene_object)->addChildObject(*scene_object, child);
+    std::shared_ptr<SceneObject>* child = reinterpret_cast<std::shared_ptr<SceneObject>*>(jchild);
+    (*scene_object)->addChildObject(*scene_object, *child);
 }
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeSceneObject_removeChildObject(JNIEnv *, jobject, jlong jscene_object, jlong jchild) {
     std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
-    SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
-    (*scene_object)->removeChildObject(child);
+    std::shared_ptr<SceneObject>* child = reinterpret_cast<std::shared_ptr<SceneObject>*>(jchild);
+    (*scene_object)->removeChildObject(*child);
 }
 
 JNIEXPORT bool JNICALL

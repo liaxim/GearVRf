@@ -62,7 +62,7 @@ void CameraRig::setPosition(const glm::vec3& transform_position) {
 }
 
 Transform* CameraRig::getHeadTransform() const {
-    SceneObject* sceneObject = owner_object();
+    std::shared_ptr<SceneObject> sceneObject = owner_object();
     sceneObject = sceneObject->getChildByIndex(0);
     return sceneObject->transform();
 }

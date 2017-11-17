@@ -40,9 +40,9 @@ public:
     Scene();
     virtual ~Scene();
     void set_java(JavaVM* javaVM, jobject javaScene);
-    SceneObject* getRoot() { return &scene_root_; }
-    void addSceneObject(SceneObject* scene_object);
-    void removeSceneObject(SceneObject* scene_object);
+    std::shared_ptr<SceneObject> getRoot() { return scene_root_; }
+    void addSceneObject(std::shared_ptr<SceneObject> scene_object);
+    void removeSceneObject(std::shared_ptr<SceneObject> scene_object);
     void removeAllSceneObjects();
     void deleteLightsAndDepthTextureOnRenderThread();
 
@@ -52,7 +52,7 @@ public:
     void set_main_camera_rig(CameraRig* camera_rig) {
         main_camera_rig_ = camera_rig;
     }
-    std::vector<SceneObject*> getWholeSceneObjects() const;
+    std::vector<std::shared_ptr<SceneObject>> getWholeSceneObjects() const;
 
     int getSceneDirtyFlag() { return 1 || dirtyFlag_;  /* force to be true */}
     void setSceneDirtyFlag(int dirtyBits) { dirtyFlag_ |= dirtyBits; }
@@ -157,7 +157,7 @@ public:
      * Called during culling to add a scene object's
      * collider to the visible collider list.
      */
-    void pick(SceneObject* sceneobj);
+    void pick(const SceneObject& sceneobj);
 
     /*
      * Get the current collider list and lock it.
@@ -206,12 +206,11 @@ private:
 
 
 private:
-    std::string uniform_desc_;
     static std::shared_ptr<Scene> main_scene_;
     JavaVM* javaVM_;
     jobject javaObj_;
     jmethodID bindShadersMethod_;
-    SceneObject scene_root_;
+    std::shared_ptr<SceneObject> scene_root_;
     CameraRig* main_camera_rig_;
     int dirtyFlag_;
     bool frustum_flag_;

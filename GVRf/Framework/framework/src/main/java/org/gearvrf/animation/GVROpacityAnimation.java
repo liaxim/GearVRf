@@ -58,7 +58,7 @@ public class GVROpacityAnimation extends GVRMaterialAnimation {
     }
 
     @Override
-    protected void animate(GVRHybridObject target, float ratio) {
+    protected void animate(Object target, float ratio) {
         mMaterial.setOpacity(mInitialOpacity + mDeltaOpacity * ratio);
     }
 }

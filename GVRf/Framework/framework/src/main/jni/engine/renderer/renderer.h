@@ -166,7 +166,7 @@ public:
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int) = 0;
 
     virtual void makeShadowMaps(std::shared_ptr<Scene> scene, ShaderManager* shader_manager) = 0;
-    virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
+    virtual void occlusion_cull(RenderState& rstate, std::vector<std::shared_ptr<SceneObject>>& scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
     virtual void updatePostEffectMesh(Mesh*) = 0;
     void addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList);
     void addRenderTarget(RenderTarget* renderTarget, EYE eye, int index){
@@ -202,8 +202,8 @@ private:
     RenderTarget* mMultiviewRenderTarget[3];
     static bool isVulkan_;
     virtual void build_frustum(float frustum[6][4], const float *vp_matrix);
-    virtual void frustum_cull(glm::vec3 camera_position, SceneObject *object,
-            float frustum[6][4], std::vector<SceneObject*>& scene_objects,
+    virtual void frustum_cull(glm::vec3 camera_position, std::shared_ptr<SceneObject> object,
+            float frustum[6][4], std::vector<std::shared_ptr<SceneObject>>& scene_objects,
             bool continue_cull, int planeMask);
 
     Renderer(const Renderer& render_engine) = delete;
@@ -224,7 +224,7 @@ protected:
     virtual void renderMesh(RenderState& rstate, RenderData* render_data) = 0;
     virtual void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader* shader) = 0;
 
-    virtual bool occlusion_cull_init(RenderState& , std::vector<SceneObject*>& scene_objects,  std::vector<RenderData*>* render_data_vector);
+    virtual bool occlusion_cull_init(RenderState& , std::vector<std::shared_ptr<SceneObject>>& scene_objects,  std::vector<RenderData*>* render_data_vector);
 
     virtual bool renderPostEffectData(RenderState& rstate, RenderTexture* input_texture, RenderData* post_effect, int pass);
 

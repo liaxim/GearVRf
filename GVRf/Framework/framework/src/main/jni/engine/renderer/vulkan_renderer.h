@@ -133,9 +133,9 @@ private:
     VulkanCore* vulkanCore_;
     void renderMesh(RenderState& rstate, RenderData* render_data){}
     void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader*){}
-    virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) {
-        occlusion_cull_init(rstate, scene_objects, render_data_vector);
 
+    virtual void occlusion_cull(RenderState& rstate, std::vector<std::shared_ptr<SceneObject>>& scene_objects, std::vector<RenderData*>* render_data_vector) {
+        occlusion_cull_init(rstate, scene_objects, render_data_vector);
     }
 
 };

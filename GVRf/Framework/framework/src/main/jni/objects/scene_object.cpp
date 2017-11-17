@@ -29,10 +29,13 @@
 
 namespace gvr {
 
+/**
+ * Must be always owned by a shared_ptr; see attachComponent
+ */
 SceneObject::SceneObject() :
-        HybridObject(), name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(
-                false),  enabled_(true),query_currently_issued_(false), vis_count_(0),
-                cull_status_(false), bounding_volume_dirty_(true) {
+        name_(""), children_(), visible_(true), transform_dirty_(false), in_frustum_(false),
+        enabled_(true),query_currently_issued_(false), vis_count_(0),
+        cull_status_(false), bounding_volume_dirty_(true) {
 
     // Occlusion query setup
     queries_ = new GLuint[1];
@@ -49,13 +52,16 @@ bool SceneObject::attachComponent(Component* component) {
         if ((*it)->getType() == component->getType())
             return false;
     }
-    component->set_owner_object(this);
+
+    //the reason why SceneObject derives from std::enable_shared_from_this
+    component->set_owner_object(std::shared_ptr<SceneObject>(this));
+
     components_.push_back(component);
-    SceneObject* par = parent();
+    std::shared_ptr<SceneObject> par = parent();
     if (par)
     {
         std::shared_ptr<Scene> scene = Scene::main_scene();
-        SceneObject* root = scene->getRoot();
+        std::shared_ptr<SceneObject> root = scene->getRoot();
         if (scene != NULL)
         {
             while (par)
@@ -76,11 +82,11 @@ bool SceneObject::detachComponent(Component* component) {
     auto it = std::find(components_.begin(), components_.end(), component);
     if (it == components_.end())
         return false;
-    SceneObject* par = parent();
+    std::shared_ptr<SceneObject> par = parent();
     if (par)
     {
         std::shared_ptr<Scene> scene = Scene::main_scene();
-        SceneObject* root = scene->getRoot();
+        std::shared_ptr<SceneObject> root = scene->getRoot();
         if (scene != NULL)
         {
             while (par)
@@ -132,12 +138,12 @@ void SceneObject::getAllComponents(std::vector<Component*>& components, long lon
         }
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2) {
-        SceneObject* obj = *it2;
+        auto obj = *it2;
         obj->getAllComponents(components, componentType);
     }
 }
 
-void SceneObject::addChildObject(std::shared_ptr<SceneObject> self, SceneObject* child) {
+void SceneObject::addChildObject(std::shared_ptr<SceneObject> self, std::shared_ptr<SceneObject> child) {
     std::shared_ptr<Scene> scene = Scene::main_scene();
     if (scene != NULL)
     {
@@ -169,7 +175,7 @@ void SceneObject::onAddedToScene(std::shared_ptr<Scene> scene)
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2)
     {
-        SceneObject* obj = *it2;
+        auto obj = *it2;
         obj->onAddedToScene(scene);
     }
 }
@@ -177,10 +183,10 @@ void SceneObject::onAddedToScene(std::shared_ptr<Scene> scene)
 /**
  * Called when a scene object is attached to a parent.
  */
-bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
+bool SceneObject::onAddChild(std::shared_ptr<SceneObject> addme, std::shared_ptr<SceneObject> root)
 {
     bounding_volume_dirty_ = true;
-    if (addme == this)
+    if (addme.get() == this)
     {
         std::string error =  "SceneObject::addChildObject() : cycle of scene objects is not allowed.";
         LOGE("%s", error.c_str());
@@ -200,7 +206,7 @@ bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
 /**
  * Called when a child is detached from its parent
  */
-bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
+bool SceneObject::onRemoveChild(std::shared_ptr<SceneObject> removeme, std::shared_ptr<SceneObject> root)
 {
     bounding_volume_dirty_ = true;
     if (parent_ != NULL)
@@ -224,15 +230,15 @@ void SceneObject::onRemovedFromScene(std::shared_ptr<Scene> scene)
     }
     for (auto it2 = children_.begin(); it2 != children_.end(); ++it2)
     {
-        SceneObject* obj = *it2;
+        auto obj = *it2;
         obj->onRemovedFromScene(scene);
     }
 }
 
-void SceneObject::removeChildObject(SceneObject* child) {
+void SceneObject::removeChildObject(std::shared_ptr<SceneObject> child) {
     std::shared_ptr<Scene> scene = Scene::main_scene();
 
-    if (child->parent_ == this)
+    if (child->parent_.get() == this)
     {
         if (scene != NULL)
         {
@@ -249,7 +255,7 @@ void SceneObject::removeChildObject(SceneObject* child) {
             std::lock_guard < std::mutex > lock(children_mutex_);
             children_.erase(std::remove(children_.begin(), children_.end(), child), children_.end());
         }
-        child->parent_ = NULL;
+        child->parent_.reset();
         child->onTransformChanged();
     }
 }
@@ -261,7 +267,7 @@ void SceneObject::onTransformChanged() {
         std::lock_guard<std::mutex> lock(children_mutex_);
         for (auto it = children_.begin(); it != children_.end(); ++it)
         {
-            SceneObject* child = *it;
+            auto child = *it;
             child->onTransformChanged();
         }
     }
@@ -271,7 +277,7 @@ void SceneObject::clear() {
     std::shared_ptr<Scene> scene = Scene::main_scene();
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it) {
-        SceneObject* child = *it;
+        auto child = *it;
         if (scene != NULL)
         {
             if (onRemoveChild(child, scene->getRoot()))
@@ -293,7 +299,7 @@ int SceneObject::getChildrenCount() const {
     return children_.size();
 }
 
-SceneObject* SceneObject::getChildByIndex(int index) {
+std::shared_ptr<SceneObject> SceneObject::getChildByIndex(int index) {
     if (index < children_.size()) {
         return children_[index];
     } else {
@@ -302,10 +308,10 @@ SceneObject* SceneObject::getChildByIndex(int index) {
     }
 }
 
-void SceneObject::getDescendants(std::vector<SceneObject*>& descendants) const {
+void SceneObject::getDescendants(std::vector<std::shared_ptr<SceneObject>>& descendants) const {
     std::lock_guard < std::mutex > lock(children_mutex_);
     for (auto it = children_.begin(); it != children_.end(); ++it) {
-        SceneObject* obj = *it;
+        auto obj = *it;
         descendants.push_back(obj);
         obj->getDescendants(descendants);
     }
@@ -455,7 +461,7 @@ bool SceneObject::intersectsBoundingVolume(float rox, float roy, float roz,
  */
 bool SceneObject::intersectsBoundingVolume(SceneObject& scene_object) {
     BoundingVolume this_bounding_volume_ = getBoundingVolume();
-    BoundingVolume that_bounding_volume = scene_object->getBoundingVolume();
+    BoundingVolume that_bounding_volume = scene_object.getBoundingVolume();
 
     glm::vec3 this_min_corner = this_bounding_volume_.min_corner();
     glm::vec3 this_max_corner = this_bounding_volume_.max_corner();
@@ -492,7 +498,7 @@ BoundingVolume& SceneObject::getBoundingVolume() {
         }
     }
     // 2. Aggregate with all its children's bounding volumes
-    std::vector<SceneObject*> childrenCopy = children();
+    std::vector<std::shared_ptr<SceneObject>> childrenCopy = children();
     for (auto it = childrenCopy.begin(); it != childrenCopy.end(); ++it) {
         BoundingVolume child_bounding_volume = (*it)->getBoundingVolume();
         if (child_bounding_volume.radius() > 0) {

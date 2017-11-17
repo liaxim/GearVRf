@@ -44,8 +44,8 @@ Renderer::Renderer() : numberDrawCalls(0),
         batch_manager = new BatchManager(BATCH_SIZE, MAX_INDICES);
     }
 }
-void Renderer::frustum_cull(glm::vec3 camera_position, SceneObject *object,
-        float frustum[6][4], std::vector<SceneObject*>& scene_objects,
+void Renderer::frustum_cull(glm::vec3 camera_position, std::shared_ptr<SceneObject> object,
+        float frustum[6][4], std::vector<std::shared_ptr<SceneObject>>& scene_objects,
         bool need_cull, int planeMask) {
 
     // frustumCull() return 3 possible values:
@@ -99,7 +99,7 @@ void Renderer::frustum_cull(glm::vec3 camera_position, SceneObject *object,
         scene_objects.push_back(object);
     }
 
-    const std::vector<SceneObject*> children = object->children();
+    const std::vector<std::shared_ptr<SceneObject>> children = object->children();
     for (auto it = children.begin(); it != children.end(); ++it) {
         frustum_cull(camera_position, *it, frustum, scene_objects, need_cull, planeMask);
     }
@@ -155,7 +155,7 @@ bool isRenderPassEqual(RenderData* rdata1, RenderData* rdata2){
 void Renderer::cullFromCamera(std::shared_ptr<Scene> scene, Camera* camera,
         ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector, bool is_multiview)
 {
-    std::vector<SceneObject*> scene_objects;
+    std::vector<std::shared_ptr<SceneObject>> scene_objects;
 
     render_data_vector->clear();
     scene_objects.clear();
@@ -179,7 +179,7 @@ void Renderer::cullFromCamera(std::shared_ptr<Scene> scene, Camera* camera,
     build_frustum(frustum, (const float*) glm::value_ptr(vp_matrix));
 
     // 2. Iteratively execute frustum culling for each root object (as well as its children objects recursively)
-    SceneObject *object = scene->getRoot();
+    std::shared_ptr<SceneObject> object = scene->getRoot();
     if (DEBUG_RENDERER) {
         LOGD("FRUSTUM: start frustum culling for root %s\n", object->name().c_str());
     }
@@ -201,17 +201,17 @@ void Renderer::addRenderData(RenderData *render_data, RenderState& rstate, std::
     }
 }
 
-bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<SceneObject*>& scene_objects,  std::vector<RenderData*>* render_data_vector){
+bool Renderer::occlusion_cull_init(RenderState& renderState, std::vector<std::shared_ptr<SceneObject>>& scene_objects,  std::vector<RenderData*>* render_data_vector){
 
     renderState.scene->lockColliders();
     renderState.scene->clearVisibleColliders();
     bool do_culling = renderState.scene->get_occlusion_culling();
     if (!do_culling) {
         for (auto it = scene_objects.begin(); it != scene_objects.end(); ++it) {
-            SceneObject *scene_object = (*it);
+            auto scene_object = (*it);
             RenderData* render_data = scene_object->render_data();
             addRenderData(render_data, renderState, *render_data_vector);
-            renderState.scene->pick(scene_object);
+            renderState.scene->pick(*scene_object);
         }
         renderState.scene->unlockColliders();
         return false;

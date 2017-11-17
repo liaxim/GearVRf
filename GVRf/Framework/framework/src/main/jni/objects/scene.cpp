@@ -119,16 +119,16 @@ void Scene::bindShaders()
     }
 }
 
-void Scene::addSceneObject(SceneObject* scene_object) {
-    scene_root_.addChildObject(&scene_root_, scene_object);
+void Scene::addSceneObject(std::shared_ptr<SceneObject> scene_object) {
+    scene_root_->addChildObject(scene_root_, scene_object);
 }
 
-void Scene::removeSceneObject(SceneObject* scene_object) {
-    scene_root_.removeChildObject(scene_object);
+void Scene::removeSceneObject(std::shared_ptr<SceneObject> scene_object) {
+    scene_root_->removeChildObject(scene_object);
 }
 
 void Scene::removeAllSceneObjects() {
-    scene_root_.clear();
+    scene_root_->clear();
     clearAllColliders();
 }
 
@@ -143,9 +143,9 @@ void Scene::clearAllColliders() {
     unlockColliders();
 }
 
-void Scene::pick(SceneObject* sceneobj) {
+void Scene::pick(const SceneObject& sceneobj) {
     if (pick_visible_) {
-         Collider* collider = static_cast<Collider*>(sceneobj->getComponent(Collider::getComponentType()));
+        Collider* collider = static_cast<Collider*>(sceneobj.getComponent(Collider::getComponentType()));
         if (collider) {
             visibleColliders.push_back(collider);
         }
@@ -180,9 +180,9 @@ void Scene::set_main_scene(std::shared_ptr<Scene> scene) {
 }
 
 
-std::vector<SceneObject*> Scene::getWholeSceneObjects() const {
-    std::vector<SceneObject*> scene_objects;
-    scene_root_.getDescendants(scene_objects);
+std::vector<std::shared_ptr<SceneObject>> Scene::getWholeSceneObjects() const {
+    std::vector<std::shared_ptr<SceneObject>> scene_objects;
+    scene_root_->getDescendants(scene_objects);
     return scene_objects;
 }
 

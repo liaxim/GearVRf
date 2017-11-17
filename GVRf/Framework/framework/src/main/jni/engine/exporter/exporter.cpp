@@ -114,7 +114,7 @@ void gvr2aiMesh(Mesh &gvrmesh, aiMesh &aimesh) {
 
 /* Converts the given GVRScene to aiScene */
 void gvr2aiScene(const Scene& gvrscene, aiScene &aiscene) {
-    std::vector<SceneObject*> scene_objects(gvrscene.getWholeSceneObjects());
+    std::vector<std::shared_ptr<SceneObject>> scene_objects(gvrscene.getWholeSceneObjects());
 
     aiscene.mRootNode = new aiNode();
 

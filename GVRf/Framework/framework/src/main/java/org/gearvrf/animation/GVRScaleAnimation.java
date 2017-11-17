@@ -120,7 +120,7 @@ public class GVRScaleAnimation extends GVRTransformAnimation {
     }
 
     @Override
-    protected void animate(GVRHybridObject target, float ratio) {
+    protected void animate(Object target, float ratio) {
         mTransform.setScale(mStartX + ratio * mDeltaX, mStartY + ratio
                 * mDeltaY, mStartZ + ratio * mDeltaZ);
     }

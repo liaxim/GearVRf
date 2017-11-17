@@ -107,7 +107,7 @@ private:
     void updateLights(RenderState &rstate, Shader* shader, int texIndex);
     virtual void renderMesh(RenderState& rstate, RenderData* render_data);
     virtual void renderMaterialShader(RenderState& rstate, RenderData* render_data, ShaderData *material, Shader* shader);
-    virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector);
+    virtual void occlusion_cull(RenderState& rstate, std::vector<std::shared_ptr<SceneObject>>& scene_objects, std::vector<RenderData*>* render_data_vector);
     void clearBuffers(const Camera& camera) const;
 
     GLUniformBlock* transform_ubo_[2];

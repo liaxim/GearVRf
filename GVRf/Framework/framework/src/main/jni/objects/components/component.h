@@ -36,13 +36,13 @@ public:
     explicit Component(long long type, SceneObject* owner_object);
     virtual ~Component();
 
-    SceneObject* owner_object() const;
+    const std::shared_ptr<SceneObject>& owner_object() const;
 
-    virtual void set_owner_object(SceneObject* owner_object);
+    virtual void set_owner_object(std::shared_ptr<SceneObject> owner_object);
     virtual void onAddedToScene(std::shared_ptr<Scene> scene) { }
     virtual void onRemovedFromScene(std::shared_ptr<Scene> scene) { }
-    virtual void onAttach(SceneObject* owner) { }
-    virtual void onDetach(SceneObject* owner) { }
+    virtual void onAttach(std::shared_ptr<SceneObject> owner) { }
+    virtual void onDetach(std::shared_ptr<SceneObject> owner) { }
 
     long long getType() const;
     bool enabled() const;
@@ -55,7 +55,7 @@ private:
     Component& operator=(Component&& component) = delete;
 
 protected:
-    SceneObject* owner_object_;
+    std::shared_ptr<SceneObject> owner_object_;
     bool         enabled_;
 
 private:

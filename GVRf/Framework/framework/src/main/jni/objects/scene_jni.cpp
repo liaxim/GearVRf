@@ -130,15 +130,15 @@ Java_org_gearvrf_NativeScene_invalidateShadowMap(JNIEnv *, jobject, jlong jscene
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_addSceneObject(JNIEnv *, jobject, jlong jscene, jlong jscene_object) {
     std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    (*scene)->addSceneObject(scene_object);
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    (*scene)->addSceneObject(*scene_object);
 }
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeScene_removeSceneObject(JNIEnv *, jobject, jlong jscene, jlong jscene_object) {
     std::shared_ptr<Scene>* scene = reinterpret_cast<std::shared_ptr<Scene>*>(jscene);
-    SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
-    (*scene)->removeSceneObject(scene_object);
+    std::shared_ptr<SceneObject>* scene_object = reinterpret_cast<std::shared_ptr<SceneObject>*>(jscene_object);
+    (*scene)->removeSceneObject(*scene_object);
 }
 
 JNIEXPORT void JNICALL

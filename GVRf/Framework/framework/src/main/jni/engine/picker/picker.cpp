@@ -49,7 +49,7 @@ void Picker::pickScene(const Scene& scene, std::vector<ColliderData>& picklist, 
     Collider::transformRay(model_matrix, ray_start, ray_dir);
     for (auto it = colliders.begin(); it != colliders.end(); ++it) {
         Collider* collider = static_cast<Collider*>(*it);
-        SceneObject* owner = collider->owner_object();
+        std::shared_ptr<SceneObject> owner = collider->owner_object();
         if (collider->enabled() && (owner != NULL) && owner->enabled()) {
             ColliderData data = collider->isHit(ray_start, ray_dir);
             if ((collider->pick_distance() > 0) && (collider->pick_distance() < data.Distance)) {
@@ -125,7 +125,7 @@ void Picker::pickVisible(const Scene& scene, Transform* t, std::vector<ColliderD
 
     for (auto it = colliders.begin(); it != colliders.end(); ++it) {
         Collider* collider = static_cast<Collider*>(*it);
-        SceneObject* owner = collider->owner_object();
+        std::shared_ptr<SceneObject> owner = collider->owner_object();
         if (collider->enabled() && (owner != NULL) && owner->enabled()) {
             ColliderData data(collider);
             Transform* trans = owner->transform();
