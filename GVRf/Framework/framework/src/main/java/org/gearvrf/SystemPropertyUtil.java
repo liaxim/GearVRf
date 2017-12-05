@@ -15,6 +15,6 @@
 
 package org.gearvrf;
 
-class SystemPropertyUtil {
-    static native boolean isSystemPropertySet(String name);
+public class SystemPropertyUtil {
+    public static native boolean isSystemPropertySet(String name);
 }
