@@ -398,6 +398,9 @@ public final class GearCursorController extends GVRCursorController
 
             handleResult = handleAButton(key);
             prevButtonA = handleResult == -1 ? prevButtonA : handleResult;
+            if (0 == prevButtonA) {
+                controllerKey = CONTROLLER_KEYS.BUTTON_A;
+            }
 
             handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_BACK,
                                         prevButtonBack, KeyEvent.KEYCODE_BACK);
@@ -409,10 +412,16 @@ public final class GearCursorController extends GVRCursorController
             handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_VOLUME_UP,
                                         prevButtonVolumeUp, KeyEvent.KEYCODE_VOLUME_UP);
             prevButtonVolumeUp = handleResult == -1 ? prevButtonVolumeUp : handleResult;
+            if (0 == prevButtonVolumeUp) {
+                controllerKey = CONTROLLER_KEYS.BUTTON_VOLUME_UP;
+            }
 
             handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_VOLUME_DOWN,
                                         prevButtonVolumeDown, KeyEvent.KEYCODE_VOLUME_DOWN);
             prevButtonVolumeDown = handleResult == -1 ? prevButtonVolumeDown : handleResult;
+            if (0 == prevButtonVolumeDown) {
+                controllerKey = CONTROLLER_KEYS.BUTTON_VOLUME_DOWN;
+            }
 
             handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_HOME,
                                         prevButtonHome, KeyEvent.KEYCODE_HOME);
