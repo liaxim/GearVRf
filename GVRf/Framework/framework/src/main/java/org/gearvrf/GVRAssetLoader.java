@@ -961,10 +961,12 @@ public final class GVRAssetLoader {
                 if (stream == null) {
                     return null;
                 }
-                byte data[] = ResourceReader.readStream(stream);
-                return data;
-            } catch (Exception e) {
-                Log.e("GVRAssetLoader", path + " exception loading asset from " + e.getMessage());
+                return ResourceReader.readStream(stream);
+            } catch (final FileNotFoundException exc) {
+                Log.e(TAG, "file not found exception loading " + path);
+                return null;
+            } catch (IOException e) {
+                Log.e(TAG, path + " exception loading asset from " + e.getMessage());
                 return null;
             } finally {
                 if (resource != null) {
@@ -1005,7 +1007,7 @@ public final class GVRAssetLoader {
                 }
                 return byteArray.getByteArray();
             } catch (IOException e) {
-                Log.e("GVRAssetLoader", path + " exception loading asset from " + e.getMessage());
+                Log.e(TAG, path + " exception loading asset from " + e.getMessage());
                 return null;
             }
         }

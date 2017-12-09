@@ -690,4 +690,8 @@ public class GVRAndroidResource {
 
         return compressedLoader;
     }
+
+    String getAssetPath() {
+        return assetPath;
+    }
 }
