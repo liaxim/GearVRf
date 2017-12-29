@@ -314,7 +314,12 @@ public class GVRShader
         GVRMaterial mtl = rdata.getMaterial();
         synchronized (shaderManager)
         {
-            int nativeShader = addShader(shaderManager, signature, mtl);
+            int nativeShader = shaderManager.getShader(signature);
+
+            if (nativeShader == 0)
+            {
+                nativeShader = addShader(shaderManager, signature, mtl);
+            }
             if (nativeShader > 0)
             {
                 rdata.setShader(nativeShader, isMultiview);
@@ -343,7 +348,11 @@ public class GVRShader
 
         synchronized (shaderManager)
         {
-            int nativeShader = addShader(shaderManager, signature, material);
+            int nativeShader = shaderManager.getShader(signature);
+            if (nativeShader > 0)
+            {
+                nativeShader = addShader(shaderManager, signature, material);
+            }
             return nativeShader;
         }
     }
