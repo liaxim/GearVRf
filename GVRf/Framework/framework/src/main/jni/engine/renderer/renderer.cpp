@@ -334,6 +334,7 @@ void Renderer::updateTransforms(RenderState& rstate, UniformBlock* transform_ubo
     rstate.uniforms.u_model = model ? model->getModelMatrix() : glm::mat4();
     rstate.uniforms.u_right = rstate.render_mask & RenderData::RenderMaskBit::Right;
     transform_ubo->setMat4("u_model", rstate.uniforms.u_model);
+    transform_ubo->setFloat("u_right", rstate.uniforms.u_right);
 
     if (rstate.is_multiview)
     {
@@ -350,7 +351,6 @@ void Renderer::updateTransforms(RenderState& rstate, UniformBlock* transform_ubo
             rstate.uniforms.u_view_inv_[0] = glm::inverse(rstate.uniforms.u_view_[0]);
             rstate.uniforms.u_view_inv_[1] = glm::inverse(rstate.uniforms.u_view_[1]);
         }
-
         transform_ubo->setMat4("u_view_", rstate.uniforms.u_view_[0]);
         transform_ubo->setMat4("u_mvp_", rstate.uniforms.u_mvp_[0]);
         transform_ubo->setMat4("u_mv_", rstate.uniforms.u_mv_[0]);
