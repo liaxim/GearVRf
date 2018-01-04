@@ -230,7 +230,7 @@ namespace gvr
             if(rstate.is_multiview)
                 rstate.render_mask = RenderData::RenderMaskBit::Right | RenderData::RenderMaskBit::Left;
 
-            rstate.uniforms.u_right = rstate.render_mask & RenderData::RenderMaskBit::Right;
+            rstate.uniforms.u_right = camera->render_mask() & RenderData::RenderMaskBit::Right;
             rstate.material_override = NULL;
             GL(glEnable (GL_BLEND));
             GL(glBlendEquation (GL_FUNC_ADD));
