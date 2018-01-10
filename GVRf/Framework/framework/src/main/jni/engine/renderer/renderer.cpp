@@ -160,7 +160,13 @@ void Renderer::cullFromCamera(Scene *scene, Camera* camera,
     render_data_vector->clear();
     scene_objects.clear();
     RenderState rstate;
+    int lightCount = scene->getLightList().size();
 
+    if (lightCount != numLights)
+    {
+        scene->bindShaders();
+        numLights = lightCount;
+    }
     rstate.is_multiview = is_multiview;
     rstate.material_override = NULL;
     rstate.shader_manager = shader_manager;
