@@ -69,6 +69,10 @@ Java_org_gearvrf_NativeLight_getLightID(JNIEnv * env,
                                         jobject obj, jlong jlight);
 
 JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeLight_setLightID(JNIEnv * env,
+                                        jobject obj, jlong jlight, jstring id);
+
+JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeLight_getMat4(JNIEnv * env,
                                      jobject obj, jlong jlight, jstring key, jfloatArray matrix);
 
@@ -163,9 +167,10 @@ Java_org_gearvrf_NativeLight_getVec4(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setVec4(JNIEnv * env,
-                                     jobject obj, jlong jlight, jstring key, jfloat x, jfloat y, jfloat z,
-                                     jfloat w) {
+Java_org_gearvrf_NativeLight_setVec4(JNIEnv * env, jobject obj,
+                                     jlong jlight, jstring key,
+                                     jfloat x, jfloat y, jfloat z, jfloat w)
+{
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_key = env->GetStringUTFChars(key, 0);
     std::string native_key = std::string(char_key);
@@ -175,12 +180,22 @@ Java_org_gearvrf_NativeLight_setVec4(JNIEnv * env,
 
 JNIEXPORT jstring JNICALL
 Java_org_gearvrf_NativeLight_getLightID(JNIEnv * env,
-                                        jobject obj, jlong jlight) {
+                                        jobject obj, jlong jlight)
+{
     Light* light = reinterpret_cast<Light*>(jlight);
     std::string lightID = light->getLightID();
     return env->NewStringUTF(lightID.c_str());
 }
 
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeLight_setLightID(JNIEnv * env,
+                                        jobject obj, jlong jlight, jstring id)
+{
+    Light* light = reinterpret_cast<Light*>(jlight);
+    const char* char_id = env->GetStringUTFChars(id, 0);
+    std::string native_id = std::string(char_id);
+    light->setLightID(native_id);
+}
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeLight_getMat4(JNIEnv * env,

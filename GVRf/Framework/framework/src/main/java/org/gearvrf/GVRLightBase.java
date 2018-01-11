@@ -481,6 +481,10 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         }
     }
 
+    void setLightID(String lightid)
+    {
+        NativeLight.setLightID(getNative(), lightid);
+    }
 }
 
 class NativeLight
