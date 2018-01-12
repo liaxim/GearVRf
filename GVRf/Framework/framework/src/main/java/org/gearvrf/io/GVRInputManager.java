@@ -28,6 +28,7 @@ import org.gearvrf.GVRAndroidResource;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRCursorController;
 import org.gearvrf.GVREventReceiver;
+import org.gearvrf.GVRMain;
 import org.gearvrf.GVRRenderData;
 import org.gearvrf.GVRScene;
 import org.gearvrf.GVRSceneObject;
@@ -39,22 +40,48 @@ import org.gearvrf.utility.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * An instance of this class is obtained using the
  * {@link GVRContext#getInputManager()} call. Use this class to query for all
  * the {@link GVRCursorController} objects in the framework.
- *
- * Use the
- * {@link GVRInputManager#addCursorControllerListener(CursorControllerListener)}
- * call to notify the application whenever a {@link GVRCursorController} is
- * added or removed from the framework.
- *
- * Alternatively use the {@link GVRInputManager#getCursorControllers()} method
- * to know all the devices currently in the framework.
- *
- * The class also allows external input devices to be added using the
+ * <p>
+ * The gvr.xml file passed to {@link org.gearvrf.GVRActivity#setMain(GVRMain, String)}
+ * designates which cursor controllers GearVRF will consider in the "useControllerTypes"
+ * field. This string is a comma separated list of controller types in increasing priority
+ * order (the last string is the most important controller which will be chosen first
+ * if it is available). The supported types are:
+ * <ul>
+ *     <li>gaze - GearVR touchpad or touch screen</li>
+ *     <li>mouse - Bluetooth mouse</li>
+ *     <li>gamepad - Bluetooth gamepad</li>
+ *     <li>weartouchpad - Android Wear touchpaad</li>
+ *     <li>controller - GearVR or Daydream hand controller</li>
+ * </ul>
+ * </p>
+ * If your application only needs a single controller, {@link GVRInputManager#selectController()}
+ * will select the highest priority controller from those currently connected and call the
+ * {@link ICursorControllerSelectListener#onCursorControllerSelected(GVRCursorController, GVRCursorController)}
+ * function for any listeners attached to the {@link GVREventReceiver} of the {@link GVRInputManager}.
+ * If a higher priority controller becomes available while your application is running,
+ * this function is called again to allow your app to switch controllers if desired.
+ * <p>
+ * You can also use a {@link ICursorControllerListener}
+ * to get notified whenever a cursor controller is added or removed from the system.
+ * In this case, your application can select one or more controllers based on these notifications.
+ * A controller is selected or removed by calling {@link GVRCursorController#setEnable(boolean)}.
+ * The {@link GVRInputManager#scanControllers()} function scans the current devices and emits
+ * these events for the connected controllers.
+ * <p>
+ * You can also call the {@link GVRInputManager#getCursorControllers()} method
+ * to query for all devices currently in the framework.
+ * <p>
+ * External input devices can also be added using the
  * {@link GVRInputManager#addCursorController(GVRCursorController)} method.
+ * @see GVRCursorController
+ * @see GVRContext#getInputManager()
+ * @see #getEventReceiver()
  */
 public class GVRInputManager implements IEventReceiver
 {
@@ -99,9 +126,18 @@ public class GVRInputManager implements IEventReceiver
     // We make use of the vendor and product id to identify a device.
     private final SparseArray<GVRCursorController> cache;
 
-    private List<CursorControllerListener> listeners;
-    private List<GVRCursorController> controllers;
+    private CopyOnWriteArrayList<GVRCursorController> controllers;
 
+    /**
+     * Construct an input manager which manages the designated cursor controllers.
+     * <p>
+     * The list of controller types comes from the gvr.xml file passed to
+     * {@link org.gearvrf.GVRActivity#setMain}. (It is the comma-separated list
+     * of controller types specified in the "useControllerTypes" field).
+     * </p>
+     * @param context       GVRContext input manager is attached to
+     * @param enabledTypes  list of controller types allowed for this applications
+     */
     public GVRInputManager(GVRContext context, ArrayList<GVRControllerType> enabledTypes)
     {
         Context androidContext = context.getContext();
@@ -121,24 +157,29 @@ public class GVRInputManager implements IEventReceiver
         {
             androidWearTouchpad = new GVRAndroidWearTouchpad(context);
         }
-        controllers = new ArrayList<GVRCursorController>();
-        listeners = new ArrayList<CursorControllerListener>();
+        controllers = new CopyOnWriteArrayList<GVRCursorController>();
     }
 
+    /**
+     * Get the event receiver which dispatches {@link ICursorControllerSelectListener}
+     * and {@link ICursorControllerListener}.
+     * @return GVREventReceiver to dispatch input manager events
+     */
     public GVREventReceiver getEventReceiver() { return mListeners; }
 
     /**
      * Emit "onCursorControllerAdded" events to controller listeners
      * for all connected controllers.
      * <p>
-     * To connect with controllers, the application must add a ControllerEventListener
+     * To connect with controllers, the application must add a {@link ICursorControllerListener}
      * to listen for onCursorControllerAdded and onCursorControllerRemoved events
      * and then call this function to emit the events.
      * An event is sent immediately if the controller is actually ready
      * and connected. If the controller connects later, the event
      * will occur later and will not be sent from this function
      * (this can happen with Bluetooth devices).
-     * @see CursorControllerListener
+     * @see ICursorControllerListener
+     * @see #selectController()
      */
     public void scanControllers()
     {
@@ -164,9 +205,9 @@ public class GVRInputManager implements IEventReceiver
      * the input manager switches to using the new controller
      * and "onCursorControllerSelected" is emitted again.
      * @param listener     listens for onCursorControllerSelected events.
-     * @see CursorControllerListener
      * @see ICursorControllerSelectListener
      * @see org.gearvrf.io.GVRInputManager.ICursorControllerSelectListener
+     * @see #scanControllers()
      */
     public void selectController(ICursorControllerSelectListener listener)
     {
@@ -176,7 +217,7 @@ public class GVRInputManager implements IEventReceiver
         }
         GVRInputManager.SingleControllerSelector
                 selector = new GVRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
-        addCursorControllerListener(selector);
+        getEventReceiver().addListener(selector);
         getEventReceiver().addListener(listener);
         scanControllers();
     }
@@ -208,32 +249,8 @@ public class GVRInputManager implements IEventReceiver
         }
         GVRInputManager.SingleControllerSelector
                 selector = new GVRInputManager.SingleControllerSelector(context, mEnabledControllerTypes);
-        addCursorControllerListener(selector);
+        mListeners.addListener(selector);
         scanControllers();
-    }
-
-    /**
-     * Add a {@link CursorControllerListener} to receive an event whenever a
-     * {@link GVRCursorController} is added or removed from the framework.
-     *
-     * @param listener the {@link CursorControllerListener} to be added.
-     */
-    public void addCursorControllerListener(CursorControllerListener listener) {
-        synchronized (listeners) {
-            listeners.add(listener);
-        }
-    }
-
-    /**
-     * Remove the previously added {@link CursorControllerListener}.
-     *
-     * @param listener the {@link CursorControllerListener} to be removed.
-     */
-    public void removeCursorControllerListener(
-            CursorControllerListener listener) {
-        synchronized (listeners) {
-            listeners.remove(listener);
-        }
     }
 
     /**
@@ -245,11 +262,8 @@ public class GVRInputManager implements IEventReceiver
      *                   framework.
      */
     public void addCursorController(GVRCursorController controller) {
-        synchronized (listeners) {
-            for (CursorControllerListener listener : listeners) {
-                listener.onCursorControllerAdded(controller);
-            }
-        }
+        controller.getGVRContext().getEventManager().sendEvent(this, ICursorControllerListener.class,
+                "onCursorControllerAdded", controller);
     }
 
 
@@ -260,14 +274,12 @@ public class GVRInputManager implements IEventReceiver
      * @param controller the external {@link GVRCursorController} to be removed from
      *                   the framework.
      */
-    public void removeCursorController(GVRCursorController controller) {
+    public void removeCursorController(GVRCursorController controller)
+    {
         controller.setEnable(false);
         controllers.remove(controller);
-        synchronized (listeners) {
-            for (CursorControllerListener listener : listeners) {
-                listener.onCursorControllerRemoved(controller);
-            }
-        }
+        controller.getGVRContext().getEventManager().sendEvent(this, ICursorControllerListener.class,
+                "onCursorControllerRemoved", controller);
     }
 
 
@@ -277,8 +289,10 @@ public class GVRInputManager implements IEventReceiver
      * @param scene
      *
      */
-    public void setScene(GVRScene scene) {
-        for (GVRCursorController controller : controllers) {
+    public void setScene(GVRScene scene)
+    {
+        for (GVRCursorController controller : controllers)
+        {
             controller.setScene(scene);
             controller.invalidate();
         }
@@ -287,7 +301,7 @@ public class GVRInputManager implements IEventReceiver
     /**
      * Scan all the attached Android IO devices and gather
      * information about them.
-     *
+     * <p>
      * This function is called once at initialization to enumerate
      * the Android devices. Calling it again is not harmful but
      * will not gather additional information.
@@ -312,13 +326,13 @@ public class GVRInputManager implements IEventReceiver
 
     /**
      * Get a list of the {@link GVRCursorController}s currently in the system.
-     *
+     * <p>
      * Ideally this call needs to be done inside
      * {@link org.gearvrf.GVRMain#onInit(GVRContext)} so that all the cursor objects are
      * set up before the rendering starts.
      *
-     * Remember to add a {@link CursorControllerListener} to receive
-     * notifications on {@link GVRCursorController} objects added or removed
+     * Remember to add a {@link ICursorControllerListener} or {@link ICursorControllerSelectListener}
+     * to receivenotifications on {@link GVRCursorController} objects added or removed
      * during runtime.
      *
      * @return a list of all the {@link GVRCursorController} objects in the
@@ -351,6 +365,14 @@ public class GVRInputManager implements IEventReceiver
         return null;
     }
 
+    /**
+     * Return an instance of the Gear cursor controller.
+     * <p>
+     * This function will always return an instance of a class that
+     * can manage the Gear cursor controller. This does not indicate
+     * a controller is present or connected.
+     * @return Gear cursor controller
+     */
     public GearCursorController getGearController() {
         return gearCursorController;
     }
@@ -368,6 +390,22 @@ public class GVRInputManager implements IEventReceiver
     }
 
     /**
+     * Remove all controllers but leave input manager running.
+     * @return number of controllers removed
+     */
+    public int clear()
+    {
+        int n = 0;
+        for (GVRCursorController c : controllers)
+        {
+            c.stopDrag();
+            removeCursorController(c);
+            ++n;
+        }
+        return n;
+    }
+
+    /**
      * Shut down the input manager.
      *
      * After this call, GearVRf will not be able to access IO devices.
@@ -375,11 +413,12 @@ public class GVRInputManager implements IEventReceiver
     public void close()
     {
         inputManager.unregisterInputDeviceListener(inputDeviceListener);
-        controllerIds.clear();
-        cache.clear();
         mouseDeviceManager.forceStopThread();
         gamepadDeviceManager.forceStopThread();
-        if (gazeCursorController != null) {
+        controllerIds.clear();
+        cache.clear();
+        if (gazeCursorController != null)
+        {
             gazeCursorController.close();
         }
         controllers.clear();
@@ -576,6 +615,7 @@ public class GVRInputManager implements IEventReceiver
         if (controller != null) {
             return controller.dispatchMotionEvent(event);
         }
+
         return false;
     }
 
@@ -605,17 +645,59 @@ public class GVRInputManager implements IEventReceiver
         }
     };
 
+    /**
+     * Add a {@link ICursorControllerListener} to the
+     * {@link GVREventReceiver} of the {@link GVRInputManager} to
+     * receive notifications whenever a {@link GVRCursorController} is added or
+     * removed from the system at runtime.
+     * @see #addCursorController(GVRCursorController)
+     * @see #getEventReceiver()
+     * @see GVREventReceiver#addListener
+     */
+    public interface ICursorControllerListener extends IEvents
+    {
+        /**
+         * Called when a {@link GVRCursorController} is added to the system.
+         *
+         * Use {@link GVRCursorController#getId()} to uniquely identify the
+         * {@link GVRCursorController} and use
+         * {@link GVRCursorController#getControllerType()} to know its
+         * {@link GVRControllerType}.
+         *
+         * @param controller
+         *            the {@link GVRCursorController} added.
+         */
+        public void onCursorControllerAdded(GVRCursorController controller);
+
+        /**
+         * Called when the {@link GVRCursorController} previously added has been
+         * removed.
+         *
+         * Use {@link GVRCursorController#getId()} to uniquely identify the
+         * {@link GVRCursorController} and
+         * {@link GVRCursorController#getControllerType()} to know its
+         * {@link GVRControllerType}.
+         *
+         * @param controller
+         *            the {@link GVRCursorController} removed.
+         */
+        public void onCursorControllerRemoved(GVRCursorController controller);
+    };
 
     /**
      * Interface to listen for cursor controller selection events.
-     * @see GVRInputManager#scanControllers()
+     * @see GVRInputManager#selectController()
      */
     public interface ICursorControllerSelectListener extends IEvents
     {
         public void onCursorControllerSelected(GVRCursorController newController, GVRCursorController oldController);
     }
 
-    protected static class SingleControllerSelector implements CursorControllerListener
+    /**
+     * Responds to cursor added or removed events and selects the highest
+     * priority controller for the list of desired types.
+     */
+    protected static class SingleControllerSelector implements ICursorControllerListener
     {
         private ArrayList<GVRControllerType> mControllerTypes;
         private int mCurrentControllerPriority = -1;
@@ -687,13 +769,13 @@ public class GVRInputManager implements IEventReceiver
                 mCursor.getTransform().setPosition(0, 0, 0);
                 controller.setCursor(mCursor);
             }
-            mCursorController = controller;
-            mCursorController.setEnable(true);
+            controller.setEnable(true);
             ctx.getEventManager().sendEvent(ctx.getInputManager(),
                                             ICursorControllerSelectListener.class,
                                             "onCursorControllerSelected",
                                             controller,
                                             mCursorController);
+            mCursorController = controller;
             Log.d(TAG, "selected " + controller.getClass().getSimpleName());
         }
 
@@ -715,12 +797,13 @@ public class GVRInputManager implements IEventReceiver
              * If we are removing the controller currently being used,
              * switch to the Gaze controller if possible
              */
-            if (mCursorController == gvrCursorController)
+            if ((mCursorController == gvrCursorController) &&
+                (gvrCursorController.getControllerType() != GVRControllerType.GAZE))
             {
                 GVRContext ctx = gvrCursorController.getGVRContext();
                 deselectController();
                 GVRCursorController gaze = ctx.getInputManager().findCursorController(GVRControllerType.GAZE);
-                if (gaze != null)
+                if ((gaze != null) && (gaze != gvrCursorController))
                 {
                     ctx.getInputManager().addCursorController(gaze);
                 }

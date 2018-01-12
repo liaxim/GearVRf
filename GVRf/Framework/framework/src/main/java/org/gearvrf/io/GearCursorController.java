@@ -19,6 +19,7 @@ package org.gearvrf.io;
 import android.graphics.PointF;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.view.InputDevice;
@@ -26,47 +27,42 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.gearvrf.GVRActivity;
-import org.gearvrf.GVRComponent;
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRCursorController;
-import org.gearvrf.GVREventListeners;
 import org.gearvrf.GVRImportSettings;
 import org.gearvrf.GVRMaterial;
 import org.gearvrf.GVRPicker;
 import org.gearvrf.GVRRenderData;
 import org.gearvrf.GVRScene;
 import org.gearvrf.GVRSceneObject;
-import org.gearvrf.GVRTexture;
 import org.gearvrf.GVRTransform;
 import org.gearvrf.IActivityEvents;
-import org.gearvrf.IAssetEvents;
-import org.gearvrf.IEvents;
-import org.gearvrf.IPickEvents;
-import org.gearvrf.ITouchEvents;
 import org.gearvrf.scene_objects.GVRLineSceneObject;
 import org.gearvrf.utility.Log;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 
 /**
  * This class represents the Gear Controller.
  *
- * The input manager notifies the application when the controller has mConnected successfully. Use
- * the {@link GVRInputManager#addCursorControllerListener(CursorControllerListener)} to get notified
- * when the controller is available to use. To query the device specific information from the
+ * The input manager notifies the application when the controller has mConnected successfully.
+ * Add a {@link org.gearvrf.io.GVRInputManager.ICursorControllerListener)} to the {@link GVREventReceiver}
+ * of this controller to get notified when the controller is available to use.
+ * To query the device specific information from the
  * Gear Controller make sure to type cast the returned {@link GVRCursorController} to
  * {@link GearCursorController} like below:
  *
  * <code>
- * OvrGearController controller = (OvrGearController) gvrCursorController;
+ * GearController controller = (GearController) gvrCursorController;
  * </code>
  *
- * Additionally register a {@link org.gearvrf.GVRCursorController.ControllerEventListener} using
- * {@link GVRCursorController#addControllerEventListener(ControllerEventListener)} to receive
+ * AYou can add a listener for {@link IControllerEvent} to receive
  * notification whenever the controller information is updated.
  */
 public final class GearCursorController extends GVRCursorController
@@ -316,23 +312,32 @@ public final class GearCursorController extends GVRCursorController
     public void onDrawFrame()
     {
         boolean wasConnected = mConnected;
+
         mConnected = (mControllerReader != null) && mControllerReader.isConnected();
-        if (!wasConnected && mConnected)
+        if (!mConnected)
         {
-            context.getInputManager().addCursorController(GearCursorController.this);
-        }
-        if (mConnected && isEnabled())
-        {
-            if (!initialized)
+            if (initialized)
             {
-                if (!thread.isAlive())
-                {
-                    thread.start();
-                    thread.prepareHandler();
-                }
-                thread.initialize();
-                initialized = true;
+                thread.uninitialize();
+                initialized = false;
             }
+            return;
+        }
+        if (!initialized)
+        {
+            if (!thread.isAlive())
+            {
+                thread.start();
+                thread.prepareHandler();
+            }
+            if (!wasConnected && mConnected)
+            {
+                thread.initialize();
+            }
+            initialized = true;
+        }
+        if (isEnabled())
+        {
             ControllerEvent event = ControllerEvent.obtain();
 
             mControllerReader.updateRotation(event.rotation);
@@ -341,16 +346,7 @@ public final class GearCursorController extends GVRCursorController
             event.key = mControllerReader.getKey();
             event.handedness = mControllerReader.getHandedness();
             mControllerReader.updateTouchpad(event.pointF);
-
             thread.sendEvent(event);
-        }
-        else
-        {
-            if (initialized)
-            {
-                thread.uninitialize();
-                initialized = false;
-            }
         }
     }
 
@@ -468,6 +464,7 @@ public final class GearCursorController extends GVRCursorController
                 public boolean handleMessage(Message message) {
                     switch (message.what) {
                         case MSG_INITIALIZE:
+                            context.getInputManager().addCursorController(GearCursorController.this);
                             break;
                         case MSG_EVENT:
                             handleControllerEvent((ControllerEvent) message.obj);
@@ -492,9 +489,50 @@ public final class GearCursorController extends GVRCursorController
             });
         }
 
+        class SendEvents implements Runnable
+        {
+            private List<KeyEvent> mKeyEvents = new ArrayList<KeyEvent>();
+            private List<MotionEvent> mMotionEvents = new ArrayList<MotionEvent>();
+
+            public void init(List<KeyEvent> keyEvents, List<MotionEvent> motionEvents)
+            {
+                if (keyEvents.size() > 0)
+                {
+                    mKeyEvents = new ArrayList<KeyEvent>(keyEvents);
+                }
+                else
+                {
+                    mKeyEvents.clear();
+                }
+                if (motionEvents.size() > 0)
+                {
+                    mMotionEvents = new ArrayList<MotionEvent>(motionEvents);
+                }
+                else
+                {
+                    mMotionEvents.clear();
+                }
+            }
+
+            public void run()
+            {
+                GVRActivity activity = getGVRContext().getActivity();
+                for (KeyEvent e : mKeyEvents)
+                {
+                    activity.dispatchKeyEvent(e);
+                }
+                for (MotionEvent e : mMotionEvents)
+                {
+                    activity.dispatchTouchEvent(MotionEvent.obtain(e));
+                }
+            }
+        }
+
+        private SendEvents mPropagateEvents = new SendEvents();
+
         void handleControllerEvent(final ControllerEvent event) {
             context.getEventManager().sendEvent(context.getActivity(), IActivityEvents.class, "onControllerEvent",
-                                                event.position, event.rotation, event.pointF);
+                                                event.position, event.rotation, event.pointF, event.touched);
 
             this.currentControllerEvent = event;
             Quaternionf q = event.rotation;
@@ -533,16 +571,24 @@ public final class GearCursorController extends GVRCursorController
                                         prevButtonHome, KeyEvent.KEYCODE_HOME);
             prevButtonHome = handleResult == -1 ? prevButtonHome : handleResult;
             event.recycle();
-            if (mSendEventsToActivity)
+            if (mSendEventsToActivity && ((keyEvent.size() > 0) || (motionEvent.size() > 0)))
             {
-                GVRActivity activity = getGVRContext().getActivity();
-                for (KeyEvent e : keyEvent)
+                mPropagateEvents.init(keyEvent, motionEvent);
+                if (Looper.getMainLooper().equals(Looper.myLooper()))
                 {
-                    activity.dispatchKeyEvent(e);
+                    mPropagateEvents.run();
                 }
-                for (MotionEvent e : motionEvent)
+                else
                 {
-                    activity.dispatchTouchEvent(e);
+                    GVRActivity activity = getGVRContext().getActivity();
+                    for (KeyEvent e : keyEvent)
+                    {
+                        activity.dispatchKeyEvent(e);
+                    }
+                    for (MotionEvent e : motionEvent)
+                    {
+                        activity.dispatchTouchEvent(MotionEvent.obtain(e));
+                    }
                 }
             }
             GearCursorController.super.invalidate();
