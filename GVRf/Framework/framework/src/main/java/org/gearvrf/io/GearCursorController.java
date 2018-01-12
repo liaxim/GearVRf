@@ -542,12 +542,17 @@ public final class GearCursorController extends GVRCursorController
             float cameraX = camTrans.getPositionX();
             float cameraY = camTrans.getPositionY();
             float cameraZ = camTrans.getPositionZ();
+            Log.i("mmarinov", "handleControllerEvent cam " + cameraX + ", " + cameraY + ", " + cameraZ);
 
             q.normalize();
             mPivotRoot.getTransform().setRotation(q.w, q.x, q.y, q.z);
             q.transform(FORWARD, result);
             setOrigin(cameraX + pos.x, cameraY + pos.y, cameraZ + pos.z);
+
             mPivotRoot.getTransform().setPosition(cameraX + pos.x, cameraY + pos.y, cameraZ + pos.z);
+//            mPivotRoot.getTransform().setPosition(cameraX , cameraY , cameraZ );
+//            mPivotRoot.getTransform().setPosition(-4f, -1f, -5f);
+            Log.i("mmarinov", "handleControllerEvent pos " + pos.x + ", " + pos.y + ", " + pos.z);
 
             int handleResult = handleEnterButton(key, event.pointF, event.touched);
             prevButtonEnter = handleResult == -1 ? prevButtonEnter : handleResult;
