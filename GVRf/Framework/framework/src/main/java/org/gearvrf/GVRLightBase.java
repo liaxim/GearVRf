@@ -17,6 +17,7 @@ package org.gearvrf;
 
 import static org.gearvrf.utility.Assert.*;
 
+import org.gearvrf.utility.Exceptions;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -303,118 +304,213 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
     {
         return mVertexDescriptor;
     }
-    
+
+
     /**
-     * Gets the value of a floating uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @return floating point value of uniform
+     * Get the {@code float} bound to the shader uniform {@code key}.
+     *
+     * @param key Name of the shader uniform
+     * @return The bound {@code float} value, returns 0.0 if key does not exist.
      */
     public float getFloat(String key)
     {
-        return NativeLight.getFloat(getNative(), key);
+        return NativeShaderData.getFloat(getNative(), key);
     }
 
     /**
-     * Sets the value of a floating uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @param value
-     *            floating point value of uniform
+     * Bind a {@code float} to the shader uniform {@code key}.
+     * Throws an exception of the key is not found.
+     *
+     * @param key       Name of the shader uniform
+     * @param value     New data
      */
     public void setFloat(String key, float value)
     {
-        checkStringNotNullOrEmpty("key", key);
+        checkKeyIsUniform(key);
         checkFloatNotNaNOrInfinity("value", value);
-        NativeLight.setFloat(getNative(), key, value);
+        NativeShaderData.setFloat(getNative(), key, value);
     }
 
     /**
-     * Gets the value of a vec3 floating uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @return vec3 value of uniform
+     * Get the {@code int} bound to the shader uniform {@code key}.
+     *
+     * @param key   Name of the shader uniform
+     * @return The bound {@code int} value, 0 if key does not exist.
+     */
+    public int getInt(String key)
+    {
+        return NativeShaderData.getInt(getNative(), key);
+    }
+
+    /**
+     * Bind an {@code int} to the shader uniform {@code key}.
+     * Throws an exception of the key does not exist.
+     * @param key       Name of the shader uniform
+     * @param value     New data
+     */
+    public void setInt(String key, int value)
+    {
+        checkKeyIsUniform(key);
+        NativeShaderData.setInt(getNative(), key, value);
+    }
+
+    /**
+     * Get the value for a floating point uniform vector.
+     * @param key name of uniform to get.
+     * @return float array with value of named uniform.
+     * @throws IllegalArgumentException if key is not in uniform descriptor.
+     */
+    public float[] getFloatVec(String key)
+    {
+        float[] vec = NativeShaderData.getFloatVec(getNative(), key);
+        if (vec == null)
+            throw new IllegalArgumentException("key " + key + " not found in material");
+        return vec;
+    }
+
+    /**
+     * Get the value for an integer uniform vector.
+     * @param key name of uniform to get.
+     * @return int array with value of named uniform.
+     * @throws IllegalArgumentException if key is not in uniform descriptor.
+     */
+    public int[] getIntVec(String key)
+    {
+        int[] vec = NativeShaderData.getIntVec(getNative(), key);
+        if (vec == null)
+            throw new IllegalArgumentException("key " + key + " not found in material");
+        return vec;
+    }
+
+    /**
+     * Get the value for a floating point vector of length 2 (type float2).
+     * @param key name of uniform to get.
+     * @return float array with two values
+     * @throws IllegalArgumentException if key is not in uniform descriptor.
+     */
+    public float[] getVec2(String key)
+    {
+        return getFloatVec(key);
+    }
+
+    /**
+     * Set the value for a floating point vector of length 2.
+     * @param key name of uniform to set.
+     * @param x new X value
+     * @param y new Y value
+     * @see #getVec2
+     * @see #getFloatVec(String)
+     */
+    public void setVec2(String key, float x, float y)
+    {
+        checkKeyIsUniform(key);
+        NativeShaderData.setVec2(getNative(), key, x, y);
+    }
+
+    /**
+     * Get the value for a floating point vector of length 3 (type float3).
+     * @param key name of uniform to get.
+     * @return float array with three values
+     * @throws IllegalArgumentException if key is not in uniform descriptor.
      */
     public float[] getVec3(String key)
     {
-        return NativeLight.getVec3(getNative(), key);
+        return getFloatVec(key);
     }
 
     /**
-     * Sets the value of a vec3 uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @param x     X coordinate of vector
-     * @param y     Y coordinate of vector
-     * @param z     Z coordinate of vector
+     * Set the value for a floating point vector of length 3.
+     * @param key name of uniform to set.
+     * @param x new X value
+     * @param y new Y value
+     * @param z new Z value
+     * @see #getVec3
+     * @see #getFloatVec(String)
      */
     public void setVec3(String key, float x, float y, float z)
     {
-        checkStringNotNullOrEmpty("key", key);
+        checkKeyIsUniform(key);
         NativeLight.setVec3(getNative(), key, x, y, z);
     }
 
     /**
-     * Gets the value of a vec4 floating uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @return vec4 value of uniform
+     * Get the value for a floating point vector of length 4 (type float4).
+     * @param key name of uniform to get.
+     * @return float array with four values
+     * @throws IllegalArgumentException if key is not in uniform descriptor.
      */
     public float[] getVec4(String key)
     {
-        return NativeLight.getVec4(getNative(), key);
+        return getFloatVec(key);
     }
 
     /**
-     * Sets the value of a vec4 uniform based on its name.
-     * 
-     * @param key   name of uniform to get
-     * @param x     X coordinate of vector
-     * @param y     Y coordinate of vector
-     * @param z     Z coordinate of vector
-     * @param w     W coordinate of vector
+     * Set the value for a floating point vector of length 4.
+     * @param key name of uniform to set.
+     * @param x new X value
+     * @param y new Y value
+     * @param z new Z value
+     * @param w new W value
+     * @see #getVec4
+     * @see #getFloatVec(String)
      */
     public void setVec4(String key, float x, float y, float z, float w)
     {
-        checkStringNotNullOrEmpty("key", key);
+        checkKeyIsUniform(key);
         NativeLight.setVec4(getNative(), key, x, y, z, w);
     }
 
     /**
-     * Sets the value of a 4x4 matrix uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
-     * @param matrix
-     *            4x4 matrix value of uniform
+     * Set the value for a floating point 4x4 matrix.
+     * @param key name of uniform to set.
+     * @see #getFloatVec(String)
      */
-    public void setMat4(String key, Matrix4f matrix)
+    public void setMat4(String key, float x1, float y1, float z1, float w1,
+                        float x2, float y2, float z2, float w2, float x3, float y3,
+                        float z3, float w3, float x4, float y4, float z4, float w4)
     {
-        float[] data = new float[16];
-        matrix.get(data);
-        checkStringNotNullOrEmpty("key", key);
-        NativeLight.setMat4(getNative(), key, data);
+        checkKeyIsUniform(key);
+        NativeLight.setMat4(getNative(), key, x1, y1, z1, w1, x2, y2,
+                                 z2, w2, x3, y3, z3, w3, x4, y4, z4, w4);
     }
 
     /**
-     * Gets the value of a 4x4 matrix uniform based on its name.
-     * 
-     * @param key
-     *            name of uniform to get
+     * Set the value for a floating point vector uniform.
+     * <p>
+     * @param key name of uniform to set.
+     * @param val floating point array with new data. The size of the array must be
+     *            at least as large as the uniform being updated.
+     * @throws IllegalArgumentException if key is not in uniform descriptor or array is wrong length.
+     * @see #getFloatVec(String)
      */
-    public Matrix4f getMat4(String key)
+    public void setFloatArray(String key, float val[])
     {
-        float[] data = new float[16];
+        checkKeyIsUniform(key);
+        NativeShaderData.setFloatVec(getNative(), key, val, val.length);
+    }
+
+    /**
+     * Set the value for an integer vector uniform.
+     * <p>
+     * @param key name of uniform to set.
+     * @param val integer array with new data. The size of the array must be
+     *            at least as large as the uniform being updated.
+     * @throws IllegalArgumentException if key is not in uniform descriptor or array is wrong length.
+     * @see #getIntVec(String)
+     */
+    public void setIntArray(String key, int val[])
+    {
+        checkKeyIsUniform(key);
+        NativeShaderData.setIntVec(getNative(), key, val, val.length);
+    }
+
+    private void checkKeyIsUniform(String key)
+    {
         checkStringNotNullOrEmpty("key", key);
-        NativeLight.getMat4(getNative(), key, data);
-        Matrix4f matrix = new Matrix4f();
-        matrix.set(data);
-        return matrix;
+        if (!mUniformDescriptor.contains(key))
+        {
+            throw Exceptions.IllegalArgument("key " + key + " not in material");
+        }
     }
 
     /**
@@ -493,23 +589,42 @@ class NativeLight
 
     static native long getComponentType();
 
-    static native float getFloat(long light, String key);
-
-    static native void setFloat(long light, String key, float value);
-
-    static native float[] getVec3(long light, String key);
-
-    static native void setVec3(long light, String key, float x, float y, float z);
-
-    static native float[] getVec4(long light, String key);
-
-    static native void setVec4(long light, String key, float x, float y, float z, float w);
-
     static native String getLightID(long light);
 
     static native void setLightID(long light, String id);
-    
-    static native void getMat4(long light, String key, float[] matrix);
-    
-    static native void setMat4(long light, String key, float[] matrix);
+
+    static native boolean hasUniform(long shaderData, String key);
+
+    static native boolean hasTexture(long shaderData, String key);
+
+    static native void setTexture(long shaderData, String key, long texture);
+
+    static native float getFloat(long shaderData, String key);
+
+    static native void setFloat(long shaderData, String key, float value);
+
+    static native int getInt(long shaderData, String key);
+
+    static native void setInt(long shaderData, String key, int value);
+
+    static native float[] getFloatVec(long shaderData, String key);
+    static native void setFloatVec(long shaderData, String key, float[] val, int n);
+    static native void setIntVec(long shaderData, String key, int[] val, int n);
+
+    static native int[] getIntVec(long shaderData, String key);
+
+    static native void setVec2(long shaderData, String key, float x, float y);
+
+    static native void setVec3(long shaderData, String key, float x,
+                               float y, float z);
+
+    static native void setVec4(long shaderData, String key, float x,
+                               float y, float z, float w);
+
+    static native float[] getMat4(long shaderData, String key);
+
+    static native void setMat4(long shaderData, String key, float x1,
+                               float y1, float z1, float w1, float x2, float y2, float z2,
+                               float w2, float x3, float y3, float z3, float w3, float x4,
+                               float y4, float z4, float w4);
 }

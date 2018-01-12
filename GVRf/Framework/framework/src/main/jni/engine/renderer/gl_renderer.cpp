@@ -26,6 +26,7 @@
 #include "gl/gl_external_image.h"
 #include "gl/gl_float_image.h"
 #include "gl/gl_imagetex.h"
+#include "gl/gl_light.h"
 #include "gl_renderer.h"
 #include "objects/scene.h"
 
@@ -183,6 +184,12 @@ namespace gvr
         LOGV("Renderer::createIndexBuffer(%d, %d) = %p", bytesPerIndex, icount, ibuf);
         return ibuf;
     }
+
+    Light* GLRenderer::createLight(const char* uniformDescriptor, const char* textureDescriptor)
+    {
+        return new GLLight(uniformDescriptor, textureDescriptor);
+    }
+
 
     GLRenderer::GLRenderer() : transform_ubo_{nullptr, nullptr}
     {
@@ -664,15 +671,16 @@ namespace gvr
     {
         const std::vector<Light*>& lightlist = rstate.scene->getLightList();
         ShadowMap* shadowMap = nullptr;
+        GLUniformBlock& lightBlock;
 
         for (auto it = lightlist.begin();
              it != lightlist.end();
              ++it)
         {
-            Light* light = (*it);
+            GLLight* light = (GLLight*) (*it);
             if (light != NULL)
             {
-                light->render(shader);
+                light->render(shader, lightBlock, texIndex, 0);
                 ShadowMap* sm = light->getShadowMap();
                 if (sm != nullptr)
                 {
@@ -691,20 +699,21 @@ namespace gvr
         }
         checkGLError("GLRenderer::updateLights");
     }
-void GLRenderer::updatePostEffectMesh(Mesh* copy_mesh)
-{
-    float positions[] = { -1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
-    float uvs[] = { 0.0f, 0.0, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f };
-    unsigned short faces[] = { 0, 2, 1, 1, 2, 3 };
 
-    const int position_size = sizeof(positions)/ sizeof(positions[0]);
-    const int uv_size = sizeof(uvs)/ sizeof(uvs[0]);
-    const int faces_size = sizeof(faces)/ sizeof(faces[0]);
+    void GLRenderer::updatePostEffectMesh(Mesh* copy_mesh)
+    {
+        float positions[] = { -1.0f, -1.0f, 0.0f, -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 0.0f };
+        float uvs[] = { 0.0f, 0.0, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f };
+        unsigned short faces[] = { 0, 2, 1, 1, 2, 3 };
 
-    copy_mesh->setVertices(positions, position_size);
-    copy_mesh->setFloatVec("a_texcoord", uvs, uv_size);
-    copy_mesh->setTriangles(faces, faces_size);
-}
+        const int position_size = sizeof(positions)/ sizeof(positions[0]);
+        const int uv_size = sizeof(uvs)/ sizeof(uvs[0]);
+        const int faces_size = sizeof(faces)/ sizeof(faces[0]);
+
+        copy_mesh->setVertices(positions, position_size);
+        copy_mesh->setFloatVec("a_texcoord", uvs, uv_size);
+        copy_mesh->setTriangles(faces, faces_size);
+    }
 
 }
 

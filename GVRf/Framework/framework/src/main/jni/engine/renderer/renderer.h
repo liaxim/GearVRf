@@ -168,7 +168,7 @@ public:
     virtual void setRenderStates(RenderData* render_data, RenderState& rstate) = 0;
     virtual Texture* createSharedTexture(int id) = 0;
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int) = 0;
-
+    virtual Light* createLight(const char* uniformDescriptor, const char* textureDescriptor) = 0;
     virtual void makeShadowMaps(Scene* scene, ShaderManager* shader_manager) = 0;
     virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
     virtual void updatePostEffectMesh(Mesh*) = 0;

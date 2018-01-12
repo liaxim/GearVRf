@@ -102,6 +102,7 @@ public:
                                  const char* uniformDescriptor, const char* textureDescriptor,
                                  const char* vertexDescriptor, const char* vertexShader,
                                  const char* fragmentShader);
+    virtual Light* createLight(const char* uniformDescriptor, const char* textureDescriptor);
     GLUniformBlock* getTransformUbo(int index) { return transform_ubo_[index]; }
     virtual void updatePostEffectMesh(Mesh*);
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData,  int);

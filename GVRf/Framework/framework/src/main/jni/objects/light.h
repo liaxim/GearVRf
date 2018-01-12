@@ -24,119 +24,141 @@
 #include <memory>
 #include <string>
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_inverse.hpp"
-
 #include "objects/shader_data.h"
 #include "engine/renderer/renderer.h"
-#include "objects/hybrid_object.h"
 #include "objects/scene_object.h"
 #include "objects/components/shadow_map.h"
-#include "components/component.h"
 #include "util/gvr_jni.h"
 #include "engine/renderer/renderer.h"
 
 namespace gvr {
-class Color;
 class SceneObject;
 class Scene;
-class ShaderManager;
-class GLFrameBuffer;
-class GLImage;
 class Shader;
 class ShadowMap;
 
 //#define DEBUG_LIGHT 1
 
-class Light final : public JavaComponent {
+class Light : public JavaComponent
+{
 public:
 
     explicit Light()
-            :   JavaComponent(Light::getComponentType()),
-                shadowMapIndex_(-1)
+    :   JavaComponent(Light::getComponentType()),
+        shadowMapIndex_(-1)
     {
     }
 
-    virtual ~Light() {}
+    virtual ~Light();
 
-    static long long getComponentType() {
+    static long long getComponentType()
+    {
         return COMPONENT_TYPE_LIGHT;
     }
 
-    virtual void set_enable(bool enable) {
-        enabled_ = enable;
-        setDirty();
+    int getByteSize(const char* key) const
+    {
+        return uniforms().getByteSize(key);
     }
 
-    float getFloat(std::string key) {
-        auto it = floats_.find(key);
-        if (it != floats_.end()) {
-            return it->second;
-        } else {
-            std::string error = "Light::getFloat() : " + key + " not found";
-            throw error;
-        }
+    bool hasUniform(const char* key) const
+    {
+        return uniforms().hasUniform(key);
     }
 
-    void setFloat(std::string key, float value) {
-        if (floats_[key] != value)
-        {
-            floats_[key] = value;
-            if (enabled_)
-            {
-                setDirty();
-            }
-        }
+    int getNumUniforms() const
+    {
+        return uniforms().getNumUniforms();
     }
 
-    glm::vec3 getVec3(std::string key) {
-        auto it = vec3s_.find(key);
-        if (it != vec3s_.end()) {
-            return it->second;
-        } else {
-            std::string error = "Light::getVec3() : " + key + " not found";
-            throw error;
-        }
+    void forEachUniform(std::function< void(const DataDescriptor::DataEntry&) > func) const
+    {
+        return uniforms().forEachEntry(func);
     }
 
-    void setVec3(std::string key, glm::vec3 vector) {
-        vec3s_[key] = vector;
-        if (enabled_) {
-            setDirty();
-        }
+    void forEachUniform(std::function< void(DataDescriptor::DataEntry&) > func)
+    {
+        return uniforms().forEachEntry(func);
     }
 
-    glm::vec4 getVec4(std::string key) {
-        auto it = vec4s_.find(key);
-        if (it != vec4s_.end()) {
-            return it->second;
-        } else {
-            std::string error = "Light::getVec4() : " + key + " not found";
-            throw error;
-        }
+    Texture* getTexture(const char* key) const
+    {
+        return uniforms().getTexture(key);
     }
 
-    void setVec4(std::string key, glm::vec4 vector) {
-        vec4s_[key] = vector;
-        if (enabled_) {
-            setDirty();
-        }
+    void setTexture(const char* key, Texture* texture)
+    {
+        uniforms().setTexture(key, texture);
     }
 
-    bool getMat4(std::string key, glm::mat4& matrix) {
-        auto it = mat4s_.find(key);
-        if (it != mat4s_.end()) {
-            matrix = it->second;
-            return true;
-        }
-        return false;
+    bool  getFloat(const char* name, float& v) const
+    {
+       return uniforms().getFloat(name, v);
     }
 
-    void setMat4(std::string key, glm::mat4 matrix) {
-        mat4s_[key] = matrix;
-        if (enabled_) {
-            setDirty();
-        }
+    bool getInt(const char* name, int& v) const
+    {
+        return uniforms().getInt(name, v);
+    }
+
+    bool  setInt(const char* name, int val)
+    {
+        return uniforms().setInt(name, val);
+    }
+
+    bool  setIntVec(const char* name, const int* val, int n)
+    {
+        return uniforms().setIntVec(name, val, n);
+    }
+
+    bool setFloatVec(const char* name, const float* val, int n)
+    {
+        return uniforms().setFloatVec(name, val, n);
+    }
+
+    bool  getFloatVec(const char* name, float* val, int n)
+    {
+        return uniforms().getFloatVec(name, val, n);
+    }
+
+    bool getIntVec(const char* name, int* val, int n)
+    {
+        return uniforms().getIntVec(name, val, n);
+    }
+
+    bool setVec2(const char* name, const glm::vec2& v)
+    {
+        return uniforms().setVec2(name, v);
+    }
+
+    bool getFloat(const char* key, float& val)
+    {
+        return uniforms().getFloat(key, val);
+    }
+
+    void setFloat(const char* key, float value)
+    {
+        uniforms().setFloat(key, value);
+    }
+
+    bool setVec3(const char* key, const glm::vec3& vector)
+    {
+        return uniforms().setVec3(key, vector);
+    }
+
+    bool setVec4(const char* key, const glm::vec4& vector)
+    {
+        return uniforms().setVec4(key, vector);
+    }
+
+    bool getMat4(const char* key, glm::mat4& matrix)
+    {
+        return uniforms().getMat4(key, matrix);
+    }
+
+    bool setMat4(const char* key, const glm::mat4& matrix)
+    {
+        return uniforms().setMat4(key, matrix);
     }
 
     bool castShadow()
@@ -144,39 +166,21 @@ public:
         return getShadowMap() != nullptr;
     }
 
-    ShadowMap* getShadowMap()
-    {
-        SceneObject* owner = owner_object();
-        ShadowMap* shadowMap = nullptr;
-
-        if (owner == nullptr)
-        {
-            return nullptr;
-        }
-        shadowMap = (ShadowMap*) owner->getComponent(RenderTarget::getComponentType());
-        if ((shadowMap != nullptr) &&
-            shadowMap->enabled() &&
-            (shadowMap->getCamera() != nullptr))
-        {
-            return shadowMap;
-        }
-        return nullptr;
-    }
+    ShadowMap* getShadowMap();
 
     /**
      * Internal function called at the start of each frame
      * to update the shadow map.
      */
     bool makeShadowMap(Scene* scene, ShaderManager* shader_manager, int texIndex);
-    /**
-     * Internal function called at the start of each shader
-     * to update the light uniforms (if necessary).
-     * @param program   ID of GL shader program
-     */
-    void render(Shader* shader);
 
-    std::string getLightID() {
-        return lightID_;
+    virtual int addToLayout(std::ostream& stream);
+
+    virtual void makeLayout(const std::vector<Light*>& lights, std::string& layout);
+
+    const char* getLightID()
+    {
+        return lightID_.c_str();
     }
 
     /**
@@ -185,12 +189,15 @@ public:
     * GVRScene when the light is attached.
     * {@link GVRScene.addLight }
     */
-    void setLightID(std::string lightid) {
+    void setLightID(const char* lightid)
+    {
         lightID_ = lightid;
-    };
+    }
 
     virtual void onAddedToScene(Scene* scene);
     virtual void onRemovedFromScene(Scene* scene);
+    virtual ShaderData&       uniforms() = 0;
+    virtual const ShaderData& uniforms() const = 0;
 
 private:
     Light(const Light& light) = delete;
@@ -198,40 +205,9 @@ private:
     Light& operator=(const Light& light) = delete;
     Light& operator=(Light&& light) = delete;
 
-
-    /*
-     * Mark the light as needing update for all shaders using it
-     */
-    void setDirty() {
-        for (auto it = dirty_.begin(); it != dirty_.end(); ++it) {
-            it->second = true;
-        }
-    }
-
-    /*
-     * Get the GL uniform offset for a named uniform.
-     */
-    int getOffset(std::string key, int programId) {
-        auto it = offsets_.find(key);
-        if (it != offsets_.end()) {
-            std::map<int, int> offsets = it->second;
-            auto it2 = offsets.find(programId);
-            if (it2 != offsets.end()) {
-                return it2->second;
-            }
-        }
-        return -1;
-    }
-
 private:
     int shadowMapIndex_;
     std::string lightID_;
-    std::map<int, bool> dirty_;
-    std::map<std::string, float> floats_;
-    std::map<std::string, glm::vec3> vec3s_;
-    std::map<std::string, glm::vec4> vec4s_;
-    std::map<std::string, glm::mat4> mat4s_;
-    std::map<std::string, std::map<int, int> > offsets_;
 };
 }
 #endif

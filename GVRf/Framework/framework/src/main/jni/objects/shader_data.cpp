@@ -83,7 +83,6 @@ void ShaderData::forEachTexture(std::function< void(const char* texname, Texture
     }
 }
 
-
 std::string ShaderData::makeShaderLayout()
 {
     return uniforms().makeShaderLayout();
@@ -180,6 +179,12 @@ bool  ShaderData::setMat4(const char* name, const glm::mat4& m)
 {
     std::lock_guard<std::mutex> lock(mLock);
     return uniforms().setMat4(name, m);
+}
+
+bool  ShaderData::getMat4(const char* name, glm::mat4& m)
+{
+    std::lock_guard<std::mutex> lock(mLock);
+    return uniforms().getMat4(name, m);
 }
 
 void ShaderData::makeDirty(DIRTY_BITS bits)

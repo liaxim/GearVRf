@@ -195,8 +195,8 @@ bool Scene::addLight(Light* light) {
         return false;
     }
     lightList.push_back(light);
-    light->setLightID(os.str());
-    LOGD("SHADER: light %s added to scene", light->getLightID().c_str());
+    light->setLightID(os.str().c_str());
+    LOGD("SHADER: light %s added to scene", light->getLightID());
     return true;
 }
 
@@ -205,7 +205,7 @@ bool Scene::removeLight(Light* light) {
     if (it == lightList.end())
         return false;
     lightList.erase(it);
-    LOGD("SHADER: light %s removed from scene", light->getLightID().c_str());
+    LOGD("SHADER: light %s removed from scene", light->getLightID());
     return true;
 }
 
