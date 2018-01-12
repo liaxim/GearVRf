@@ -178,9 +178,8 @@ bool LightList::createLightBlock(Renderer* renderer)
     if ((mLightBlock == NULL) ||
         (numBytes > mLightBlock->getTotalSize()))
     {
-        std::string desc("float lightdata[");
-        desc += std::to_string(numBytes / sizeof(float)) + "]";
-        mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", 1);
+        std::string desc("float lightdata");
+        mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", numBytes / sizeof(float));
         return true;
     }
     return false;
@@ -200,13 +199,13 @@ void LightList::clear()
     }
 }
 
-void LightList::makeShaderLayout(std::string& layout) const
+void LightList::makeShaderBlock(std::string& layout) const
 {
     std::ostringstream stream;
     stream << "layout (std140) uniform Lights_ubo\n{" << std::endl;
     for (auto it = mClassMap.begin(); it != mClassMap.end(); ++it)
     {
-        stream << it->first << '[' << it->second << ']' << std::endl;
+        stream << 'U' << it->first << " " << it->first << "s[" << it->second << "];" << std::endl;
     }
     stream << "};" << std::endl;
     layout = stream.str();

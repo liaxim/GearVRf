@@ -56,7 +56,7 @@ public:
         return mLightList;
     }
 
-    void makeShaderLayout(std::string& layout) const;
+    void makeShaderBlock(std::string& layout) const;
 
     ShadowMap* updateLights(Renderer* renderer, Shader* shader);
 
@@ -68,11 +68,6 @@ public:
     }
 
     int makeShadowMaps(Scene* scene, ShaderManager* shaderManager);
-
-    UniformBlock* getLightBuffer()
-    {
-        return mLightBlock;
-    }
 
 private:
     LightList(const LightList& lights) = delete;

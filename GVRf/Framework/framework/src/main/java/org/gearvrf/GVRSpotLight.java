@@ -69,7 +69,7 @@ public class GVRSpotLight extends GVRPointLight
     private AtomicBoolean mChanged = new AtomicBoolean();
     protected final static String UNIFORM_DESC = GVRPointLight.UNIFORM_DESC +
                                                " float inner_cone_angle; float outer_cone_angle; "
-                                                + " float shadow_map_index; vec4 sm0; vec4 sm1; vec4 sm2; vec4 sm3";
+                                                + " float shadow_map_index; float4 sm0; float4 sm1; float4 sm2; float4 sm3";
 
     public GVRSpotLight(GVRContext gvrContext)
     {
@@ -85,6 +85,7 @@ public class GVRSpotLight extends GVRPointLight
     public GVRSpotLight(GVRContext gvrContext, String uniformDesc, String vertexDesc)
     {
         super(gvrContext, uniformDesc, vertexDesc);
+        setLightClass(getClass().getSimpleName());
         mChanged.set(true);
         setFloat("shadow_map_index", -1.0f);
         setInnerConeAngle(90.0f);

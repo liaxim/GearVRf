@@ -72,8 +72,10 @@ namespace gvr
         return true;
     }
 
-    int Light::addToLayout(std::ostream& stream)
+    int Light::makeShaderLayout(std::string& layout)
     {
+        std::ostringstream stream;
+
         forEachUniform([&stream, this](const DataDescriptor::DataEntry& entry) mutable
         {
             int nelems = entry.Count;
@@ -85,6 +87,7 @@ namespace gvr
                     stream << entry.Type << " " << entry.Name << ";" << std::endl;
             }
         });
+        layout = stream.str();
         return uniforms().uniforms().getTotalSize();
     }
 

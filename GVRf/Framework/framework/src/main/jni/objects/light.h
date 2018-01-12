@@ -185,13 +185,13 @@ public:
 
     ShadowMap* getShadowMap();
 
+    int makeShaderLayout(std::string& layout);
+
     /**
      * Internal function called at the start of each frame
      * to update the shadow map.
      */
     bool makeShadowMap(Scene* scene, ShaderManager* shader_manager, int texIndex);
-
-    virtual int addToLayout(std::ostream& stream);
 
     const char* getLightClass() const
     {

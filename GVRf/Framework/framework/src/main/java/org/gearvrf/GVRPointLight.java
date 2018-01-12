@@ -51,9 +51,9 @@ import org.gearvrf.utility.TextFile;
 public class GVRPointLight extends GVRLightBase
 {
     protected final static String UNIFORM_DESC = GVRLightBase.UNIFORM_DESC +
-                                                 " vec4 diffuse_intensity"
-                                                 + " vec4 ambient_intensity"
-                                                 + " vec4 specular_intensity"
+                                                 " float4 diffuse_intensity"
+                                                 + " float4 ambient_intensity"
+                                                 + " float4 specular_intensity"
                                                  + " float attenuation_constant"
                                                  + " float attenuation_linear"
                                                  + " float attenuation_quadratic";
@@ -62,6 +62,7 @@ public class GVRPointLight extends GVRLightBase
     public GVRPointLight(GVRContext ctx)
     {
         this(ctx, UNIFORM_DESC, null);
+        setLightClass(getClass().getSimpleName());
         if (shaderSource == null)
         {
             shaderSource = TextFile.readTextFile(ctx.getContext(), R.raw.pointlight);

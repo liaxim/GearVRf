@@ -55,15 +55,15 @@ public class GVRDirectLight extends GVRLightBase
     private static String vertexShader = null;
     private boolean useShadowShader = true;
     protected final static String UNIFORM_DESC = GVRLightBase.UNIFORM_DESC +
-        " vec4 diffuse_intensity"
-        + " vec4 ambient_intensity"
-        + " vec4 specular_intensity"
+        " float4 diffuse_intensity"
+        + " float4 ambient_intensity"
+        + " float4 specular_intensity"
         + " float shadow_map_index"
-        + " vec4 sm0 vec4 sm1 vec4 sm2 vec4 sm3";
+        + " float4 sm0 float4 sm1 float4 sm2 float4 sm3";
 
     public GVRDirectLight(GVRContext gvrContext)
     {
-        this(gvrContext, UNIFORM_DESC,  "vec4 shadow_position");
+        this(gvrContext, UNIFORM_DESC,  "float4 shadow_position");
         if (useShadowShader)
         {
             if (fragmentShader == null)
@@ -82,6 +82,7 @@ public class GVRDirectLight extends GVRLightBase
     public GVRDirectLight(GVRContext ctx, String uniformDesc, String vertexDesc)
     {
         super(ctx, uniformDesc, vertexDesc);
+        setLightClass(getClass().getSimpleName());
         setAmbientIntensity(0.0f, 0.0f, 0.0f, 1.0f);
         setDiffuseIntensity(1.0f, 1.0f, 1.0f, 1.0f);
         setSpecularIntensity(1.0f, 1.0f, 1.0f, 1.0f);

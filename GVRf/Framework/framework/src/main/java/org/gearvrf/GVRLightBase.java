@@ -46,7 +46,7 @@ import org.joml.Vector3f;
  */
 public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListener
 {
-    protected final static String UNIFORM_DESC = "float enabled vec3 world_position vec3 world_direction";
+    protected final static String UNIFORM_DESC = "float enabled float3 world_position float3 world_direction";
     protected Matrix4f mLightRot;
     protected Vector3f mOldDir;
     protected Vector3f mOldPos;
@@ -58,11 +58,6 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
     protected String mUniformDescriptor = null;
     protected String mVertexDescriptor = null;
     protected boolean mCastShadow = false;
-
-    public GVRLightBase(GVRContext gvrContext)
-    {
-        this(gvrContext,UNIFORM_DESC, null);
-    }
 
     protected GVRLightBase(GVRContext gvrContext, String uniformDesc, String vertexDesc)
     {
@@ -151,6 +146,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
             super.setOwnerObject(newOwner);
         }
     }
+
 
     /**
      * Gets the shadow material used in constructing shadow maps.
@@ -287,7 +283,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
      * These produce the structure defined in the shader source code.
      * Each light object maintains a copy of these values and sends them to the
      * shader when they are updated.
-     * 
+     *
      * @return String describing light vertex shader output
      */
     public String getVertexDescriptor()
@@ -354,7 +350,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
     {
         float[] vec = NativeLight.getFloatVec(getNative(), key);
         if (vec == null)
-            throw new IllegalArgumentException("key " + key + " not found in material");
+            throw new IllegalArgumentException("key " + key + " not found in light");
         return vec;
     }
 
@@ -368,7 +364,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
     {
         int[] vec = NativeLight.getIntVec(getNative(), key);
         if (vec == null)
-            throw new IllegalArgumentException("key " + key + " not found in material");
+            throw new IllegalArgumentException("key " + key + " not found in light");
         return vec;
     }
 
@@ -541,7 +537,10 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
  */
     public void onDrawFrame(float frameTime)
     {     
-        if (!isEnabled() || (getFloat("enabled") <= 0.0f) || (owner == null)) { return; }
+        if (!isEnabled() || (owner == null) || (getFloat("enabled") <= 0.0f))
+        {
+            return;
+        }
         float[] odir = getVec3("world_direction");
         float[] opos = getVec3("world_position");
         GVRSceneObject parent = owner;
@@ -579,9 +578,14 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         NativeLight.setLightClass(getNative(), className);
     }
 
-    static String makeShaderLayout(GVRScene scene)
+    String makeShaderLayout()
     {
-        return NativeLight.makeShaderLayout(scene.getNative());
+        return NativeLight.makeShaderLayout(getNative());
+    }
+
+    static String makeShaderBlock(GVRScene scene)
+    {
+        return NativeLight.makeShaderBlock(scene.getNative());
     }
 }
 
@@ -597,40 +601,44 @@ class NativeLight
 
     static native int getLightIndex(long light);
 
-    static native boolean hasUniform(long shaderData, String key);
+    static native boolean hasUniform(long light, String key);
 
-    static native boolean hasTexture(long shaderData, String key);
+    static native boolean hasTexture(long light, String key);
 
-    static native void setTexture(long shaderData, String key, long texture);
+    static native void setTexture(long light, String key, long texture);
 
-    static native float getFloat(long shaderData, String key);
+    static native float getFloat(long light, String key);
 
-    static native void setFloat(long shaderData, String key, float value);
+    static native void setFloat(long light, String key, float value);
 
-    static native int getInt(long shaderData, String key);
+    static native int getInt(long light, String key);
 
-    static native void setInt(long shaderData, String key, int value);
+    static native void setInt(long light, String key, int value);
 
-    static native float[] getFloatVec(long shaderData, String key);
-    static native void setFloatVec(long shaderData, String key, float[] val, int n);
-    static native void setIntVec(long shaderData, String key, int[] val, int n);
+    static native float[] getFloatVec(long light, String key);
 
-    static native int[] getIntVec(long shaderData, String key);
+    static native void setFloatVec(long light, String key, float[] val, int n);
 
-    static native void setVec2(long shaderData, String key, float x, float y);
+    static native void setIntVec(long light, String key, int[] val, int n);
 
-    static native void setVec3(long shaderData, String key, float x,
+    static native int[] getIntVec(long light, String key);
+
+    static native void setVec2(long light, String key, float x, float y);
+
+    static native void setVec3(long light, String key, float x,
                                float y, float z);
 
-    static native void setVec4(long shaderData, String key, float x,
+    static native void setVec4(long light, String key, float x,
                                float y, float z, float w);
 
-    static native float[] getMat4(long shaderData, String key);
+    static native float[] getMat4(long light, String key);
 
-    static native void setMat4(long shaderData, String key, float x1,
+    static native void setMat4(long light, String key, float x1,
                                float y1, float z1, float w1, float x2, float y2, float z2,
                                float w2, float x3, float y3, float z3, float w3, float x4,
                                float y4, float z4, float w4);
 
-    static native String makeShaderLayout(long scene);
+    static native String makeShaderBlock(long scene);
+
+    static native String makeShaderLayout(long light);
 }

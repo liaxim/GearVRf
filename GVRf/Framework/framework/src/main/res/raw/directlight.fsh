@@ -1,4 +1,4 @@
-Radiance @LightType(Surface s, in Uniform@LightType data)
+Radiance @LightType(Surface s, in U@LightType data)
 {
 #ifdef HAS_MULTIVIEW
 	vec4 L = u_view_[gl_ViewID_OVR] * vec4(data.world_direction.xyz, 0.0);
