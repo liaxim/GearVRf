@@ -45,7 +45,9 @@ public:
 
     explicit Light()
     :   JavaComponent(Light::getComponentType()),
-        shadowMapIndex_(-1)
+        mBlockOffset(0),
+        mShadowMapIndex(-1),
+        mLightIndex(-1)
     {
     }
 
@@ -54,6 +56,21 @@ public:
     static long long getComponentType()
     {
         return COMPONENT_TYPE_LIGHT;
+    }
+
+    int getBlockOffset() const
+    {
+        return mBlockOffset;
+    }
+
+    void setBlockOffset(int offset)
+    {
+        mBlockOffset = offset;
+    }
+
+    int getTotalSize() const
+    {
+        return uniforms().getTotalSize();
     }
 
     int getByteSize(const char* key) const
@@ -176,11 +193,19 @@ public:
 
     virtual int addToLayout(std::ostream& stream);
 
-    virtual void makeLayout(const std::vector<Light*>& lights, std::string& layout);
-
-    const char* getLightID()
+    const char* getLightClass() const
     {
-        return lightID_.c_str();
+        return mLightClass.c_str();
+    }
+
+    int getLightIndex() const
+    {
+        return mLightIndex;
+    }
+
+    void setLightIndex(int index)
+    {
+        mLightIndex = 0;
     }
 
     /**
@@ -189,9 +214,9 @@ public:
     * GVRScene when the light is attached.
     * {@link GVRScene.addLight }
     */
-    void setLightID(const char* lightid)
+    void setLightClass(const char* lightClass)
     {
-        lightID_ = lightid;
+        mLightClass = lightClass;
     }
 
     virtual void onAddedToScene(Scene* scene);
@@ -206,8 +231,10 @@ private:
     Light& operator=(Light&& light) = delete;
 
 private:
-    int shadowMapIndex_;
-    std::string lightID_;
+    int mShadowMapIndex;
+    std::string mLightClass;
+    int mLightIndex;
+    int mBlockOffset;
 };
 }
 #endif

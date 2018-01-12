@@ -57,6 +57,7 @@ public:
     void    setTexture(const char* key, Texture* texture);
     void    forEachTexture(std::function< void(const char* texname, Texture* tex) > func) const;
     int     getByteSize(const char* name) const;
+    int     getTotalSize() const;
     int     getNumUniforms() const { return uniforms().getNumEntries(); }
     bool    getFloat(const char* name, float& v) const;
     bool    getInt(const char* name, int& v) const;

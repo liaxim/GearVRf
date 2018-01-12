@@ -28,47 +28,48 @@ namespace gvr {
  * @param uniform_desc  string describing uniforms used by this material
  * @param texture_desc  string describing textures used by this material
  */
-    ShaderData::ShaderData(const char* texture_desc) :
-            mNativeShader(0),
-            mTextureDesc(texture_desc),
-            mLock(),
-            mDirty(NONE)
+ShaderData::ShaderData(const char* texture_desc) :
+        mNativeShader(0),
+        mTextureDesc(texture_desc),
+        mLock(),
+        mDirty(NONE)
+{
+    DataDescriptor texdesc(texture_desc);
+    texdesc.forEach([this](const char* name, const char* type, int size) mutable
     {
-        DataDescriptor texdesc(texture_desc);
-        texdesc.forEach([this](const char* name, const char* type, int size) mutable
-        {
-            mTextureNames.push_back(name);
-            mTextures.push_back(nullptr);
-        });
-    }
+        mTextureNames.push_back(name);
+        mTextures.push_back(nullptr);
+    });
+}
 
-    Texture* ShaderData::getTexture(const char* key) const
+Texture* ShaderData::getTexture(const char* key) const
+{
+    for (auto it = mTextureNames.begin(); it < mTextureNames.end(); ++it)
     {
-        for (auto it = mTextureNames.begin(); it < mTextureNames.end(); ++it)
+        if (*it == key)
         {
-            if (*it == key)
-            {
-                return mTextures[it - mTextureNames.begin()];
-            }
-        }
-        return NULL;
-    }
-
-    void ShaderData::setTexture(const char* key, Texture* texture)
-    {
-        std::lock_guard<std::mutex> lock(mLock);
-        for (int i = 0; i < mTextureNames.size(); ++i)
-        {
-            const std::string& temp = mTextureNames[i];
-            if (temp.compare(key) == 0)
-            {
-                Texture* oldtex = mTextures[i];
-                makeDirty(oldtex ? MOD_TEXTURE : NEW_TEXTURE);
-                mTextures[i] = texture;
-                return;
-            }
+            return mTextures[it - mTextureNames.begin()];
         }
     }
+    return NULL;
+}
+
+void ShaderData::setTexture(const char* key, Texture* texture)
+{
+    std::lock_guard<std::mutex> lock(mLock);
+    for (int i = 0; i < mTextureNames.size(); ++i)
+    {
+        const std::string& temp = mTextureNames[i];
+        if (temp.compare(key) == 0)
+        {
+            Texture* oldtex = mTextures[i];
+            makeDirty(oldtex ? MOD_TEXTURE : NEW_TEXTURE);
+            mTextures[i] = texture;
+            return;
+        }
+    }
+}
+
 /**
  * Visits each texture in the material and calls the given function.
  */
@@ -86,6 +87,12 @@ void ShaderData::forEachTexture(std::function< void(const char* texname, Texture
 std::string ShaderData::makeShaderLayout()
 {
     return uniforms().makeShaderLayout();
+}
+
+int ShaderData::getTotalSize() const
+{
+    std::lock_guard<std::mutex> lock(mLock);
+    return uniforms().getTotalSize();
 }
 
 int ShaderData::getByteSize(const char* name) const

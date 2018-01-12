@@ -383,6 +383,18 @@ public class GVRShaderData extends GVRHybridObject
     }
 
     /**
+     * Get the value for a floating point 4x4 matrix.
+     * @param key name of uniform to get.
+     * @return floating array with 16 elements
+     * @see #getFloatVec(String)
+     */
+    public float[] getMat4(String key)
+    {
+        checkKeyIsUniform(key);
+        return NativeShaderData.getMat4(getNative(), key);
+    }
+
+    /**
      * Set the value for a floating point 4x4 matrix.
      * @param key name of uniform to set.
      * @see #getFloatVec(String)

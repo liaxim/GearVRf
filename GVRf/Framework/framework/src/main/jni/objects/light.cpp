@@ -88,18 +88,5 @@ namespace gvr
         return uniforms().uniforms().getTotalSize();
     }
 
-    void Light::makeLayout(const std::vector<Light*>& lights, std::string& layout)
-    {
-        std::ostringstream stream;
-        stream << "layout (std140) uniform Lights_ubo\n{" << std::endl;
-        for (auto it = lights.begin(); it != lights.end(); ++it)
-        {
-            Light* l = *it;
-            l->addToLayout(stream);
-        }
-        stream << "};" << std::endl;
-        layout = stream.str();
-    }
-
 }
 

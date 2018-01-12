@@ -120,10 +120,14 @@ public:
     {
         return mUseHasBones;
     }
-    bool isShaderDirty(){
+
+    bool isShaderDirty()
+    {
         return  shaderDirty;
     }
-    void setShaderDirty(bool flag){
+
+    void setShaderDirty(bool flag)
+    {
         shaderDirty = flag;
     }
 

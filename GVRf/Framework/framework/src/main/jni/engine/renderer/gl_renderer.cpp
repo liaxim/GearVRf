@@ -426,16 +426,11 @@ namespace gvr
     void GLRenderer::makeShadowMaps(Scene* scene, ShaderManager* shader_manager)
     {
         checkGLError("makeShadowMaps");
-        const std::vector<Light*> lights = scene->getLightList();
         GLint drawFB, readFB;
-        int texIndex = 0;
 
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &drawFB);
         glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &readFB);
-        for (auto it = lights.begin(); it != lights.end(); ++it) {
-            (*it)->makeShadowMap(scene, shader_manager, texIndex);
-            ++texIndex;
-        }
+        scene->getLights().makeShadowMaps(scene, shader_manager);
         glBindFramebuffer(GL_READ_FRAMEBUFFER, readFB);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, drawFB);
     }
@@ -669,25 +664,8 @@ namespace gvr
 
     void GLRenderer::updateLights(RenderState& rstate, Shader* shader, int texIndex)
     {
-        const std::vector<Light*>& lightlist = rstate.scene->getLightList();
-        ShadowMap* shadowMap = nullptr;
-        GLUniformBlock& lightBlock;
+        ShadowMap* shadowMap = rstate.scene->getLights().updateLights(this, shader);
 
-        for (auto it = lightlist.begin();
-             it != lightlist.end();
-             ++it)
-        {
-            GLLight* light = (GLLight*) (*it);
-            if (light != NULL)
-            {
-                light->render(shader, lightBlock, texIndex, 0);
-                ShadowMap* sm = light->getShadowMap();
-                if (sm != nullptr)
-                {
-                    shadowMap = sm;
-                }
-            }
-        }
         if (shadowMap)
         {
             GLShader* glshader = static_cast<GLShader*>(shader);

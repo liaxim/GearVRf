@@ -66,37 +66,30 @@ public class GVRSpotLight extends GVRPointLight
 {
     private static String fragmentShader = null;
     private static String vertexShader = null;
-    private boolean useShadowShader = true;
     private AtomicBoolean mChanged = new AtomicBoolean();
+    protected final static String UNIFORM_DESC = GVRPointLight.UNIFORM_DESC +
+                                               " float inner_cone_angle; float outer_cone_angle; "
+                                                + " float shadow_map_index; vec4 sm0; vec4 sm1; vec4 sm2; vec4 sm3";
 
-    public GVRSpotLight(GVRContext gvrContext, GVRSceneObject owner)
-    {
-        super(gvrContext, owner);
-        mChanged.set(true);
-        mUniformDescriptor += " float inner_cone_angle; float outer_cone_angle; ";
-        if (useShadowShader)
-        {
-            mUniformDescriptor += " float shadow_map_index; vec4 sm0; vec4 sm1; vec4 sm2; vec4 sm3";
-            mVertexDescriptor = "vec4 shadow_position";
-            if (fragmentShader == null)
-                fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.spotshadowlight);
-            if (vertexShader == null)
-                vertexShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.vertex_shadow);
-            mVertexShaderSource = vertexShader;
-            setFloat("shadow_map_index", -1.0f);
-        }
-        else if (fragmentShader == null)
-            fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.spotlight);
-        mFragmentShaderSource = fragmentShader;
-        setInnerConeAngle(90.0f);
-        setOuterConeAngle(90.0f);
-    }
-    
     public GVRSpotLight(GVRContext gvrContext)
     {
-        this(gvrContext, null);
-        mChanged.set(true);
+        this(gvrContext, UNIFORM_DESC, "vec4 shadow_position");
+        if (fragmentShader == null)
+            fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.spotshadowlight);
+        if (vertexShader == null)
+            vertexShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.vertex_shadow);
+        mVertexShaderSource = vertexShader;
+        mFragmentShaderSource = fragmentShader;
     }
+    
+    public GVRSpotLight(GVRContext gvrContext, String uniformDesc, String vertexDesc)
+    {
+        super(gvrContext, uniformDesc, vertexDesc);
+        mChanged.set(true);
+        setFloat("shadow_map_index", -1.0f);
+        setInnerConeAngle(90.0f);
+        setOuterConeAngle(90.0f);
+   }
 
     /**
      * Get the inner angle of the spotlight cone in degrees.

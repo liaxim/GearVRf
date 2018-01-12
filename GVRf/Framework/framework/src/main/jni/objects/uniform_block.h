@@ -28,6 +28,7 @@
 #define MATERIAL_UBO_INDEX  1
 #define BONES_UBO_INDEX     2
 #define LIGHT_UBO_INDEX     3
+#define LAST_UBO_INDEX      3
 
 namespace gvr
 {

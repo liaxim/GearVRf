@@ -22,6 +22,7 @@
 #include "util/gvr_jni.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "scene.h"
+#include "lightlist.h"
 
 namespace gvr {
 extern "C" {
@@ -112,11 +113,17 @@ JNIEXPORT jboolean JNICALL
 Java_org_gearvrf_NativeLight_hasTexture(JNIEnv*, jobject, jlong, jstring);
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightID(JNIEnv * env,
+Java_org_gearvrf_NativeLight_getLightClass(JNIEnv * env,
                                         jobject obj, jlong jlight);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightID(JNIEnv * env, jobject obj, jlong jlight, jstring lightid);
+Java_org_gearvrf_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring lightclass);
+
+JNIEXPORT jint JNICALL
+Java_org_gearvrf_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight);
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index);
 
 JNIEXPORT jstring JNICALL
 Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv * env, jobject obj, jlong jscene);
@@ -157,22 +164,33 @@ Java_org_gearvrf_NativeLight_disable(JNIEnv * env, jobject obj, jlong jlight)
 
 
 JNIEXPORT jstring JNICALL
-Java_org_gearvrf_NativeLight_getLightID(JNIEnv * env,
-                                        jobject obj, jlong jlight)
+Java_org_gearvrf_NativeLight_getLightClass(JNIEnv * env, jobject obj, jlong jlight)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
-    std::string lightID = light->getLightID();
-    return env->NewStringUTF(lightID.c_str());
+    std::string clz = light->getLightClass();
+    return env->NewStringUTF(clz.c_str());
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeLight_setLightID(JNIEnv * env,
-                                        jobject obj, jlong jlight, jstring id)
+Java_org_gearvrf_NativeLight_setLightClass(JNIEnv * env, jobject obj, jlong jlight, jstring jlightClass)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
-    const char* char_id = env->GetStringUTFChars(id, 0);
-    std::string native_id = std::string(char_id);
-    light->setLightID(native_id.c_str());
+    const char* char_id = env->GetStringUTFChars(jlightClass, 0);
+    light->setLightClass(char_id);
+}
+
+JNIEXPORT jint JNICALL
+Java_org_gearvrf_NativeLight_getLightIndex(JNIEnv * env, jobject obj, jlong jlight)
+{
+    Light* light = reinterpret_cast<Light*>(jlight);
+    return light->getLightIndex();
+}
+
+JNIEXPORT void JNICALL
+Java_org_gearvrf_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index)
+{
+    Light* light = reinterpret_cast<Light*>(jlight);
+    light->setLightIndex(index);
 }
 
 JNIEXPORT jboolean JNICALL
@@ -335,8 +353,8 @@ Java_org_gearvrf_NativeLight_setVec3(JNIEnv* env, jobject obj,
 
 JNIEXPORT jboolean JNICALL
 Java_org_gearvrf_NativeLight_setVec4(JNIEnv* env, jobject obj,
-                                          jlong jlight, jstring key, jfloat x, jfloat y,
-                                          jfloat z, jfloat w)
+                                     jlong jlight, jstring key,
+                                     jfloat x, jfloat y, jfloat z, jfloat w)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -346,12 +364,12 @@ Java_org_gearvrf_NativeLight_setVec4(JNIEnv* env, jobject obj,
 }
 
 JNIEXPORT jboolean JNICALL
-Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env,
-                                          jobject obj, jlong jlight, jstring key,
-                                          jfloat x1, jfloat y1, jfloat z1, jfloat w1,
-                                          jfloat x2, jfloat y2, jfloat z2, jfloat w2,
-                                          jfloat x3, jfloat y3, jfloat z3, jfloat w3,
-                                          jfloat x4, jfloat y4, jfloat z4, jfloat w4)
+Java_org_gearvrf_NativeLight_setMat4(JNIEnv* env, jobject obj,
+                                     jlong jlight, jstring key,
+                                     jfloat x1, jfloat y1, jfloat z1, jfloat w1,
+                                     jfloat x2, jfloat y2, jfloat z2, jfloat w2,
+                                     jfloat x3, jfloat y3, jfloat z3, jfloat w3,
+                                     jfloat x4, jfloat y4, jfloat z4, jfloat w4)
 {
     Light* light = reinterpret_cast<Light*>(jlight);
     const char* char_key = env->GetStringUTFChars(key, 0);
@@ -394,13 +412,9 @@ JNIEXPORT jstring JNICALL
 Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv* env, jobject obj, jlong jscene)
 {
     Scene* scene = reinterpret_cast<Scene*>(jscene);
-    const std::vector<Light*>& lights = scene->getLightList();
+    const LightList& lights = scene->getLights();
     std::string layout;
-    if (lights.size() > 0)
-    {
-        Light* l = lights[0];
-        l->makeLayout(lights, layout);
-    }
+    lights.makeShaderLayout(layout);
     return env->NewStringUTF(layout.c_str());
 }
 }

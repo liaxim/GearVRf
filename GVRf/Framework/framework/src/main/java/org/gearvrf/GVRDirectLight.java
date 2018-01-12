@@ -54,26 +54,22 @@ public class GVRDirectLight extends GVRLightBase
     private static String fragmentShader = null;
     private static String vertexShader = null;
     private boolean useShadowShader = true;
+    protected final static String UNIFORM_DESC = GVRLightBase.UNIFORM_DESC +
+        " vec4 diffuse_intensity"
+        + " vec4 ambient_intensity"
+        + " vec4 specular_intensity"
+        + " float shadow_map_index"
+        + " vec4 sm0 vec4 sm1 vec4 sm2 vec4 sm3";
 
-    public GVRDirectLight(GVRContext gvrContext) {
-        this(gvrContext, null);
-     }
-
-    public GVRDirectLight(GVRContext gvrContext, GVRSceneObject parent)
+    public GVRDirectLight(GVRContext gvrContext)
     {
-        super(gvrContext, parent);
-        mUniformDescriptor += " vec4 diffuse_intensity"
-                + " vec4 ambient_intensity"
-                + " vec4 specular_intensity"
-                + " float shadow_map_index"
-                + " vec4 sm0 vec4 sm1 vec4 sm2 vec4 sm3";
+        this(gvrContext, UNIFORM_DESC,  "vec4 shadow_position");
         if (useShadowShader)
         {
             if (fragmentShader == null)
                 fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.directshadowlight);
             if (vertexShader == null)
                 vertexShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.vertex_shadow);
-            mVertexDescriptor = "vec4 shadow_position";
             mVertexShaderSource = vertexShader;
         }
         else if (fragmentShader == null)
@@ -81,11 +77,16 @@ public class GVRDirectLight extends GVRLightBase
             fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.directlight);
         }
         mFragmentShaderSource = fragmentShader;
+    }
+
+    public GVRDirectLight(GVRContext ctx, String uniformDesc, String vertexDesc)
+    {
+        super(ctx, uniformDesc, vertexDesc);
         setAmbientIntensity(0.0f, 0.0f, 0.0f, 1.0f);
         setDiffuseIntensity(1.0f, 1.0f, 1.0f, 1.0f);
         setSpecularIntensity(1.0f, 1.0f, 1.0f, 1.0f);
     }
-    
+
     /**
      * Get the ambient light intensity.
      * 

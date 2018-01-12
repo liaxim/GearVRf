@@ -50,20 +50,28 @@ import org.gearvrf.utility.TextFile;
  */
 public class GVRPointLight extends GVRLightBase
 {
+    protected final static String UNIFORM_DESC = GVRLightBase.UNIFORM_DESC +
+                                                 " vec4 diffuse_intensity"
+                                                 + " vec4 ambient_intensity"
+                                                 + " vec4 specular_intensity"
+                                                 + " float attenuation_constant"
+                                                 + " float attenuation_linear"
+                                                 + " float attenuation_quadratic";
     private static String shaderSource = null;
-    public GVRPointLight(GVRContext gvrContext, GVRSceneObject owner) {
-        super(gvrContext, owner);
-        mUniformDescriptor += " vec4 diffuse_intensity"
-                + " vec4 ambient_intensity"
-                + " vec4 specular_intensity"
-                + " float attenuation_constant"
-                + " float attenuation_linear"
-                + " float attenuation_quadratic";
 
-        if (shaderSource == null) {
-            shaderSource = TextFile.readTextFile(gvrContext.getContext(), R.raw.pointlight);
+    public GVRPointLight(GVRContext ctx)
+    {
+        this(ctx, UNIFORM_DESC, null);
+        if (shaderSource == null)
+        {
+            shaderSource = TextFile.readTextFile(ctx.getContext(), R.raw.pointlight);
         }
         mFragmentShaderSource = shaderSource;
+    }
+
+    protected GVRPointLight(GVRContext ctx, String uniformDesc, String vertexDesc)
+    {
+        super(ctx, uniformDesc, vertexDesc);
         setAmbientIntensity(0.0f, 0.0f, 0.0f, 1.0f);
         setDiffuseIntensity(1.0f, 1.0f, 1.0f, 1.0f);
         setSpecularIntensity(1.0f, 1.0f, 1.0f, 1.0f);
@@ -72,9 +80,6 @@ public class GVRPointLight extends GVRLightBase
         setFloat("attenuation_quadratic", 0);
     }
     
-    public GVRPointLight(GVRContext gvrContext) {
-        this(gvrContext, null);
-    }
 
     /**
     * Get the ambient light intensity.
