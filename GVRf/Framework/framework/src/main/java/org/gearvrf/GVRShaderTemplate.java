@@ -659,12 +659,16 @@ public class GVRShaderTemplate extends GVRShader
             String ulightStructName = lightType + "s";
             String lightShader = lclass.VertexShader;
             String lightIndex;
-            String vertexOutputs = lclass.VertexOutputs.replace("$PREFIX", "out");
+            String vertexOutputs = lclass.VertexOutputs;
 
             if (lightShader == null)
                 continue;
             lightDefs += "\n" + lclass.FragmentUniforms + "\n";
-            lightDefs += vertexOutputs.replace("$COUNT", lclass.Count.toString());
+            if (vertexOutputs != null)
+            {
+                vertexOutputs = vertexOutputs.replace("$PREFIX", "out");
+                lightDefs += vertexOutputs.replace("$COUNT", lclass.Count.toString());
+            }
             if (lclass.Count > 1)
             {
                 lightIndex = "[i]";

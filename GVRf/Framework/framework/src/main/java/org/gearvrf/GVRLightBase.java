@@ -531,10 +531,35 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
     }
 
 
-/**
- * Updates the position and direction of this light from the transform of
- * scene object that owns it.
- */
+    public int getLightIndex()
+    {
+        return NativeLight.getLightIndex(getNative());
+    }
+
+    protected void setLightClass(String className)
+    {
+        NativeLight.setLightClass(getNative(), className);
+    }
+
+    String getShaderType(String name)
+    {
+        return NativeLight.getShaderType(getNative(), name);
+    }
+
+    String makeShaderLayout()
+    {
+        return NativeLight.makeShaderLayout(getNative());
+    }
+
+    static String makeShaderBlock(GVRScene scene)
+    {
+        return NativeLight.makeShaderBlock(scene.getNative());
+    }
+
+    /**
+     * Updates the position and direction of this light from the transform of
+     * scene object that owns it.
+     */
     public void onDrawFrame(float frameTime)
     {     
         if (!isEnabled() || (owner == null) || (getFloat("enabled") <= 0.0f))
@@ -568,30 +593,6 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         }
     }
 
-    public int getLightIndex()
-    {
-        return NativeLight.getLightIndex(getNative());
-    }
-
-    protected void setLightClass(String className)
-    {
-        NativeLight.setLightClass(getNative(), className);
-    }
-
-    String getShaderType(String name)
-    {
-        return NativeLight.getShaderType(name);
-    }
-
-    String makeShaderLayout()
-    {
-        return NativeLight.makeShaderLayout(getNative());
-    }
-
-    static String makeShaderBlock(GVRScene scene)
-    {
-        return NativeLight.makeShaderBlock(scene.getNative());
-    }
 }
 
 class NativeLight
@@ -643,7 +644,7 @@ class NativeLight
                                float w2, float x3, float y3, float z3, float w3, float x4,
                                float y4, float z4, float w4);
 
-    static native String getShaderType(long light);
+    static native String getShaderType(long light, String name);
 
     static native String makeShaderBlock(long scene);
 
