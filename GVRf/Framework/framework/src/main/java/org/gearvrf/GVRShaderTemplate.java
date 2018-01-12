@@ -14,16 +14,6 @@
  */
 package org.gearvrf;
 
-import static android.opengl.GLES20.GL_EXTENSIONS;
-import static android.opengl.GLES20.glGetString;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,10 +21,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.gearvrf.utility.VrAppSettings;
-
 import org.gearvrf.utility.Log;
-import android.os.Environment;
 
 /**
  * Generates a set of native vertex and fragment shaders from source code segments.
@@ -84,14 +71,16 @@ public class GVRShaderTemplate extends GVRShader
         {
             Count = 1;
             FragmentUniforms = "";
+            VertexStruct = null;
             VertexOutputs = null;
             FragmentShader = null;
             VertexShader = null;
         }
         public Integer Count;
         public String FragmentUniforms;
-        public String VertexOutputs;
+        public String VertexStruct;
         public String VertexShader;
+        public String VertexOutputs;
         public String FragmentShader;
         public String VertexDescriptor;
     };
@@ -606,8 +595,8 @@ public class GVRShaderTemplate extends GVRShader
             if (lclass.FragmentShader == null)
                 continue;
             lightDefs += "\n" + lclass.FragmentUniforms;
-            if (lclass.VertexOutputs != null)
-                lightDefs += "\n" + lclass.VertexOutputs;
+            if (lclass.VertexStruct != null)
+                lightDefs += "\n" + lclass.VertexStruct;
             lightDefs += "\n" + lclass.FragmentShader + "\n";
             if (lclass.Count > 1)
             {
@@ -618,8 +607,9 @@ public class GVRShaderTemplate extends GVRShader
             {
                 String vlightStructName = "V" + lightType;
                 String vlightData = vlightStructName + "s";
-                lightDefs += makeVertexOutputsLoop(lclass.VertexDescriptor, vlightStructName, "in ",
-                                                   lclass.Count);
+                String vertexOutputs = lclass.VertexOutputs.replace("$PREFIX", "out");
+
+                lightDefs += vertexOutputs.replace("$COUNT", lclass.Count.toString());
                 lightSources += vlightStructName + " " + vlightData + "[" +
                                 lclass.Count + "];\n";
                 lightFunction += "        if (" + ulightData + elemIndex +
@@ -669,11 +659,12 @@ public class GVRShaderTemplate extends GVRShader
             String ulightStructName = lightType + "s";
             String lightShader = lclass.VertexShader;
             String lightIndex;
+            String vertexOutputs = lclass.VertexOutputs.replace("$PREFIX", "out");
 
             if (lightShader == null)
                 continue;
             lightDefs += "\n" + lclass.FragmentUniforms + "\n";
-            lightDefs += makeVertexOutputsLoop(lclass.VertexDescriptor, lightType, "out ", lclass.Count);
+            lightDefs += vertexOutputs.replace("$COUNT", lclass.Count.toString());
             if (lclass.Count > 1)
             {
                 lightIndex = "[i]";
@@ -737,7 +728,8 @@ public class GVRShaderTemplate extends GVRShader
                 if (light.getVertexDescriptor() != null)
                 {
                     lightClass.VertexDescriptor = light.getVertexDescriptor();
-                    lightClass.VertexOutputs = makeShaderStruct(light.getVertexDescriptor(), "V" + lightType, lightClass.VertexShader);
+                    lightClass.VertexStruct = makeShaderStruct(light.getVertexDescriptor(), "V" + lightType, lightClass.VertexShader);
+                    lightClass.VertexOutputs = makeVertexOutputsLoop(light);
                 }
                 lightClasses.put(lightType, lightClass);
             }
@@ -771,17 +763,18 @@ public class GVRShaderTemplate extends GVRShader
         return structDesc;
     }
 
-    private String makeVertexOutputsLoop(String descriptor, String lightClassName, String prefix, int count)
+    private String makeVertexOutputsLoop(GVRLightBase light)
     {
+        String lightClassName = light.getLightClass();
         Pattern pattern = Pattern.compile("[ ]*([a-zA-Z0-9_]+)[ ]+([A-Za-z0-9_]+)[,;:]*");
-        Matcher matcher = pattern.matcher(descriptor);
+        Matcher matcher = pattern.matcher(light.getVertexDescriptor());
         String desc = "";
         while (matcher.find())
         {
             String name = matcher.group(2);
-            String type = matcher.group(1);
+            String type = light.getShaderType(name);
 
-            desc += prefix + type + " " + lightClassName + "_" + name + "[" + count + "];\n";
+            desc += "$PREFIX " + type + " " + lightClassName + "_" + name + "[$COUNT];\n";
         }
         return desc;
     }

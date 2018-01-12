@@ -205,6 +205,16 @@ namespace gvr
                 });
     }
 
+    const char* DataDescriptor::getShaderType(const char* name) const
+    {
+        const DataEntry* entry = find(name);
+        if (entry)
+        {
+            return entry->Type.c_str();
+        }
+        return NULL;
+    }
+
     std::string DataDescriptor::makeShaderType(const char* type, int byteSize)
     {
         std::ostringstream stream;

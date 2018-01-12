@@ -78,6 +78,11 @@ public:
         return uniforms().getByteSize(key);
     }
 
+    const char* getShaderType(const char* key)
+    {
+        return uniforms().getShaderType(key);
+    }
+
     bool hasUniform(const char* key) const
     {
         return uniforms().hasUniform(key);

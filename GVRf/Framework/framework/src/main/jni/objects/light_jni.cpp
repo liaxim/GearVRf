@@ -126,6 +126,9 @@ JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeLight_setLightIndex(JNIEnv * env, jobject obj, jlong jlight, jint index);
 
 JNIEXPORT jstring JNICALL
+Java_org_gearvrf_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jname);
+
+JNIEXPORT jstring JNICALL
 Java_org_gearvrf_NativeLight_makeShaderLayout(JNIEnv * env, jobject obj, jlong jlight);
 
 JNIEXPORT jstring JNICALL
@@ -409,6 +412,16 @@ Java_org_gearvrf_NativeLight_hasUniform(JNIEnv* env, jobject obj, jlong jlight, 
     env->ReleaseStringUTFChars(key, char_key);
     return (jboolean) hasUniform;
 
+}
+
+JNIEXPORT jstring JNICALL
+Java_org_gearvrf_NativeLight_getShaderType(JNIEnv* env, jobject, jlong jlight, jstring jname)
+{
+    Light* light = reinterpret_cast<Light*>(jlight);
+    const char* char_key = env->GetStringUTFChars(jname, 0);
+    const char* type = light->getShaderType(char_key);
+    env->ReleaseStringUTFChars(jname, char_key);
+    return env->NewStringUTF(type);
 }
 
 JNIEXPORT jstring JNICALL

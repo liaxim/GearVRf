@@ -578,6 +578,11 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         NativeLight.setLightClass(getNative(), className);
     }
 
+    String getShaderType(String name)
+    {
+        return NativeLight.getShaderType(name);
+    }
+
     String makeShaderLayout()
     {
         return NativeLight.makeShaderLayout(getNative());
@@ -637,6 +642,8 @@ class NativeLight
                                float y1, float z1, float w1, float x2, float y2, float z2,
                                float w2, float x3, float y3, float z3, float w3, float x4,
                                float y4, float z4, float w4);
+
+    static native String getShaderType(long light);
 
     static native String makeShaderBlock(long scene);
 

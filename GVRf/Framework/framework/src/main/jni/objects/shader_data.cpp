@@ -42,6 +42,11 @@ ShaderData::ShaderData(const char* texture_desc) :
     });
 }
 
+const char* ShaderData::getShaderType(const char* name)
+{
+    return uniforms().getShaderType(name);
+}
+
 Texture* ShaderData::getTexture(const char* key) const
 {
     for (auto it = mTextureNames.begin(); it < mTextureNames.end(); ++it)

@@ -135,6 +135,12 @@ namespace gvr {
         int getByteSize(const char* name) const;
 
         /*
+         * Get the shader type of this entry.
+         * @param name string name of uniform whose size you want
+         */
+        const char* getShaderType(const char* name) const;
+
+        /*
          * Determine if data has changed since last render.
          * @returns true if data has been updated, else false.
          */
