@@ -78,7 +78,7 @@ public:
         return uniforms().getByteSize(key);
     }
 
-    const char* getShaderType(const char* key)
+    std::string getShaderType(const char* key)
     {
         return uniforms().getShaderType(key);
     }

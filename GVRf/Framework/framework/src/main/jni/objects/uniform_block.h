@@ -324,6 +324,11 @@ namespace gvr
          */
         std::string toString();
 
+        /*
+         * Dumps the entire uniform block as raw floats
+         */
+        std::string dumpFloats();
+
         /**
          * Get a pointer to the entire uniform data area.
          * @returns -> uniform block data if it exists, else NULL

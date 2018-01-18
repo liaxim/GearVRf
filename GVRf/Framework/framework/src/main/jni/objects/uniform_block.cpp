@@ -276,6 +276,27 @@ namespace gvr
         return stream.str();
     }
 
+    std::string UniformBlock::dumpFloats()
+    {
+        std::ostringstream os;
+        const float* ptr = (const float*) mUniformData;
+        int n = 16;
+        int offset = 0;
+        int totalsize = getTotalSize() / sizeof(float);
+        while (offset < totalsize)
+        {
+            if (--n <= 0)
+            {
+                os << std::endl;
+                n = 16;
+            }
+            os << *ptr++ << " ";
+            offset++;
+        }
+        os << std::endl;
+        return os.str();
+    }
+
     std::string UniformBlock::toString()
     {
         std::ostringstream os;
@@ -283,18 +304,20 @@ namespace gvr
         {
             forEachEntry([this, &os, i](const DataEntry& e) mutable
             {
-                os << e.Name << ": " << i * e.Offset;
+                os << e.Name << ": ";
                 for (int j = 0; j < e.Size / sizeof(float); j++)
                 {
-                    char* d = ((char*) mUniformData) + e.Offset;
+                    char* d = ((char*) mUniformData) + e.Offset + (i * mElemSize);
                     os << " ";
                     if (e.Name[0] == 'i')
                     {
-                        os << *(((int*) d) + i);
+                        int* ip = ((int*) d) + j;
+                        os << *ip;
                     }
                     else
                     {
-                        os << *(((float*) d) + i);
+                        float* fp = ((float*) d) + j;
+                        os << *fp;
                     }
                 }
                 os << ';' << std::endl;
@@ -363,7 +386,7 @@ namespace gvr
     {
         int nelems = srcBlock.getTotalSize() / mElemSize;
         if ((elemIndex >= 0) &&
-            (elemIndex + nelems < mMaxElems))
+            (elemIndex + nelems <= mMaxElems))
         {
             const char* src = (const char*) srcBlock.getData();
             memcpy(mUniformData + mElemSize * elemIndex, src, nelems * mElemSize);

@@ -292,7 +292,7 @@ public class GVRDirectLight extends GVRLightBase
         if ((mOldDir.x != mNewDir.x) || (mOldDir.y != mNewDir.y) || (mOldDir.z != mNewDir.z))
         {
             changed = true;
-            setVec3("world_direction", mNewDir.x, mNewDir.y, mNewDir.z);
+            setVec4("world_direction", mNewDir.x, mNewDir.y, mNewDir.z, 0);
         }
         GVRShadowMap shadowMap = (GVRShadowMap) getComponent(GVRShadowMap.getComponentType());
         if ((shadowMap != null) && changed && shadowMap.isEnabled())
@@ -312,6 +312,6 @@ public class GVRDirectLight extends GVRLightBase
         mNewPos.x = bv.center.x - far * mNewDir.x;
         mNewPos.y = bv.center.y - far * mNewDir.y;
         mNewPos.z = bv.center.z - far * mNewDir.z;
-        setVec3("world_position", mNewPos.x, mNewPos.y, mNewPos.z);
+        setPosition(mNewPos.x, mNewPos.y, mNewPos.z);
     }
 }

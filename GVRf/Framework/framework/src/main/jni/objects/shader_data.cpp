@@ -42,9 +42,9 @@ ShaderData::ShaderData(const char* texture_desc) :
     });
 }
 
-const char* ShaderData::getShaderType(const char* name)
+std::string ShaderData::getShaderType(const char* descriptorType)
 {
-    return uniforms().getShaderType(name);
+    return uniforms().getShaderType(descriptorType);
 }
 
 Texture* ShaderData::getTexture(const char* key) const

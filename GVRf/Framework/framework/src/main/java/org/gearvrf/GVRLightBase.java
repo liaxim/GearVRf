@@ -46,7 +46,7 @@ import org.joml.Vector3f;
  */
 public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListener
 {
-    protected final static String UNIFORM_DESC = "float enabled float3 world_position float3 world_direction";
+    protected final static String UNIFORM_DESC = "float enabled float pad1 float pad2 float pad3 float4 world_position float4 world_direction";
     protected Matrix4f mLightRot;
     protected Vector3f mOldDir;
     protected Vector3f mOldPos;
@@ -70,8 +70,8 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         mNewPos = new Vector3f();
         mNewDir = new Vector3f(0.0f, 0.0f, -1.0f);
         setFloat("enabled", 1.0f);
-        setVec3("world_position", 0.0f, 0.0f, 0.0f);
-        setVec3("world_direction", 0.0f, 0.0f, 1.0f);
+        setVec4("world_position", 0.0f, 0.0f, 0.0f, 10.0f);
+        setVec4("world_direction", 0.0f, 0.0f, 1.0f, 0.0f);
     }
 
     static public long getComponentType() {
@@ -188,7 +188,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
      * @return the world position of the light as a 3 element array
      */
     public float[] getPosition() {
-        return getVec3("world_position");
+        return getVec4("world_position");
     }
 
     /**
@@ -205,7 +205,7 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
      *            z-coordinate in world coordinate system
      */
     public void setPosition(float x, float y, float z) {
-        setVec3("world_position", x, y, z);
+        setVec4("world_position", x, y, z, 1.0f);
     }
 
     /**
@@ -585,11 +585,11 @@ public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListen
         worldmtx.transformDirection(mNewDir);
         if ((mOldDir.x != mNewDir.x) || (mOldDir.y != mNewDir.y) || (mOldDir.z != mNewDir.z))
         {
-            setVec3("world_direction", mNewDir.x, mNewDir.y, mNewDir.z);
+            setVec4("world_direction", mNewDir.x, mNewDir.y, mNewDir.z, 0);
         }
         if ((mOldPos.x != mNewPos.x) || (mOldPos.y != mNewPos.y) || (mOldPos.z != mNewPos.z))
         {
-            setVec3("world_position", mNewPos.x, mNewPos.y, mNewPos.z);
+            setPosition(mNewPos.x, mNewPos.y, mNewPos.z);
         }
     }
 

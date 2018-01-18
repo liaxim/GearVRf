@@ -352,9 +352,9 @@ Java_org_gearvrf_NativeShaderData_getShaderType(JNIEnv* env, jobject, jlong jsha
 {
     ShaderData* shader_data = reinterpret_cast<ShaderData*>(jshader_data);
     const char* char_key = env->GetStringUTFChars(jname, 0);
-    const char* type = shader_data->getShaderType(char_key);
+    std::string type = shader_data->getShaderType(char_key);
     env->ReleaseStringUTFChars(jname, char_key);
-    return env->NewStringUTF(type);
+    return env->NewStringUTF(type.c_str());
 }
 
 JNIEXPORT jstring JNICALL

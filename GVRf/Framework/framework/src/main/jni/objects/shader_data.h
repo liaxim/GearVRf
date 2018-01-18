@@ -59,7 +59,7 @@ public:
     int     getByteSize(const char* name) const;
     int     getTotalSize() const;
     int     getNumUniforms() const { return uniforms().getNumEntries(); }
-    const char* getShaderType(const char* name);
+    std::string getShaderType(const char* descriptorType);
     bool    getFloat(const char* name, float& v) const;
     bool    getInt(const char* name, int& v) const;
     bool    setInt(const char* name, int val);

@@ -135,10 +135,10 @@ namespace gvr {
         int getByteSize(const char* name) const;
 
         /*
-         * Get the shader type of this entry.
-         * @param name string name of uniform whose size you want
+         * Get the shader type for this descriptor type.
+         * @param dtype type from a vertex or uniform descriptor
          */
-        const char* getShaderType(const char* name) const;
+        std::string getShaderType(const char* dtype) const;
 
         /*
          * Determine if data has changed since last render.

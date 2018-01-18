@@ -334,12 +334,10 @@ public class GVRShaderTemplate extends GVRShader
         {
             if (type.equals("Vertex"))
             {
-                //lightShaderSource = generateLightVertexShader(lightlist, lightClasses);
                 lightShaderSource = generateLightVertexShaderLoop(scene, lightClasses);
             }
             else
             {
-                //lightShaderSource = generateLightFragmentShader(lightlist, lightClasses);
                 lightShaderSource = generateLightFragmentShaderLoop(scene, lightClasses);
             }
             shaderSource.append("#define HAS_LIGHTSOURCES 1\n");
@@ -591,39 +589,28 @@ public class GVRShaderTemplate extends GVRShader
             String lightType = entry.getKey();
             String ulightData = lightType + "s";
             String elemIndex = "[0]";
+            String index = "0";
+            String lightShader = lclass.FragmentShader;
 
-            if (lclass.FragmentShader == null)
+            if (lightShader == null)
                 continue;
+            lightShader = lightShader.replace("@LIGHTIN", ulightData + elemIndex);
             lightDefs += "\n" + lclass.FragmentUniforms;
-            if (lclass.VertexStruct != null)
-                lightDefs += "\n" + lclass.VertexStruct;
-            lightDefs += "\n" + lclass.FragmentShader + "\n";
             if (lclass.Count > 1)
             {
+                index = "i";
                 elemIndex = "[i]";
                 lightFunction += "    for (int i = 0; i < " + lclass.Count + "; ++i)\n    {\n";
             }
             if (lclass.VertexDescriptor != null)
             {
-                String vlightStructName = "V" + lightType;
-                String vlightData = vlightStructName + "s";
-                String vertexOutputs = lclass.VertexOutputs.replace("$PREFIX", "out");
+                String vertexOutputs = lclass.VertexOutputs.replace("$PREFIX", "in");
 
                 lightDefs += vertexOutputs.replace("$COUNT", lclass.Count.toString());
-                lightSources += vlightStructName + " " + vlightData + "[" +
-                                lclass.Count + "];\n";
-                lightFunction += "        if (" + ulightData + elemIndex +
-                                 ".enabled != 0.0)\n        {\n";
-                lightFunction += makeVertexCopyLoop(lclass.VertexDescriptor,
-                                                    vlightStructName, vlightData, elemIndex);
-                lightFunction += "            r = " + lightType + "(s, " + ulightData +
-                                 elemIndex + ", " + vlightData + elemIndex + ");\n";
             }
-            else
-            {
-                lightFunction += "        if (" + ulightData + elemIndex + ".enabled != 0.0)\n        {\n";
-                lightFunction += "            r = " + lightType + "(s, " + ulightData + elemIndex + ");\n";
-            }
+            lightDefs += "\n" + lightShader + "\n";
+            lightFunction += "        if (" + ulightData + elemIndex + ".enabled != 0.0)\n        {\n";
+            lightFunction += "            r = " + lightType + "(s, " + ulightData + elemIndex + ", " + index + ");\n";
             lightFunction += addLightFunc;
             lightFunction += "    }\n";
             if (lclass.Count > 1)
@@ -647,22 +634,25 @@ public class GVRShaderTemplate extends GVRShader
      */
     private String generateLightVertexShaderLoop(GVRScene scene, Map<String, LightClass> lightClasses)
     {
-        String lightSources = GVRLightBase.makeShaderBlock(scene);
+        String lightSources = "";
         String lightDefs = "";
         String lightFunction = "\nvoid LightVertex(Vertex vertex)\n{\n";
-        Pattern pattern = Pattern.compile("@LIGHTOUT.([A-Za-z0-9_]+)*");
 
         for (Map.Entry<String, LightClass> entry : lightClasses.entrySet())
         {
             LightClass lclass = entry.getValue();
             String lightType = entry.getKey();
-            String ulightStructName = lightType + "s";
+            String ulightArrayName = lightType + "s";
             String lightShader = lclass.VertexShader;
             String lightIndex;
             String vertexOutputs = lclass.VertexOutputs;
 
             if (lightShader == null)
                 continue;
+            if (lightSources.equals(""))
+            {
+                lightSources = GVRLightBase.makeShaderBlock(scene);
+            }
             lightDefs += "\n" + lclass.FragmentUniforms + "\n";
             if (vertexOutputs != null)
             {
@@ -678,15 +668,8 @@ public class GVRShaderTemplate extends GVRShader
             {
                 lightIndex = "[0]";
             }
-            lightShader = lightShader.replace("@LIGHTIN", ulightStructName + lightIndex);
-            Matcher m = pattern.matcher(lightShader);
-
-            while (m.find(0))
-            {
-                lightShader = m.replaceFirst(lightType + "_" + m.group(1) + lightIndex);
-                m.reset(lightShader);
-            }
-            lightFunction += "        if (" + ulightStructName + lightIndex + ".enabled != 0.0)\n        {\n";
+            lightShader = processLightShader(lightShader, lightType, lightIndex, ulightArrayName);
+            lightFunction += "        if (" + ulightArrayName + lightIndex + ".enabled != 0.0)\n        {\n";
             lightFunction += lightShader + "        }\n";
             if (lclass.Count > 1)
             {
@@ -695,6 +678,21 @@ public class GVRShaderTemplate extends GVRShader
         }
         lightFunction += "}\n";
         return lightDefs + lightSources + lightFunction;
+    }
+
+
+    private String processLightShader(String lightShader, String lightType, String lightIndex, String lightArray)
+    {
+        Pattern pattern = Pattern.compile("@LIGHTOUT.([A-Za-z0-9_]+)*");
+        lightShader = lightShader.replace("@LIGHTIN", lightArray + lightIndex);
+        Matcher m = pattern.matcher(lightShader);
+
+        while (m.find(0))
+        {
+            lightShader = m.replaceFirst(lightType + "_" + m.group(1) + lightIndex);
+            m.reset(lightShader);
+        }
+        return lightShader;
     }
 
     private Map<String, LightClass> scanLights(GVRLightBase[] lightlist)
@@ -728,12 +726,12 @@ public class GVRShaderTemplate extends GVRShader
                 if (light.getVertexShaderSource() != null)
                 {
                     lightClass.VertexShader = light.getVertexShaderSource().replace("@LightType", lightType);
-                }
-                if (light.getVertexDescriptor() != null)
-                {
-                    lightClass.VertexDescriptor = light.getVertexDescriptor();
-                    lightClass.VertexStruct = makeShaderStruct(light.getVertexDescriptor(), "V" + lightType, lightClass.VertexShader);
-                    lightClass.VertexOutputs = makeVertexOutputsLoop(light);
+                    if (light.getVertexDescriptor() != null)
+                    {
+                        lightClass.VertexDescriptor = light.getVertexDescriptor();
+                        lightClass.VertexStruct = makeShaderStruct(light.getVertexDescriptor(), "V" + lightType, lightClass.VertexShader);
+                        lightClass.VertexOutputs = makeVertexOutputsLoop(light);
+                    }
                 }
                 lightClasses.put(lightType, lightClass);
             }
@@ -761,7 +759,7 @@ public class GVRShaderTemplate extends GVRShader
 
     private String makeUniformStruct(GVRLightBase light)
     {
-        String structDesc = "struct U*" + light.getLightClass() + "\n{\n";
+        String structDesc = "struct U" + light.getLightClass() + "\n{\n";
         structDesc += light.makeShaderLayout();
         structDesc += "};\n";
         return structDesc;
@@ -776,8 +774,9 @@ public class GVRShaderTemplate extends GVRShader
         while (matcher.find())
         {
             String name = matcher.group(2);
-            String type = light.getShaderType(name);
+            String type = matcher.group(1);
 
+            type = light.getShaderType(type);
             desc += "$PREFIX " + type + " " + lightClassName + "_" + name + "[$COUNT];\n";
         }
         return desc;

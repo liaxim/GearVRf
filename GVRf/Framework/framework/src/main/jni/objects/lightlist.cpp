@@ -143,8 +143,9 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
     mDirty = 0;
     if (updated)
     {
-        mLightBlock->bindBuffer(shader, renderer);
+        mLightBlock->updateGPU(renderer);
     }
+    mLightBlock->bindBuffer(shader, renderer);
     return shadowMap;
 }
 
@@ -161,7 +162,7 @@ int LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
 
 bool LightList::createLightBlock(Renderer* renderer)
 {
-    int numBytes = 0;
+    int numFloats = 0;
 
     for (auto it = mLightList.begin();
          it != mLightList.end();
@@ -170,16 +171,16 @@ bool LightList::createLightBlock(Renderer* renderer)
         Light* light = *it;
         if (light != NULL)
         {
-            light->setBlockOffset(numBytes);
-            numBytes += light->getTotalSize();
-            numBytes = (numBytes + 4) & ~3;
+            light->setBlockOffset(numFloats / sizeof(float));
+            numFloats += light->getTotalSize() / sizeof(float);
         }
     }
     if ((mLightBlock == NULL) ||
-        (numBytes > mLightBlock->getTotalSize()))
+        (numFloats > mLightBlock->getTotalSize()))
     {
         std::string desc("float lightdata");
-        mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", numBytes / sizeof(float));
+        mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", numFloats);
+        mLightBlock->useGPUBuffer(true);
         return true;
     }
     return false;

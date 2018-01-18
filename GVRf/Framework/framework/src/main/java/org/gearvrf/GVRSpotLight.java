@@ -247,14 +247,14 @@ public class GVRSpotLight extends GVRPointLight
         if ((mOldDir.x != mNewDir.x) || (mOldDir.y != mNewDir.y) || (mOldDir.z != mNewDir.z))
         {
             changed = true;
-            setVec3("world_direction", mNewDir.x, mNewDir.y, mNewDir.z);
+            setVec4("world_direction", mNewDir.x, mNewDir.y, mNewDir.z, 0);
             mOldDir.set(mNewDir);
             mChanged.set(false);
         }
         if ((mOldPos.x != mNewPos.x) || (mOldPos.y != mNewPos.y) || (mOldPos.z != mNewPos.z))
         {
             changed = true;
-            setVec3("world_position", mNewPos.x, mNewPos.y, mNewPos.z);
+            setPosition(mNewPos.x, mNewPos.y, mNewPos.z);
             mOldPos.set(mNewPos);
             mChanged.set(false);
         }
