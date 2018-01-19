@@ -285,13 +285,13 @@ namespace gvr
         int totalsize = getTotalSize() / sizeof(float);
         while (offset < totalsize)
         {
+            os << *ptr++ << " ";
+            offset++;
             if (--n <= 0)
             {
                 os << std::endl;
                 n = 16;
             }
-            os << *ptr++ << " ";
-            offset++;
         }
         os << std::endl;
         return os.str();

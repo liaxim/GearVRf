@@ -46,7 +46,7 @@ import org.joml.Vector3f;
  */
 public class GVRLightBase extends GVRJavaComponent implements GVRDrawFrameListener
 {
-    protected final static String UNIFORM_DESC = "float enabled float shadow_map_index float pad1 float pad2 float4 world_position float4 world_direction";
+    protected final static String UNIFORM_DESC = "float enabled float shadow_map_index float pad1 float pad2 float4 world_position float4 world_direction ";
     protected Matrix4f mLightRot;
     protected Vector3f mOldDir;
     protected Vector3f mOldPos;

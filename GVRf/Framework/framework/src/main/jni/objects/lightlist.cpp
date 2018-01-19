@@ -134,13 +134,7 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
             if (dirty || light->uniforms().isDirty(ShaderData::MAT_DATA))
             {
                 int offset = light->getBlockOffset();
-                std::string s = light->uniforms().uniforms().toString();
-                LOGE("LIGHTS: %s\n%s\n\n", light->getLightClass(), s.c_str());
-                s = light->uniforms().uniforms().dumpFloats();
-                LOGE("LIGHTS: %s\n%s\n\n", light->getLightClass(), s.c_str());
                 mLightBlock->setAt(offset, light->uniforms().uniforms());
-                s = mLightBlock->dumpFloats();
-                LOGE("LIGHTS: LIGHTBLOCK\n%s", s.c_str());
                 updated = true;
                 light->uniforms().clearDirty();
             }

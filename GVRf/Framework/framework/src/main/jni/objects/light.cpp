@@ -87,13 +87,10 @@ namespace gvr
         forEachUniform([&stream, this](const DataDescriptor::DataEntry& entry) mutable
         {
             int nelems = entry.Count;
-            if (entry.IsSet)
-            {
-                if (nelems > 1)
-                    stream << entry.Type << " " << entry.Name << "[" << nelems << "];" << std::endl;
-                else
-                    stream << entry.Type << " " << entry.Name << ";" << std::endl;
-            }
+            if (nelems > 1)
+                stream << entry.Type << " " << entry.Name << "[" << nelems << "];" << std::endl;
+            else
+                stream << entry.Type << " " << entry.Name << ";" << std::endl;
         });
         layout = stream.str();
         return uniforms().uniforms().getTotalSize();

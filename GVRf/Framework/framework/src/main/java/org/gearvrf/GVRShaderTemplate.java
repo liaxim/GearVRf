@@ -592,10 +592,10 @@ public class GVRShaderTemplate extends GVRShader
             String index = "0";
             String lightShader = lclass.FragmentShader;
 
+            lightDefs += "\n" + lclass.FragmentUniforms;
             if (lightShader == null)
                 continue;
             lightShader = lightShader.replace("@LIGHTIN", ulightData + elemIndex);
-            lightDefs += "\n" + lclass.FragmentUniforms;
             if (lclass.Count > 1)
             {
                 index = "i";

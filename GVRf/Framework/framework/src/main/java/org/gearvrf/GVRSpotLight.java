@@ -67,13 +67,13 @@ public class GVRSpotLight extends GVRPointLight
     private static String fragmentShader = null;
     private static String vertexShader = null;
     private AtomicBoolean mChanged = new AtomicBoolean();
-    protected final static String UNIFORM_DESC = GVRPointLight.UNIFORM_DESC +
-                                               "float inner_cone_angle; float outer_cone_angle; "
-                                                + "float4 sm0; float4 sm1; float4 sm2; float4 sm3";
+    protected final static String SPOT_UNIFORM_DESC = POINT_UNIFORM_DESC
+            + " float inner_cone_angle; float outer_cone_angle; float spad1; float spad2;"
+            + " float4 sm0; float4 sm1; float4 sm2; float4 sm3";
 
     public GVRSpotLight(GVRContext gvrContext)
     {
-        this(gvrContext, UNIFORM_DESC, "vec4 shadow_position");
+        this(gvrContext, SPOT_UNIFORM_DESC, "vec4 shadow_position");
         if (fragmentShader == null)
             fragmentShader = TextFile.readTextFile(gvrContext.getContext(), R.raw.spotshadowlight);
         if (vertexShader == null)

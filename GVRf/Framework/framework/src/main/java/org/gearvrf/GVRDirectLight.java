@@ -54,7 +54,7 @@ public class GVRDirectLight extends GVRLightBase
     private static String fragmentShader = null;
     private static String vertexShader = null;
     private boolean useShadowShader = true;
-    protected final static String UNIFORM_DESC = GVRLightBase.UNIFORM_DESC +
+    protected final static String DIRECT_UNIFORM_DESC = UNIFORM_DESC +
         " float4 diffuse_intensity"
         + " float4 ambient_intensity"
         + " float4 specular_intensity"
@@ -62,7 +62,7 @@ public class GVRDirectLight extends GVRLightBase
 
     public GVRDirectLight(GVRContext gvrContext)
     {
-        this(gvrContext, UNIFORM_DESC,  "float4 shadow_position");
+        this(gvrContext, DIRECT_UNIFORM_DESC,  "float4 shadow_position");
         if (useShadowShader)
         {
             if (fragmentShader == null)
