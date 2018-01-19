@@ -647,13 +647,15 @@ public class GVRShaderTemplate extends GVRShader
             String lightIndex;
             String vertexOutputs = lclass.VertexOutputs;
 
-            if (lightShader == null)
-                continue;
             if (lightSources.equals(""))
             {
                 lightSources = GVRLightBase.makeShaderBlock(scene);
             }
             lightDefs += "\n" + lclass.FragmentUniforms + "\n";
+            if (lightShader == null)
+            {
+                continue;
+            }
             if (vertexOutputs != null)
             {
                 vertexOutputs = vertexOutputs.replace("$PREFIX", "out");

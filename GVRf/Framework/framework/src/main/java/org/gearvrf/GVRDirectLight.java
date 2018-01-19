@@ -58,7 +58,6 @@ public class GVRDirectLight extends GVRLightBase
         " float4 diffuse_intensity"
         + " float4 ambient_intensity"
         + " float4 specular_intensity"
-        + " float shadow_map_index"
         + " float4 sm0 float4 sm1 float4 sm2 float4 sm3";
 
     public GVRDirectLight(GVRContext gvrContext)

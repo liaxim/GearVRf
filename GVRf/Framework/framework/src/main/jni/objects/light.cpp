@@ -56,14 +56,22 @@ namespace gvr
     bool Light::makeShadowMap(Scene* scene, ShaderManager* shader_manager, int texIndex)
     {
         ShadowMap* shadowMap = getShadowMap();
+        float shadow_map_index = -1;
+        getFloat("shadow_map_index", shadow_map_index);
         if ((shadowMap == nullptr) || !shadowMap->hasTexture())
         {
-            setFloat("shadow_map_index", -1);
+            if (shadow_map_index >= 0)
+            {
+                setFloat("shadow_map_index", -1);
+            }
             return false;
         }
-        shadowMap->setLayerIndex(texIndex);
-        setFloat("shadow_map_index", (float) texIndex);
+        else if (shadow_map_index != texIndex)
+        {
+            setFloat("shadow_map_index", (float) texIndex);
+        }
         Renderer* renderer = gRenderer->getInstance();
+        shadowMap->setLayerIndex(texIndex);
         shadowMap->setMainScene(scene);
         shadowMap->cullFromCamera(scene, shadowMap->getCamera(),renderer, shader_manager);
         shadowMap->beginRendering(renderer);

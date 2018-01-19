@@ -68,8 +68,8 @@ public class GVRSpotLight extends GVRPointLight
     private static String vertexShader = null;
     private AtomicBoolean mChanged = new AtomicBoolean();
     protected final static String UNIFORM_DESC = GVRPointLight.UNIFORM_DESC +
-                                               " float inner_cone_angle; float outer_cone_angle; "
-                                                + " float shadow_map_index; float4 sm0; float4 sm1; float4 sm2; float4 sm3";
+                                               "float inner_cone_angle; float outer_cone_angle; "
+                                                + "float4 sm0; float4 sm1; float4 sm2; float4 sm3";
 
     public GVRSpotLight(GVRContext gvrContext)
     {
