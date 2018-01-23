@@ -39,6 +39,7 @@ typedef void (GL_APIENTRY *PFNGLFRAMEBUFFERTEXTUREMULTISAMPLEMULTIVIEWOVRPROC)(G
                                                                                GLsizei numViews);
 GLRenderTexture::GLRenderTexture(int width, int height, int sample_count, int layers, GLuint fboId, GLuint texId):
         RenderTexture(sample_count),
+        layer_index_(0),
         renderTexture_gl_render_buffer_(nullptr),
         renderTexture_gl_frame_buffer_(nullptr),
         renderTexture_gl_resolve_buffer_(nullptr),
@@ -49,6 +50,7 @@ GLRenderTexture::GLRenderTexture(int width, int height, int sample_count, int la
 }
 GLRenderTexture::GLRenderTexture(int width, int height, int sample_count, int layers, int depth_format) :
         RenderTexture(sample_count),
+        layer_index_(0),
         renderTexture_gl_render_buffer_(nullptr),
         renderTexture_gl_frame_buffer_(nullptr),
         renderTexture_gl_resolve_buffer_(nullptr),
@@ -80,6 +82,8 @@ GLRenderTexture::GLRenderTexture(int width, int height, int sample_count,
         int jcolor_format, int jdepth_format, bool resolve_depth,
         const TextureParameters* texparams)
         : RenderTexture(sample_count),
+          depth_format_(jdepth_format),
+          layer_index_(0),
           renderTexture_gl_render_buffer_(nullptr),
           renderTexture_gl_frame_buffer_(new GLFrameBuffer()),
           renderTexture_gl_resolve_buffer_(nullptr),
@@ -139,7 +143,7 @@ void GLRenderTexture::generateRenderTextureNoMultiSampling(int jdepth_format,
     if (renderTexture_gl_frame_buffer_ == NULL)
     {
         renderTexture_gl_frame_buffer_ = new GLFrameBuffer();
-        generateRenderTextureLayer(depth_format_, width(), height());
+        generateRenderTextureLayer(width(), height());
         checkGLError("RenderTexture::isReady generateRenderTextureLayer");
     }
     return status;
@@ -160,13 +164,13 @@ void GLRenderTexture::generateRenderTextureNoMultiSampling(int jdepth_format,
     GLRenderTexture::beginRendering(renderer);
 
 }
-void GLNonMultiviewRenderTexture::generateRenderTextureLayer(GLenum depth_format, int width, int height)
+void GLNonMultiviewRenderTexture::generateRenderTextureLayer(int width, int height)
 {
     if (depth_format_ && (renderTexture_gl_render_buffer_ == nullptr))
     {
         renderTexture_gl_render_buffer_ = new GLRenderBuffer();
         glBindRenderbuffer(GL_RENDERBUFFER, renderTexture_gl_render_buffer_->id());
-        glRenderbufferStorage(GL_RENDERBUFFER, depth_format, width, height);
+        glRenderbufferStorage(GL_RENDERBUFFER, depth_format_, width, height);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
     GLRenderImage* image = static_cast<GLRenderImage*>(getImage());

@@ -31,8 +31,9 @@ class Renderer;
          * All the shadow maps share the same RenderTexture.
          * We only delete it once for layer 0.
          */
-        if (mLayerIndex > 0)
+        if ((mLayerIndex == 0) && (mRenderTexture != nullptr))
         {
+            delete mRenderTexture;
             mRenderTexture = nullptr;
         }
     }
@@ -40,7 +41,7 @@ class Renderer;
     void ShadowMap::setLayerIndex(int layerIndex)
     {
         mLayerIndex = layerIndex;
-        GLNonMultiviewRenderTexture* rtex = static_cast<GLNonMultiviewRenderTexture*>(mRenderTexture);
+        GLRenderTexture* rtex = static_cast<GLRenderTexture*>(mRenderTexture);
 
         if (rtex)
         {
@@ -51,7 +52,7 @@ class Renderer;
 
     void ShadowMap::bindTexture(int loc, int texIndex)
     {
-        GLNonMultiviewRenderTexture* rtex = static_cast<GLNonMultiviewRenderTexture*>(mRenderTexture);
+        GLRenderTexture* rtex = static_cast<GLRenderTexture*>(mRenderTexture);
 
         if (rtex)
         {

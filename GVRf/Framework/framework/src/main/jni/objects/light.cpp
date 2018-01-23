@@ -22,7 +22,8 @@
 
 namespace gvr
 {
-    Light::~Light() { }
+    Light::~Light()
+    { }
 
     void Light::onAddedToScene(Scene *scene)
     {

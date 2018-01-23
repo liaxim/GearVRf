@@ -63,6 +63,7 @@ bool LightList::addLight(Light* light)
  */
 bool LightList::removeLight(Light* light)
 {
+    std::lock_guard < std::mutex > lock(mLock);
     auto it2 = std::find(mLightList.begin(), mLightList.end(), light);
     if (it2 == mLightList.end())
     {
@@ -114,6 +115,7 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
     bool dirty = (mDirty & 2) != 0;
     bool updated = false;
     ShadowMap* shadowMap = NULL;
+    std::lock_guard < std::mutex > lock(mLock);
 
     if (mDirty & 1)
     {
@@ -127,7 +129,7 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
         if (light != NULL)
         {
             ShadowMap* sm = light->getShadowMap();
-            if (sm)
+            if (sm && sm->enabled())
             {
                 shadowMap = sm;
             }
@@ -152,10 +154,15 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
 int LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
 {
     int texIndex = 0;
+    std::lock_guard < std::mutex > lock(mLock);
     for (auto it = mLightList.begin(); it != mLightList.end(); ++it)
     {
-        (*it)->makeShadowMap(scene, shaderManager, texIndex);
-        ++texIndex;
+        Light* l = (*it);
+        if (l->enabled())
+        {
+            l->makeShadowMap(scene, shaderManager, texIndex);
+            ++texIndex;
+        }
     }
     return texIndex;
 }
@@ -191,6 +198,7 @@ bool LightList::createLightBlock(Renderer* renderer)
  */
 void LightList::clear()
 {
+//    std::lock_guard < std::mutex > lock(mLock);
     mClassMap.clear();
     mLightList.clear();
     if (mLightBlock != NULL)

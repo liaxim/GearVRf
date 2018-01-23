@@ -76,6 +76,7 @@ private:
     LightList& operator=(LightList&& lights) = delete;
 
 private:
+    std::mutex mLock;
     std::vector<Light*> mLightList;
     std::map<std::string, int> mClassMap;
     UniformBlock* mLightBlock;
