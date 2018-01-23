@@ -753,6 +753,7 @@ public class GVRPicker extends GVRBehavior implements IEventReceiver {
      */
     protected void propagateOnTouch(GVRPickedObject hit)
     {
+        Log.i("mmarinov", "propagateOnTouch");
         if (mEventOptions.contains(EventOptions.SEND_TOUCH_EVENTS))
         {
             GVREventManager eventManager = getGVRContext().getEventManager();

@@ -41,10 +41,13 @@ import org.gearvrf.utility.Log;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -491,41 +494,31 @@ public final class GearCursorController extends GVRCursorController
 
         class SendEvents implements Runnable
         {
-            private KeyEvent[] mKeyEvents = new KeyEvent[10];
-            private MotionEvent[] mMotionEvents = new MotionEvent[10];
+            private final ConcurrentLinkedQueue<KeyEvent> mKeyEvents = new ConcurrentLinkedQueue<>();
+            private final ConcurrentLinkedQueue<MotionEvent> mMotionEvents = new ConcurrentLinkedQueue<>();
 
             public void init(List<KeyEvent> keyEvents, List<MotionEvent> motionEvents)
             {
-                if (keyEvents.size() > 0)
-                {
-                    mKeyEvents = keyEvents.toArray(mKeyEvents);
-                }
-                if (motionEvents.size() > 0)
-                {
-                    mMotionEvents = motionEvents.toArray(mMotionEvents);
-                }
+                mKeyEvents.addAll(keyEvents);
+                mMotionEvents.addAll(motionEvents);
             }
 
             public void run()
             {
                 GVRActivity activity = getGVRContext().getActivity();
-                for (KeyEvent e : mKeyEvents)
-                {
-                    if (null != e) {
-                        activity.dispatchKeyEvent(e);
-                    } else {
-                        break;
-                    }
+                for (final Iterator<KeyEvent> it = mKeyEvents.iterator(); it.hasNext(); ) {
+                    final KeyEvent e = it.next();
+                    activity.dispatchKeyEvent(e);
+                    it.remove();
                 }
-                for (MotionEvent e : mMotionEvents)
-                {
-                    if (null != e) {
-                        MotionEvent dupe = MotionEvent.obtain(e);
-                        activity.dispatchTouchEvent(dupe);
-                        dupe.recycle();
-                    } else {
-                        break;
-                    }
+
+                for (Iterator<MotionEvent> it = mMotionEvents.iterator(); it.hasNext(); ) {
+                    final MotionEvent e = it.next();
+                    final MotionEvent dupe = MotionEvent.obtain(e);
+                    it.remove();
+
+                    activity.dispatchTouchEvent(dupe);
+                    dupe.recycle();
                 }
             }
         }

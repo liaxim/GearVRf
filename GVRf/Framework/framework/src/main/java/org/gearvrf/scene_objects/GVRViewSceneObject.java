@@ -428,6 +428,7 @@ public class GVRViewSceneObject extends GVRSceneObject {
                 {
                     MotionEvent enew = MotionEvent.obtain(e);
 
+                    Log.i("mmarinov", "dispatchPickerInputEvent " + e);
                     enew.setLocation(x, y);
                     RootViewGroup.super.dispatchTouchEvent(enew);
                     enew.recycle();
@@ -588,20 +589,25 @@ public class GVRViewSceneObject extends GVRSceneObject {
 
         }
 
-        public void onEnter(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo) { }
+        @Override
+        public void onEnter(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo) { Log.i("mmarinov", "onEnter");}
+        @Override
         public void onExit(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo)
         {
+            Log.i("mmarinov", "onExit 0");
             if (sceneObject == mSelected)
             {
+                Log.i("mmarinov", "onExit " + mSelected);
                 mSelected = null;
                 onDrag(pickInfo);
            }
         }
 
-        public void onTouchStart(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo)
-        {
-            if ((mSelected == null) && (pickInfo.motionEvent != null))
-            {
+        @Override
+        public void onTouchStart(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo) {
+            Log.i("mmarinov", "onTouchStart 0");
+            if ((mSelected == null) && (pickInfo.motionEvent != null)) {
+                Log.i("mmarinov", "onTouchStart 1");
                 final MotionEvent event = pickInfo.motionEvent;
                 final float[] texCoords = pickInfo.getTextureCoords();
 
@@ -612,20 +618,24 @@ public class GVRViewSceneObject extends GVRSceneObject {
                 mSelected = sceneObject;
                 dispatchPickerInputEvent(event, mHitX, mHitY);
             }
-       }
+        }
 
-        public void onInside(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo)
-        {
-            if (sceneObject == mSelected)
-            {
+        @Override
+        public void onInside(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo) {
+            Log.i("mmarinov", "onInside 0");
+            if (sceneObject == mSelected) {
+                Log.i("mmarinov", "onInside " + mSelected);
                 onDrag(pickInfo);
             }
         }
 
+        @Override
         public void onTouchEnd(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo)
         {
+            Log.i("mmarinov", "onTouchEnd 0");
             if (mSelected != null)
             {
+                Log.i("mmarinov", "onTouchEnd 1");
                 onDrag(pickInfo);
                 mSelected = null;
             }
@@ -665,8 +675,10 @@ public class GVRViewSceneObject extends GVRSceneObject {
             }
         }
 
+        @Override
         public void onMotionOutside(GVRPicker picker, MotionEvent event)
         {
+            Log.i("mmarinov", "onMotionOutside " + event);
             dispatchPickerInputEvent(event, event.getX(), event.getY());
         }
     }
