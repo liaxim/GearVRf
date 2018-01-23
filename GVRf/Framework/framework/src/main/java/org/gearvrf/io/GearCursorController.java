@@ -491,18 +491,18 @@ public final class GearCursorController extends GVRCursorController
 
         class SendEvents implements Runnable
         {
-            private List<KeyEvent> mKeyEvents = new ArrayList<KeyEvent>();
-            private List<MotionEvent> mMotionEvents = new ArrayList<MotionEvent>();
+            private KeyEvent[] mKeyEvents = new KeyEvent[10];
+            private MotionEvent[] mMotionEvents = new MotionEvent[10];
 
             public void init(List<KeyEvent> keyEvents, List<MotionEvent> motionEvents)
             {
                 if (keyEvents.size() > 0)
                 {
-                    mKeyEvents.addAll(keyEvents);
+                    mKeyEvents = keyEvents.toArray(mKeyEvents);
                 }
                 if (motionEvents.size() > 0)
                 {
-                    mMotionEvents.addAll(motionEvents);
+                    mMotionEvents = motionEvents.toArray(mMotionEvents);
                 }
             }
 
@@ -511,15 +511,22 @@ public final class GearCursorController extends GVRCursorController
                 GVRActivity activity = getGVRContext().getActivity();
                 for (KeyEvent e : mKeyEvents)
                 {
-                    activity.dispatchKeyEvent(e);
+                    if (null != e) {
+                        activity.dispatchKeyEvent(e);
+                    } else {
+                        break;
+                    }
                 }
                 for (MotionEvent e : mMotionEvents)
                 {
-                    activity.dispatchTouchEvent(MotionEvent.obtain(e));
-                    e.recycle();
+                    if (null != e) {
+                        MotionEvent dupe = MotionEvent.obtain(e);
+                        activity.dispatchTouchEvent(dupe);
+                        dupe.recycle();
+                    } else {
+                        break;
+                    }
                 }
-                mKeyEvents.clear();
-                mMotionEvents.clear();
             }
         }
 
