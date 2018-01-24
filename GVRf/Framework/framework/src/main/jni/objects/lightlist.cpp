@@ -203,7 +203,7 @@ void LightList::clear()
     mLightList.clear();
     if (mLightBlock != NULL)
     {
-        delete mLightBlock;
+//        delete mLightBlock;
         mLightBlock = NULL;
     }
 }
