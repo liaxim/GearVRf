@@ -54,26 +54,6 @@ namespace gvr
             return uniforms_;
         }
 
-        /*
-         * Loads the uniforms associated with this light
-         * into the GPU if they have changed.
-         * @param program   ID of shader program light is bound ot
-         * @param texIndex  next available texture location
-         */
-        void render(Shader* shader, GLUniformBlock& lightBuffer, int texIndex, int bufferOffset)
-        {
-            ShadowMap* sm = getShadowMap();
-            if (sm)
-            {
-                GLShader* glshader = static_cast<GLShader*>(shader);
-                int loc = glGetUniformLocation(glshader->getProgramId(), "u_shadow_maps");
-                if (loc >= 0)
-                {
-                    sm->bindTexture(loc, texIndex);
-                }
-            }
-        }
-
     protected:
         GLMaterial uniforms_;
     };

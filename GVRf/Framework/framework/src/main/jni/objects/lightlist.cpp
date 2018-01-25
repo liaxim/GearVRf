@@ -25,19 +25,32 @@
 
 namespace gvr {
 
+LightList::~LightList()
+{
+    if (mLightBlock)
+    {
+        delete mLightBlock;
+        mLightBlock = nullptr;
+    }
+#ifdef DEBUG_LIGHT
+    LOGD("LIGHT: deleting light block");
+#endif
+}
+
 /*
  * Adds a new light to the scene.
  * Return true if light was added, false if already there or too many lights.
  */
 bool LightList::addLight(Light* light)
 {
+    std::lock_guard < std::mutex > lock(mLock);
     auto it = std::find(mLightList.begin(), mLightList.end(), light);
 
     if (it != mLightList.end())
         return false;
     if (mLightList.size() >= Scene::MAX_LIGHTS)
     {
-        LOGD("SHADER: light not added, more than %d lights not allowed", Scene::MAX_LIGHTS);
+        LOGE("SHADER: light not added, more than %d lights not allowed", Scene::MAX_LIGHTS);
         return false;
     }
     mLightList.push_back(light);
@@ -53,7 +66,9 @@ bool LightList::addLight(Light* light)
         mClassMap[light->getLightClass()] = 1;
     }
     mDirty |= 1;
-    LOGD("SHADER: %s added to scene", light->getLightClass());
+#ifdef DEBUG_LIGHT
+    LOGD("LIGHT: %s added to scene", light->getLightClass());
+#endif
     return true;
 }
 
@@ -105,7 +120,9 @@ bool LightList::removeLight(Light* light)
             }
         }
     }
-    LOGD("SHADER: %s removed from scene", light->getLightClass());
+#ifdef DEBUG_LIGHT
+    LOGD("LIGHT: %s removed from scene", light->getLightClass());
+#endif
     mDirty |= 2;
     return true;
 }
@@ -139,6 +156,9 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
                 mLightBlock->setAt(offset, light->uniforms().uniforms());
                 updated = true;
                 light->uniforms().clearDirty();
+#ifdef DEBUG_LIGHT
+                LOGD("LIGHT: %s updated offset = %d", light->getLightClass(), offset);
+#endif
             }
         }
     }
@@ -151,10 +171,11 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
     return shadowMap;
 }
 
-int LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
+void LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
 {
-    int texIndex = 0;
     std::lock_guard < std::mutex > lock(mLock);
+    int texIndex = 0;
+
     for (auto it = mLightList.begin(); it != mLightList.end(); ++it)
     {
         Light* l = (*it);
@@ -164,7 +185,6 @@ int LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
             ++texIndex;
         }
     }
-    return texIndex;
 }
 
 bool LightList::createLightBlock(Renderer* renderer)
@@ -188,6 +208,9 @@ bool LightList::createLightBlock(Renderer* renderer)
         std::string desc("float lightdata");
         mLightBlock = renderer->createUniformBlock(desc.c_str(), LIGHT_UBO_INDEX, "Lights_ubo", numFloats);
         mLightBlock->useGPUBuffer(true);
+#ifdef DEBUG_LIGHT
+        LOGD("LIGHT: creating light uniform block");
+#endif
         return true;
     }
     return false;
@@ -201,11 +224,10 @@ void LightList::clear()
 //    std::lock_guard < std::mutex > lock(mLock);
     mClassMap.clear();
     mLightList.clear();
-    if (mLightBlock != NULL)
-    {
-//        delete mLightBlock;
-        mLightBlock = NULL;
-    }
+    mDirty = 2;
+#ifdef DEBUG_LIGHT
+    LOGD("LIGHT: clearing lights");
+#endif
 }
 
 void LightList::makeShaderBlock(std::string& layout) const

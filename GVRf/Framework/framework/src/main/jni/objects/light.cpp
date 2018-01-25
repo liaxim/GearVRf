@@ -64,11 +64,17 @@ namespace gvr
             if (shadow_map_index >= 0)
             {
                 setFloat("shadow_map_index", -1);
+#ifdef DEBUG_LIGHT
+                LOGD("LIGHT: %s shadow_map_index = %f", getLightClass(), shadow_map_index);
+#endif
             }
             return false;
         }
         else if (shadow_map_index != texIndex)
         {
+            #ifdef DEBUG_LIGHT
+                LOGD("LIGHT: %s shadow_map_index = %d", getLightClass(), texIndex);
+            #endif
             setFloat("shadow_map_index", (float) texIndex);
         }
         Renderer* renderer = gRenderer->getInstance();

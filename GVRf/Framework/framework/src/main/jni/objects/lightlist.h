@@ -21,6 +21,7 @@
 #ifndef LIGHTLIST_H_
 #define LIGHTLIST_H_
 
+#include <functional>
 #include "engine/renderer/renderer.h"
 #include "objects/light.h"
 
@@ -32,7 +33,8 @@ class LightList
 public:
     static const int DEFAULT_BLOCK_SIZE = 1024;
     LightList() : mDirty(0), mLightBlock(NULL) { }
-    virtual ~LightList() { clear(); }
+
+    virtual ~LightList();
 
     /*
      * Adds a new light to the scene.
@@ -51,6 +53,13 @@ public:
      */
     void clear();
 
+    /*
+     * Call the given function for each light in the list.
+     * @param func function to call
+     */
+    void forEachLight(std::function< void(const Light&) > func) const;
+    void forEachLight(std::function< void(Light&) > func);
+
     const std::vector<Light*>& getLights() const
     {
         return mLightList;
@@ -67,7 +76,7 @@ public:
         return mDirty != 0;
     }
 
-    int makeShadowMaps(Scene* scene, ShaderManager* shaderManager);
+    void makeShadowMaps(Scene* scene, ShaderManager* shaderManager);
 
 private:
     LightList(const LightList& lights) = delete;
@@ -76,7 +85,7 @@ private:
     LightList& operator=(LightList&& lights) = delete;
 
 private:
-    std::mutex mLock;
+    mutable std::mutex mLock;
     std::vector<Light*> mLightList;
     std::map<std::string, int> mClassMap;
     UniformBlock* mLightBlock;

@@ -37,7 +37,7 @@ class Scene;
 class Shader;
 class ShadowMap;
 
-//#define DEBUG_LIGHT 1
+#define DEBUG_LIGHT 1
 
 class Light : public JavaComponent
 {

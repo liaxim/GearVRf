@@ -672,6 +672,9 @@ namespace gvr
             int loc = glGetUniformLocation(glshader->getProgramId(), "u_shadow_maps");
             if (loc >= 0)
             {
+#ifdef DEBUG_LIGHT
+                LOGV("LIGHT: binding shadow map loc=%d texIndex = %d", loc, texIndex);
+#endif
                 shadowMap->bindTexture(loc, texIndex);
             }
         }

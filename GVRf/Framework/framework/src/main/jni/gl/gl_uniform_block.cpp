@@ -53,8 +53,9 @@ namespace gvr {
                 glBindBufferBase(GL_UNIFORM_BUFFER, mBindingPoint, GLBuffer);
                 glBufferSubData(GL_UNIFORM_BUFFER, GLOffset, mElemSize * mMaxElems, getData());
                 mIsDirty = false;
-                if (Shader::LOG_SHADER)
-                    LOGV("UniformBlock::updateGPU %s size %d\n", getBlockName(), getTotalSize());
+#ifdef DEBUG_SHADER
+                LOGV("SHADER: UniformBlock::updateGPU %s size %d\n", getBlockName(), getTotalSize());
+#endif
             }
             checkGLError("GLUniformBlock::updateGPU");
         }
@@ -195,9 +196,10 @@ namespace gvr {
             }
             glUniformBlockBinding(glshader->getProgramId(), blockIndex, mBindingPoint);
             glBindBufferBase(GL_UNIFORM_BUFFER, mBindingPoint, GLBuffer);
-            if (Shader::LOG_SHADER)
-                LOGV("UniformBlock::bindBuffer %s bind at %d index = %d\n", getBlockName(),
+#ifdef DEBUG_SHADER
+            LOGV("SHADER: UniformBlock::bindBuffer %s bind at %d index = %d\n", getBlockName(),
                      mBindingPoint, blockIndex);
+#endif
             checkGLError("GLUniformBlock::bindBuffer");
             return true;
         }
