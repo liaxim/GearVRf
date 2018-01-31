@@ -37,13 +37,20 @@ LightList::~LightList()
 #endif
 }
 
+int LightList::getLights(std::vector<Light*>& lights) const
+{
+    std::lock_guard < std::recursive_mutex > lock(mLock);
+    lights.assign(mLightList.begin(), mLightList.end());
+    return mLightList.size();
+}
+
 /*
  * Adds a new light to the scene.
  * Return true if light was added, false if already there or too many lights.
  */
 bool LightList::addLight(Light* light)
 {
-    std::lock_guard < std::mutex > lock(mLock);
+    std::lock_guard < std::recursive_mutex > lock(mLock);
     auto it = std::find(mLightList.begin(), mLightList.end(), light);
 
     if (it != mLightList.end())
@@ -78,7 +85,7 @@ bool LightList::addLight(Light* light)
  */
 bool LightList::removeLight(Light* light)
 {
-    std::lock_guard < std::mutex > lock(mLock);
+    std::lock_guard < std::recursive_mutex > lock(mLock);
     auto it2 = std::find(mLightList.begin(), mLightList.end(), light);
     if (it2 == mLightList.end())
     {
@@ -132,7 +139,7 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
     bool dirty = (mDirty & 2) != 0;
     bool updated = false;
     ShadowMap* shadowMap = NULL;
-    std::lock_guard < std::mutex > lock(mLock);
+    std::lock_guard < std::recursive_mutex > lock(mLock);
 
     if (mDirty & 1)
     {
@@ -173,7 +180,7 @@ ShadowMap* LightList::updateLights(Renderer* renderer, Shader* shader)
 
 void LightList::makeShadowMaps(Scene* scene, ShaderManager* shaderManager)
 {
-    std::lock_guard < std::mutex > lock(mLock);
+    std::lock_guard < std::recursive_mutex > lock(mLock);
     int texIndex = 0;
 
     for (auto it = mLightList.begin(); it != mLightList.end(); ++it)

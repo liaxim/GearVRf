@@ -60,10 +60,7 @@ public:
     void forEachLight(std::function< void(const Light&) > func) const;
     void forEachLight(std::function< void(Light&) > func);
 
-    const std::vector<Light*>& getLights() const
-    {
-        return mLightList;
-    }
+    int getLights(std::vector<Light*>& lights) const;
 
     void makeShaderBlock(std::string& layout) const;
 
@@ -85,7 +82,7 @@ private:
     LightList& operator=(LightList&& lights) = delete;
 
 private:
-    mutable std::mutex mLock;
+    mutable std::recursive_mutex mLock;
     std::vector<Light*> mLightList;
     std::map<std::string, int> mClassMap;
     UniformBlock* mLightBlock;

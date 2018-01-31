@@ -25,18 +25,6 @@ class Renderer;
 
     }
 
-    ShadowMap::~ShadowMap()
-    {
-        /*
-         * All the shadow maps share the same RenderTexture.
-         * We only delete it once for layer 0.
-         */
-        if (mLayerIndex > 0)
-        {
-            mRenderTexture = nullptr;
-        }
-    }
-
     void ShadowMap::setLayerIndex(int layerIndex)
     {
         mLayerIndex = layerIndex;
