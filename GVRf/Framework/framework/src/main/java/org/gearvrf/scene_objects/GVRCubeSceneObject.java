@@ -422,7 +422,7 @@ public class GVRCubeSceneObject extends GVRSceneObject {
                     "The length of textureList is not 6.");
         }
 
-        createSimpleCubeSixMeshes(gvrContext, facingOut, "float a_position float a_texcoord float a_normal", textureList);
+        createSimpleCubeSixMeshes(gvrContext, facingOut, "float3 a_position float2 a_texcoord float3 a_normal", textureList);
     }
 
     /**
@@ -555,12 +555,13 @@ public class GVRCubeSceneObject extends GVRSceneObject {
     {
         GVRSceneObject[] children = new GVRSceneObject[6];
         GVRMesh[] meshes = new GVRMesh[6];
-        GVRVertexBuffer vbuf = new GVRVertexBuffer(gvrContext, vertexDesc, SIMPLE_VERTICES.length);
+        GVRVertexBuffer vbuf = new GVRVertexBuffer(gvrContext, vertexDesc, SIMPLE_VERTICES.length / 3);
 
         if (facingOut)
         {
-            vbuf.setFloatArray("a_normal", SIMPLE_OUTWARD_NORMALS);
-            vbuf.setFloatArray("a_texcoord", SIMPLE_OUTWARD_TEXCOORDS);
+            vbuf.setFloatArray("a_position", SIMPLE_VERTICES, 3, 0);
+            vbuf.setFloatArray("a_normal", SIMPLE_OUTWARD_NORMALS, 3, 0);
+            vbuf.setFloatArray("a_texcoord", SIMPLE_OUTWARD_TEXCOORDS, 2, 0);
             meshes[0] = createMesh(vbuf, 0, SIMPLE_OUTWARD_FRONT_INDICES);
             meshes[1] = createMesh(vbuf, 6, SIMPLE_OUTWARD_RIGHT_INDICES);
             meshes[2] = createMesh(vbuf, 12, SIMPLE_OUTWARD_BACK_INDICES);
@@ -570,8 +571,9 @@ public class GVRCubeSceneObject extends GVRSceneObject {
         }
         else
         {
-            vbuf.setFloatArray("a_normal", SIMPLE_INWARD_NORMALS);
-            vbuf.setFloatArray("a_texcoord", SIMPLE_INWARD_TEXCOORDS);
+            vbuf.setFloatArray("a_position", SIMPLE_VERTICES, 3, 0);
+            vbuf.setFloatArray("a_normal", SIMPLE_INWARD_NORMALS, 3, 0);
+            vbuf.setFloatArray("a_texcoord", SIMPLE_INWARD_TEXCOORDS, 2, 0);
             meshes[0] = createMesh(vbuf, 0, SIMPLE_INWARD_FRONT_INDICES);
             meshes[1] = createMesh(vbuf, 6, SIMPLE_INWARD_RIGHT_INDICES);
             meshes[2] = createMesh(vbuf, 12, SIMPLE_INWARD_BACK_INDICES);
