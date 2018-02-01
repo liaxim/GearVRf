@@ -57,6 +57,7 @@ namespace gvr {
         ovrMobile* oculusMobile_ = nullptr;
         long long frameIndex = 1;
         FrameBufferObject frameBuffer_[VRAPI_FRAME_LAYER_EYE_MAX];
+        FrameBufferObject frameBufferHeadlocked_[VRAPI_FRAME_LAYER_EYE_MAX];
         ovrMatrix4f projectionMatrix_;
         ovrMatrix4f texCoordsTanAnglesMatrix_;
         ovrPerformanceParms oculusPerformanceParms_;
@@ -69,8 +70,8 @@ namespace gvr {
         int x, y, width, height;                // viewport
 
         void initializeOculusJava(JNIEnv& env, ovrJava& oculusJava);
-        void beginRenderingEye(const int eye);
-        void endRenderingEye(const int eye);
+        void beginRenderingEye(FrameBufferObject& fbo, const int eye);
+        void endRenderingEye(FrameBufferObject& fbo, const int eye);
 
         bool docked_ = false;
         bool clampToBorderSupported_ = false;

@@ -186,6 +186,10 @@ void GVRActivity::onSurfaceChanged(JNIEnv &env) {
                                      mHeightConfiguration, mMultisamplesConfiguration,
                                      mResolveDepthConfiguration,
                                      mDepthTextureFormatConfiguration);
+            frameBufferHeadlocked_[eye].create(mColorTextureFormatConfiguration, mWidthConfiguration,
+                                     mHeightConfiguration, mMultisamplesConfiguration,
+                                     mResolveDepthConfiguration,
+                                     mDepthTextureFormatConfiguration);
         }
 
         // default viewport same as window size
@@ -247,10 +251,25 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
             eyeTexture.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_;
             eyeTexture.HeadPose = updatedTracking.HeadPose;
         }
-    parms.Layers[0].Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
-    if (CameraRig::CameraRigType::FREEZE == cameraRig_->camera_rig_type()) {
-        parms.Layers[0].Flags |= VRAPI_FRAME_LAYER_FLAG_FIXED_TO_VIEW;
-    }
+        parms.Layers[0].Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
+//        if (CameraRig::CameraRigType::FREEZE == cameraRig_->camera_rig_type()) {
+//            parms.Layers[0].Flags |= VRAPI_FRAME_LAYER_FLAG_SPIN;
+//        }
+//        parms.Layers[0].SrcBlend = VRAPI_FRAME_LAYER_BLEND_ONE;
+//        parms.Layers[0].DstBlend = VRAPI_FRAME_LAYER_BLEND_ZERO;
+
+        for ( int eye = 0; eye < VRAPI_FRAME_LAYER_EYE_MAX; eye++ )
+        {
+            ovrFrameLayerTexture& eyeTexture = parms.Layers[1].Textures[eye];
+
+            eyeTexture.ColorTextureSwapChain = frameBufferHeadlocked_[use_multiview ? 0 : eye].mColorTextureSwapChain;
+            eyeTexture.DepthTextureSwapChain = frameBufferHeadlocked_[use_multiview ? 0 : eye].mDepthTextureSwapChain;
+            eyeTexture.TextureSwapChainIndex = frameBufferHeadlocked_[use_multiview ? 0 : eye].mTextureSwapChainIndex;
+            eyeTexture.TexCoordsFromTanAngles = texCoordsTanAnglesMatrix_;
+            eyeTexture.HeadPose = updatedTracking.HeadPose;
+        }
+        parms.Layers[1].Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
+        parms.Layers[1].Flags |= VRAPI_FRAME_LAYER_FLAG_FIXED_TO_VIEW;
 
         if (docked_) {
             const ovrQuatf& orientation = updatedTracking.HeadPose.Pose.Orientation;
@@ -273,7 +292,7 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
         for (int eye = 0; eye < (use_multiview ? 1 :VRAPI_FRAME_LAYER_EYE_MAX); eye++) {
             int textureSwapChainIndex = frameBuffer_[eye].mTextureSwapChainIndex;
             if(!gRenderer->isVulkanInstance()) {
-                beginRenderingEye(eye);
+                beginRenderingEye(frameBuffer_[eye], eye);
             }
             oculusJavaGlThread_.Env->CallVoidMethod(jViewManager, onDrawEyeMethodId, eye, textureSwapChainIndex, use_multiview);
 
@@ -281,7 +300,36 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
                 copyVulkanTexture(textureSwapChainIndex,eye);
             }
             else {
-                endRenderingEye(eye);
+                endRenderingEye(frameBuffer_[eye], eye);
+                FrameBufferObject::unbind();
+            }
+        }
+
+        for (int eye = 0; eye < (use_multiview ? 1 :VRAPI_FRAME_LAYER_EYE_MAX); eye++) {
+            int textureSwapChainIndex = frameBufferHeadlocked_[eye].mTextureSwapChainIndex;
+            if(!gRenderer->isVulkanInstance()) {
+//                beginRenderingEye(frameBufferHeadlocked_[eye], eye);
+                frameBufferHeadlocked_[eye].bind();
+
+                GL(glViewport(100, 100, 100, 100));
+                GL(glScissor(100, 100, 100, 100));
+
+                static const GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT};
+                GL(glInvalidateFramebuffer(GL_FRAMEBUFFER, sizeof(attachments)/sizeof(GLenum), attachments));
+
+            }
+
+//            glViewport(100, 100, 100, 100);
+//            glScissor(100, 100, 100, 100);
+//            oculusJavaGlThread_.Env->CallVoidMethod(jViewManager, onDrawEyeMethodId, eye, textureSwapChainIndex, use_multiview);
+            glClearColor(1, 0, 0, 1);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if(gRenderer->isVulkanInstance()){
+                copyVulkanTexture(textureSwapChainIndex,eye);
+            }
+            else {
+                endRenderingEye(frameBufferHeadlocked_[eye], eye);
                 FrameBufferObject::unbind();
             }
         }
@@ -292,23 +340,24 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
             gearController->onFrame(predictedDisplayTime);
         }
 
+        parms.LayerCount = 2;
         vrapi_SubmitFrame(oculusMobile_, &parms);
     }
 
     static const GLenum attachments[] = {GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT};
 
-    void GVRActivity::beginRenderingEye(const int eye) {
+    void GVRActivity::beginRenderingEye(FrameBufferObject& fbo, const int eye) {
 
        // no n
-        frameBuffer_[eye].bind();
+        fbo.bind();
 
         GL(glViewport(x, y, width, height));
-        GL(glScissor(0, 0, frameBuffer_[eye].mWidth, frameBuffer_[eye].mHeight));
+        GL(glScissor(0, 0, fbo.mWidth, fbo.mHeight));
 
         GL(glInvalidateFramebuffer(GL_FRAMEBUFFER, sizeof(attachments)/sizeof(GLenum), attachments));
     }
 
-    void GVRActivity::endRenderingEye(const int eye) {
+    void GVRActivity::endRenderingEye(FrameBufferObject& fbo, const int eye) {
         GL(glDisable(GL_DEPTH_TEST));
         GL(glDisable(GL_CULL_FACE));
 
@@ -321,25 +370,25 @@ void GVRActivity::onDrawFrame(jobject jViewManager) {
             // up when time warp pushes the texture partially off screen.
             // </quote>
             // also see EyePostRender::FillEdgeColor in VrAppFramework
-            GL(glClearColor(0, 0, 0, 1));
-            GL(glEnable(GL_SCISSOR_TEST));
-
-            GL(glScissor(0, 0, mWidthConfiguration, 1));
-            GL(glClear(GL_COLOR_BUFFER_BIT));
-            GL(glScissor(0, mHeightConfiguration - 1, mWidthConfiguration, 1));
-            GL(glClear(GL_COLOR_BUFFER_BIT));
-            GL(glScissor(0, 0, 1, mHeightConfiguration));
-            GL(glClear(GL_COLOR_BUFFER_BIT));
-            GL(glScissor(mWidthConfiguration - 1, 0, 1, mHeightConfiguration));
-            GL(glClear(GL_COLOR_BUFFER_BIT));
-
-            GL(glDisable(GL_SCISSOR_TEST));
+//            GL(glClearColor(0, 0, 0, 1));
+//            GL(glEnable(GL_SCISSOR_TEST));
+//
+//            GL(glScissor(0, 0, mWidthConfiguration, 1));
+//            GL(glClear(GL_COLOR_BUFFER_BIT));
+//            GL(glScissor(0, mHeightConfiguration - 1, mWidthConfiguration, 1));
+//            GL(glClear(GL_COLOR_BUFFER_BIT));
+//            GL(glScissor(0, 0, 1, mHeightConfiguration));
+//            GL(glClear(GL_COLOR_BUFFER_BIT));
+//            GL(glScissor(mWidthConfiguration - 1, 0, 1, mHeightConfiguration));
+//            GL(glClear(GL_COLOR_BUFFER_BIT));
+//
+//            GL(glDisable(GL_SCISSOR_TEST));
         }
 
         //per vrAppFw
         GL(glFlush());
-        frameBuffer_[eye].resolve();
-        frameBuffer_[eye].advance();
+        fbo.resolve();
+        fbo.advance();
     }
 
     void GVRActivity::initializeOculusJava(JNIEnv& env, ovrJava& oculusJava) {

@@ -21,9 +21,9 @@ import android.util.DisplayMetrics;
 import org.gearvrf.debug.GVRFPSTracer;
 import org.gearvrf.debug.GVRMethodCallTracer;
 import org.gearvrf.debug.GVRStatsLine;
+import org.gearvrf.io.GearCursorController;
 import org.gearvrf.utility.Log;
 import org.gearvrf.utility.VrAppSettings;
-import org.gearvrf.io.GearCursorController;
 
 /*
  * This is the most important part of gvrf.
