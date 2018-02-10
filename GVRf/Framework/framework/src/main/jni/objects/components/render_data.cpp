@@ -277,9 +277,7 @@ int RenderData::isValid(Renderer* renderer, const RenderState& rstate)
         //@todo implementation details leaked; unify common JNI reqs of Scene and RenderData
         JNIEnv* env = nullptr;
         int rc = rstate.scene->get_java_env(&env);
-        jobject localSceneObject = rstate.scene->getJavaObj(*env);
-        bindShader(env, localSceneObject, rstate.is_multiview);
-        env->DeleteLocalRef(localSceneObject);
+        bindShader(env, rstate.javaSceneObject, rstate.is_multiview);
         if (rc > 0) {
             rstate.scene->detach_java_env();
         }
