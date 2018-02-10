@@ -39,7 +39,7 @@ namespace gvr {
     JNIEXPORT jlong JNICALL
             Java_org_gearvrf_NativeRenderTarget_attachRenderTarget(JNIEnv *env, jobject obj, jlong jrendertarget, jlong jnextrendertarget);
     JNIEXPORT void JNICALL
-    Java_org_gearvrf_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jlong ptr, jlong jcamera, jlong jshaderManager);
+    Java_org_gearvrf_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaSceneObject, jlong ptr, jlong jcamera, jlong jshaderManager);
     JNIEXPORT void JNICALL
     Java_org_gearvrf_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget, jlong camera,
                                                jlong shader_manager, jlong posteffectrenderTextureA, jlong posteffectRenderTextureB, jlong jscene);
@@ -104,13 +104,15 @@ Java_org_gearvrf_NativeRenderTarget_endRendering(JNIEnv *env, jobject obj, jlong
 
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jlong ptr, jlong jcamera, jlong jshaderManager){
+Java_org_gearvrf_NativeRenderTarget_cullFromCamera(JNIEnv *env, jobject obj, jlong jscene, jobject javaSceneObject, jlong ptr, jlong jcamera, jlong jshaderManager){
 
     RenderTarget* target = reinterpret_cast<RenderTarget*>(ptr);
     Camera* camera = reinterpret_cast<Camera*>(jcamera);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     ShaderManager* shaderManager = reinterpret_cast<ShaderManager*> (jshaderManager);
-    target->cullFromCamera(scene, camera,gRenderer->getInstance(), shaderManager);
+    javaSceneObject = env->NewLocalRef(javaSceneObject);
+    target->cullFromCamera(scene, javaSceneObject, camera,gRenderer->getInstance(), shaderManager);
+    env->DeleteLocalRef(javaSceneObject);
 }
 
 JNIEXPORT void JNICALL

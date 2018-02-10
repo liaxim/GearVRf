@@ -95,7 +95,7 @@ public:
                         ShaderManager* shader_manager, PostEffectShaderManager* post_effect_shader_manager,
                         RenderTexture* post_effect_render_texture_a,
                         RenderTexture* post_effect_render_texture_b) {};
-    void makeShadowMaps(Scene* scene, ShaderManager* shader_manager){}
+    void makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager){}
     void set_face_culling(int cull_face){}
     virtual ShaderData* createMaterial(const char* uniform_desc, const char* texture_desc);
     virtual RenderData* createRenderData();

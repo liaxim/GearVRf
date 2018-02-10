@@ -85,6 +85,7 @@ struct RenderState {
     int                     viewportHeight;
     bool                    invalidateShaders;
     Scene*                  scene;
+    jobject                 javaSceneObject;
     ShaderData*             material_override;
     ShaderUniformsPerObject uniforms;
     ShaderManager*          shader_manager;
@@ -153,7 +154,7 @@ public:
     virtual IndexBuffer* createIndexBuffer(int bytesPerIndex, int icount) = 0;
     void updateTransforms(RenderState& rstate, UniformBlock* block, RenderData*);
     virtual void initializeStats();
-    virtual void cullFromCamera(Scene *scene, Camera* camera,
+    virtual void cullFromCamera(Scene *scene, jobject javaSceneObject, Camera* camera,
                                 ShaderManager* shader_manager, std::vector<RenderData*>* render_data_vector,bool);
     virtual void set_face_culling(int cull_face) = 0;
 
@@ -169,7 +170,7 @@ public:
     virtual Texture* createSharedTexture(int id) = 0;
     virtual bool renderWithShader(RenderState& rstate, Shader* shader, RenderData* renderData, ShaderData* shaderData, int) = 0;
 
-    virtual void makeShadowMaps(Scene* scene, ShaderManager* shader_manager) = 0;
+    virtual void makeShadowMaps(Scene* scene, jobject javaSceneObject, ShaderManager* shader_manager) = 0;
     virtual void occlusion_cull(RenderState& rstate, std::vector<SceneObject*>& scene_objects, std::vector<RenderData*>* render_data_vector) = 0;
     virtual void updatePostEffectMesh(Mesh*) = 0;
     void addRenderData(RenderData *render_data, RenderState& rstate, std::vector<RenderData*>& renderList);

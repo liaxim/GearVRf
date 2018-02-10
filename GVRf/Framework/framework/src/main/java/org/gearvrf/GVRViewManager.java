@@ -493,7 +493,7 @@ abstract class GVRViewManager extends GVRContext {
         GVRNotifications.notifyBeforeStep();
         mFrameHandler.beforeDrawEyes();
 
-        makeShadowMaps(mMainScene.getNative(), mRenderBundle.getMaterialShaderManager().getNative(),
+        makeShadowMaps(mMainScene.getNative(), mMainScene, mRenderBundle.getMaterialShaderManager().getNative(),
                 mRenderBundle.getPostEffectRenderTextureA().getWidth(),
                 mRenderBundle.getPostEffectRenderTextureA().getHeight());
     }
@@ -521,7 +521,7 @@ abstract class GVRViewManager extends GVRContext {
 
     void cullAndRender(GVRRenderTarget renderTarget, GVRScene scene)
     {
-        cullAndRender(renderTarget.getNative(), scene.getNative(),
+        cullAndRender(renderTarget.getNative(), scene.getNative(), scene,
                 mRenderBundle.getMaterialShaderManager().getNative(),
                 mRenderBundle.getPostEffectRenderTextureA().getNative(),
                 mRenderBundle.getPostEffectRenderTextureB().getNative());
@@ -825,8 +825,8 @@ abstract class GVRViewManager extends GVRContext {
     protected int mReadbackBufferWidth;
     protected int mReadbackBufferHeight;
 
-    protected native void makeShadowMaps(long scene, long shader_manager, int width, int height);
-    protected native void cullAndRender(long render_target, long scene, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
+    protected native void makeShadowMaps(long scene, GVRScene javaSceneObject, long shader_manager, int width, int height);
+    protected native void cullAndRender(long render_target, long scene, GVRScene javaSceneObject, long shader_manager, long postEffectRenderTextureA, long postEffectRenderTextureB);
     private native static void readRenderResultNative(Object readbackBuffer, long renderTarget, int eye, boolean useMultiview);
 
     private static final String TAG = "GVRViewManager";
