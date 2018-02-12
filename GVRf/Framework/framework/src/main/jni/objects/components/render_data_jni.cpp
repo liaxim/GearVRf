@@ -39,8 +39,8 @@ Java_org_gearvrf_NativeRenderData_addPass(JNIEnv* env,
                                           jobject obj, jlong jrender_data, jlong jrender_pass);
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderData_removePass(JNIEnv* env,
-                                             jobject obj, jlong jrender_data, jint pass);
+Java_org_gearvrf_NativeRenderData_removePass(JNIEnv *env, jclass type, jlong renderData,
+                                             jint renderPass);
 
 JNIEXPORT void JNICALL
 Java_org_gearvrf_NativeRenderData_enableLight(JNIEnv * env,
@@ -216,11 +216,10 @@ Java_org_gearvrf_NativeRenderData_addPass(JNIEnv* env,
 }
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderData_removePass(JNIEnv* env,
-                                             jobject obj, jlong jrender_data, jint pass)
+Java_org_gearvrf_NativeRenderData_removePass(JNIEnv *, jclass, jlong renderData, jint renderPass)
 {
-    RenderData* render_data = reinterpret_cast<RenderData*>(jrender_data);
-    render_data->remove_pass(pass);
+    RenderData* render_data = reinterpret_cast<RenderData*>(renderData);
+    render_data->remove_pass(renderPass);
 }
 
 JNIEXPORT void JNICALL
