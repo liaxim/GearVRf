@@ -18,6 +18,7 @@ package org.gearvrf;
 import org.gearvrf.GVRRenderPass.GVRCullFaceEnum;
 import org.gearvrf.utility.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import static android.opengl.GLES30.GL_LINES;
@@ -34,11 +35,12 @@ import static android.opengl.GLES30.GL_TRIANGLE_STRIP;
  * This includes the {@link GVRMesh mesh} itself, the mesh's {@link GVRMaterial
  * material}, camera association, rendering order, and various other parameters.
  */
-public final class GVRRenderData extends GVRJavaComponent implements IRenderable, PrettyPrint {
+public final class GVRRenderData extends GVRComponent implements IRenderable, PrettyPrint {
+
+    private static final String TAG = "GVRRenderData";
 
     private GVRMesh mMesh;
     private ArrayList<GVRRenderPass> mRenderPassList;
-    private static final String TAG = "GearVRf";
     private boolean mLightMapEnabled;
     private boolean isLightEnabled;
 
@@ -97,8 +99,10 @@ public final class GVRRenderData extends GVRJavaComponent implements IRenderable
      */
     public GVRRenderData(GVRContext gvrContext) {
         super(gvrContext, NativeRenderData.ctor());
+        NativeRenderData.setBindShaderObject(getNative(), new BindShaderFromNative(this));
+
         GVRRenderPass basePass = new GVRRenderPass(gvrContext);
-        mRenderPassList = new ArrayList<GVRRenderPass>();
+        mRenderPassList = new ArrayList<>();
         addPass(basePass);
         isLightEnabled = true;
         mLightMapEnabled = false;
@@ -106,6 +110,8 @@ public final class GVRRenderData extends GVRJavaComponent implements IRenderable
 
     public GVRRenderData(GVRContext gvrContext, GVRMaterial material) {
         super(gvrContext, NativeRenderData.ctor());
+        NativeRenderData.setBindShaderObject(getNative(), new BindShaderFromNative(this));
+
         setOwnerObject(owner);
         GVRRenderPass basePass = new GVRRenderPass(gvrContext, material);
         isLightEnabled = true;
@@ -113,7 +119,6 @@ public final class GVRRenderData extends GVRJavaComponent implements IRenderable
         mRenderPassList = new ArrayList<GVRRenderPass>();
         addPass(basePass);
     }
-
 
     static public long getComponentType() {
         return NativeRenderData.getComponentType();
@@ -311,27 +316,24 @@ public final class GVRRenderData extends GVRJavaComponent implements IRenderable
         }
     }
 
-    /**
-     * Called from the GL thread during rendering when a
-     * RenderData without a valid shader is encountered.
-     */
-    void bindShaderNative(GVRScene scene, boolean isMultiview)
-    {
-        bindShader(scene, isMultiview);
-        /*
-        if (sBindShaderFromNative == null)
-        {
-            sBindShaderFromNative = new Runnable()
-            {
-                public void run()
-                {
-                    bindShader(scene);
-                }
-            };
+    static final class BindShaderFromNative {
+        private final WeakReference<GVRRenderData> mRenderData;
+
+        private BindShaderFromNative(final GVRRenderData renderData) {
+            mRenderData = new WeakReference<>(renderData);
         }
-        getGVRContext().runOnTheFrameworkThread(sBindShaderFromNative);
-        */
-    }
+
+        //called from c++
+        @SuppressWarnings("unused")
+        private void call(GVRScene scene, boolean isMultiview) {
+            final GVRRenderData renderData = mRenderData.get();
+            if (null != renderData) {
+                renderData.bindShader(scene, isMultiview);
+            } else {
+                Log.w(TAG, "render data instance is no more; not binding shader");
+            }
+        }
+    };
 
     /**
      * Enable lighting effect for the render_data. Note that it is different from
@@ -933,4 +935,6 @@ class NativeRenderData {
     static native void setStencilMask(long renderData, int mask);
 
     static native void setStencilTest(long renderData, boolean flag);
+
+    static native void setBindShaderObject(long renderData, GVRRenderData.BindShaderFromNative object);
 }
