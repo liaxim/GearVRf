@@ -46,14 +46,18 @@ namespace gvr {
     };
 
 JNIEXPORT void JNICALL
-Java_org_gearvrf_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget, jlong camera,
-                                           jlong shader_manager, jlong posteffectrenderTextureA, jlong posteffectRenderTextureB, jlong jscene){
+Java_org_gearvrf_NativeRenderTarget_render(JNIEnv *env, jobject obj, jlong renderTarget,
+                                           jlong camera,
+                                           jlong shader_manager, jlong posteffectrenderTextureA,
+                                           jlong posteffectRenderTextureB, jlong jscene, jobject javaSceneObject) {
     RenderTarget* target = reinterpret_cast<RenderTarget*>(renderTarget);
     Scene* scene = reinterpret_cast<Scene*>(jscene);
     // Do not remote this: need it for screenshot capturer, center camera rendering
     target->setCamera(reinterpret_cast<Camera*>(camera));
-    gRenderer->getInstance()->renderRenderTarget(scene, target, reinterpret_cast<ShaderManager*>(shader_manager),
+    javaSceneObject = env->NewLocalRef(javaSceneObject);
+    gRenderer->getInstance()->renderRenderTarget(scene, javaSceneObject, target, reinterpret_cast<ShaderManager*>(shader_manager),
                                                  reinterpret_cast<RenderTexture*>(posteffectrenderTextureA), reinterpret_cast<RenderTexture*>(posteffectRenderTextureB));
+    env->DeleteLocalRef(javaSceneObject);
 }
 
 JNIEXPORT jlong JNICALL
