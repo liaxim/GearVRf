@@ -30,6 +30,7 @@
 
 #include "util/gvr_log.h"
 #include <cstdlib>
+#include <cstring>
 
 #include "objects/gl_pending_task.h"
 
