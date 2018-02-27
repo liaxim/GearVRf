@@ -142,6 +142,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
         mRenderableViewGroup = (ViewGroup) findViewById(android.R.id.content).getRootView();
 
         mActivityNative = mDelegate.getActivityNative();
+        setImmersiveSticky();
     }
 
     protected void onInitAppSettings(VrAppSettings appSettings) {
