@@ -30,6 +30,7 @@ Java_org_gearvrf_SystemPropertyUtil_isSystemPropertySet(JNIEnv *env, jclass type
     return result;
 }
 
+extern "C"
 JNIEXPORT jint JNICALL
 Java_org_gearvrf_SystemPropertyUtil_getSystemProperty(JNIEnv *env, jclass type, jstring name_) {
     const char *name = env->GetStringUTFChars(name_, 0);
@@ -64,6 +65,6 @@ int getSystemProperty(const char *prop) {
         }
     }
 
-    return 0;
+    return -1;
 }
 }
