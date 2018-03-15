@@ -429,6 +429,7 @@ public class GVRViewSceneObject extends GVRSceneObject {
                     MotionEvent enew = MotionEvent.obtain(e);
 
                     enew.setLocation(x, y);
+                    Log.i("mmarinov", "run " + enew);
                     RootViewGroup.super.dispatchTouchEvent(enew);
                     enew.recycle();
                 }
@@ -600,13 +601,17 @@ public class GVRViewSceneObject extends GVRSceneObject {
 
         public void onTouchStart(GVRSceneObject sceneObject, GVRPicker.GVRPickedObject pickInfo)
         {
+            Log.i("mmarinov", "onTouchStart");
             if ((mSelected == null) && (pickInfo.motionEvent != null))
             {
+                Log.i("mmarinov", "onTouchStart 1");
                 final MotionEvent event = pickInfo.motionEvent;
                 final float[] texCoords = pickInfo.getTextureCoords();
 
                 mHitX = texCoords[0] * getWidth();
                 mHitY = texCoords[1] * getHeight();
+                Log.i("mmarinov", "onTouchStart "+ mHitX + " " + mHitY);
+
                 mActionDownX = event.getRawX() - getLeft();
                 mActionDownY = event.getRawY() - getTop();
                 mSelected = sceneObject;
@@ -639,6 +644,7 @@ public class GVRViewSceneObject extends GVRSceneObject {
                 final float[] texCoords = pickInfo.getTextureCoords();
                 float x = event.getRawX() - getTop();
                 float y = event.getRawY() - getLeft();
+                Log.i("mmarinov", "onDrag " + x + " " + y);
 
                 /*
                  * When we get events from the Gear controller we replace the location
@@ -648,6 +654,7 @@ public class GVRViewSceneObject extends GVRSceneObject {
                 if ((pickInfo.getPicker().getController().getControllerType() == GVRControllerType.CONTROLLER) &&
                     (event.getButtonState() == MotionEvent.BUTTON_SECONDARY))
                 {
+                    Log.i("mmarinov", "onDrag 2");
                     x = texCoords[0] * getWidth();
                     y = texCoords[1] * getHeight();
                 }
@@ -661,12 +668,21 @@ public class GVRViewSceneObject extends GVRSceneObject {
                     x += mHitX - mActionDownX;
                     y += mHitY - mActionDownY;
                 }
+                Log.i("mmarinov", "onDrag disp " + event + " " + x + " " + y);
                 dispatchPickerInputEvent(event, x, y);
             }
         }
 
         public void onMotionOutside(GVRPicker picker, MotionEvent event)
         {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_MOVE:
+                    break;
+                default:
+                    return;
+            }
             dispatchPickerInputEvent(event, event.getX(), event.getY());
         }
     }

@@ -24,6 +24,7 @@ import android.view.MotionEvent;
 
 import org.gearvrf.GVRContext;
 import org.gearvrf.GVRScene;
+import org.gearvrf.utility.Log;
 import org.joml.Vector3f;
 
 import java.util.concurrent.CountDownLatch;
@@ -67,6 +68,7 @@ final public class GVRGazeCursorController extends GVRCursorController
 
     private void handleMotionEvent(MotionEvent event)
     {
+        Log.i("mmarinov", "handleMotionEvent "+event);
         float eventX = event.getX();
         int action = event.getAction();
         float deltaX;
@@ -79,6 +81,7 @@ final public class GVRGazeCursorController extends GVRCursorController
         switch (action)
         {
             case MotionEvent.ACTION_DOWN:
+                Log.i("mmarinov", "handleMotionEvent AD");
             actionDownX = eventX;
             actionDownZ = mCursorDepth;
             if ((mTouchButtons & button) != 0)
@@ -90,11 +93,13 @@ final public class GVRGazeCursorController extends GVRCursorController
             break;
 
             case MotionEvent.ACTION_UP:
+                Log.i("mmarinov", "handleMotionEvent AP");
             setActive(false);
             setKeyEvent(BUTTON_GAZE_UP);
             break;
 
             case MotionEvent.ACTION_MOVE:
+                Log.i("mmarinov", "handleMotionEvent AM");
             deltaX = eventX - actionDownX;
             if (mCursorControl == CursorControl.CURSOR_DEPTH_FROM_CONTROLLER)
             {
@@ -110,6 +115,8 @@ final public class GVRGazeCursorController extends GVRCursorController
                 setCursorDepth(eventZ);
             }
             break;
+            default:
+                return;
         }
         setMotionEvent(event);
         invalidate();
