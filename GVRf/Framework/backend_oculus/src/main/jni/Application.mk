@@ -20,8 +20,8 @@
  endif
 
  APP_PLATFORM := android-19
- APP_STL := gnustl_static
- NDK_TOOLCHAIN_VERSION := 4.9
+ APP_STL := c++_static
+ NDK_TOOLCHAIN_VERSION := clang
  ifndef OVR_MOBILE_SDK
     	OVR_MOBILE_SDK=../../../../../ovr_sdk_mobile
  endif

@@ -20,8 +20,6 @@ android {
         targetSdkVersion 21
         externalNativeBuild {
             cmake {
-                arguments.add('-DANDROID_TOOLCHAIN=gcc')
-                arguments.add('-DANDROID_STL=gnustl_static')
             }
         }
         ndk {
