@@ -181,7 +181,7 @@ public abstract class GVRCursorController implements IEventReceiver
     protected Object eventLock = new Object();
     protected GVRSceneObject mCursor = null;
     protected boolean enable = false;
-    protected boolean mSendEventsToActivity = true;
+    private boolean mSendEventsToActivity = true;
     protected Object mCursorLock = new Object();
     protected Dragger mDragger = new Dragger(mCursorLock);
 
@@ -290,7 +290,7 @@ public abstract class GVRCursorController implements IEventReceiver
         synchronized (eventLock) {
             this.keyEvent.add(event);
         }
-        return !mSendEventsToActivity;
+        return !canSendEventsToActivity();
     }
 
     /**
@@ -304,7 +304,7 @@ public abstract class GVRCursorController implements IEventReceiver
         synchronized (eventLock) {
             this.motionEvent.add(event);
         }
-        return !mSendEventsToActivity;
+        return !canSendEventsToActivity();
     }
 
     /**
@@ -351,22 +351,28 @@ public abstract class GVRCursorController implements IEventReceiver
      * If you are using {@link org.gearvrf.scene_objects.GVRViewSceneObject}
      * disable this option because events are routed to the Android View in this case.
      *
+     * Keep in mind that this feature may not be supported with some backends. For
+     * example it is not for Daydream.
      * @param flag true to send events to GVRActivity, false to not send them
      * @see #sendingEventsToActivity
      * @see IControllerEvent
      * @see #addPickEventListener(IEvents)
      * @see ITouchEvents
      */
-    public void sendEventsToActivity(boolean flag)
+    public final void sendEventsToActivity(boolean flag)
     {
         mSendEventsToActivity = flag;
+    }
+
+    protected boolean canSendEventsToActivity() {
+        return mSendEventsToActivity;
     }
 
     /**
      * Determine whether controller events are being routed to GVRActivity.
      * @return true if events are sent to the activity, else false
      */
-    public boolean sendingEventsToActivity() { return mSendEventsToActivity; }
+    public final boolean sendingEventsToActivity() { return canSendEventsToActivity(); }
 
     /**
      * Set a {@link GVRSceneObject} to be controlled by the

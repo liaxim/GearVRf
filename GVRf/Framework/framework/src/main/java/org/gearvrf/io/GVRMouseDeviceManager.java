@@ -148,7 +148,7 @@ final class GVRMouseDeviceManager {
             {
                 if (deviceManager.thread.submitKeyEvent(getId(), event))
                 {
-                    return !mSendEventsToActivity;
+                    return !canSendEventsToActivity();
                 }
             }
             return false;
@@ -161,7 +161,7 @@ final class GVRMouseDeviceManager {
             {
                 if (deviceManager.thread.submitMotionEvent(getId(), event))
                 {
-                    return !mSendEventsToActivity;
+                    return !canSendEventsToActivity();
                 }
             }
             return false;

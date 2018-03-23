@@ -31,7 +31,6 @@ import org.gearvrf.GVRPicker;
 import org.gearvrf.GVRRenderData;
 import org.gearvrf.GVRScene;
 import org.gearvrf.GVRSceneObject;
-import org.gearvrf.GVRTransform;
 import org.gearvrf.IActivityEvents;
 import org.gearvrf.scene_objects.GVRLineSceneObject;
 import org.gearvrf.utility.Log;
@@ -81,6 +80,41 @@ public final class GVRGearCursorController extends GVRCursorController
         float getHandedness();
 
         void updateTouchpad(PointF pt);
+
+        boolean supportsSendEventsToActivity();
+    }
+
+    public static class ControllerReaderStubs implements ControllerReader
+    {
+        @Override
+        public boolean isConnected() {
+            return false;
+        }
+        @Override
+        public boolean isTouched() {
+            return false;
+        }
+        @Override
+        public void updateRotation(Quaternionf quat) {
+        }
+        @Override
+        public void updatePosition(Vector3f vec) {
+        }
+        @Override
+        public int getKey() {
+            return 0;
+        }
+        @Override
+        public float getHandedness() {
+            return 0;
+        }
+        @Override
+        public void updateTouchpad(PointF pt) {
+        }
+        @Override
+        public boolean supportsSendEventsToActivity() {
+            return true;
+        }
     }
 
     public enum CONTROLLER_KEYS
@@ -478,7 +512,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                     prevButtonHome, KeyEvent.KEYCODE_HOME);
         prevButtonHome = handleResult == -1 ? prevButtonHome : handleResult;
         event.recycle();
-        if (mSendEventsToActivity && ((keyEvent.size() > 0) || (motionEvent.size() > 0)))
+        if (canSendEventsToActivity() && ((keyEvent.size() > 0) || (motionEvent.size() > 0)))
         {
             mPropagateEvents.init(keyEvent, motionEvent);
             getGVRContext().getActivity().runOnUiThread(mPropagateEvents);
@@ -714,6 +748,15 @@ public final class GVRGearCursorController extends GVRCursorController
                 mActivity.dispatchTouchEvent(dupe);
                 dupe.recycle();
             }
+        }
+    }
+
+    @Override
+    protected boolean canSendEventsToActivity() {
+        if (mControllerReader.supportsSendEventsToActivity()) {
+            return super.canSendEventsToActivity();
+        } else {
+            return false;
         }
     }
 }
