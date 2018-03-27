@@ -105,11 +105,6 @@ class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderS
         }
     }
 
-    @Override
-    public boolean supportsSendEventsToActivity() {
-        return false;
-    }
-
     private class EventListener extends Controller.EventListener
             implements ControllerManager.EventListener {
 

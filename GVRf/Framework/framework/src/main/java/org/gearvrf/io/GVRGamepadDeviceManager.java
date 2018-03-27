@@ -201,7 +201,7 @@ class GVRGamepadDeviceManager {
         {
             if (deviceManager.thread.submitKeyEvent(getId(), event))
             {
-                return !canSendEventsToActivity();
+                return true;
             }
             return false;
         }
@@ -211,7 +211,7 @@ class GVRGamepadDeviceManager {
         {
             if (deviceManager.thread.submitMotionEvent(getId(), event))
             {
-                return !canSendEventsToActivity();
+                return true;
             }
             return false;
         }

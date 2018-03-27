@@ -49,7 +49,7 @@ final public class GVRGazeCursorController extends GVRCursorController
         if (isEnabled())
         {
             setKeyEvent(event);
-            return !canSendEventsToActivity();
+            return true;
         }
         return false;
     }
@@ -60,7 +60,7 @@ final public class GVRGazeCursorController extends GVRCursorController
         if (isEnabled())
         {
             handleMotionEvent(MotionEvent.obtain(event));
-            return !canSendEventsToActivity();
+            return true;
         }
         return false;
     }

@@ -22,6 +22,7 @@ import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import org.gearvrf.io.GVRTouchPadGestureListener;
 import org.gearvrf.scene_objects.GVRViewSceneObject;
 import org.gearvrf.scene_objects.view.GVRView;
 import org.gearvrf.script.IScriptable;
@@ -646,6 +648,32 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
             Log.w(TAG, "dock listener not started");
         }
     }
+
+    /**
+     * Enables the onSwipe event. By default it is not.
+     * @see GVRMain#onSwipe(GVRTouchPadGestureListener.Action, float)
+     * @see GVRTouchPadGestureListener
+     */
+    public synchronized void enableSwipeEvents() {
+        final GVRTouchPadGestureListener gestureListener = new GVRTouchPadGestureListener() {
+            @Override
+            public boolean onSwipe(MotionEvent e, Action action, float vx, float vy) {
+                if (null != mGVRMain) {
+                    mGVRMain.onSwipe(action, vx);
+                }
+                return true;
+            }
+        };
+        mGestureDetector = new GestureDetector(getApplicationContext(), gestureListener);
+        getEventReceiver().addListener(new GVREventListeners.ActivityEvents() {
+            @Override
+            public void dispatchTouchEvent(MotionEvent event) {
+                mGestureDetector.onTouchEvent(event);
+            }
+        });
+    }
+
+    private GestureDetector mGestureDetector;
 
     private GVRActivityDelegate mDelegate;
 

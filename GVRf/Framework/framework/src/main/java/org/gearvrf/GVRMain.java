@@ -16,6 +16,7 @@
 package org.gearvrf;
 
 import org.gearvrf.animation.GVRAnimation;
+import org.gearvrf.io.GVRTouchPadGestureListener;
 import org.gearvrf.script.GVRScriptFile;
 import org.gearvrf.script.IScriptable;
 
@@ -153,6 +154,15 @@ public abstract class GVRMain implements IScriptEvents, IScriptable, IEventRecei
     public boolean onBackPress() {
         return false;
     }
+
+    /**
+     * Handle swipe events by implementing this method.
+     * @see GVRActivity#enableSwipeEvents()
+     * @see GVRTouchPadGestureListener
+     * @param action
+     * @param vx
+     */
+    public void onSwipe(GVRTouchPadGestureListener.Action action, float vx) {}
 
     /*
      * Splash screen support: methods to call or overload to change the default

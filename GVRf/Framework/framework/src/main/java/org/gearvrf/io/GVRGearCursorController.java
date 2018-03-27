@@ -24,6 +24,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.gearvrf.GVRContext;
+import org.gearvrf.GVREventManager;
 import org.gearvrf.GVREventReceiver;
 import org.gearvrf.GVRImportSettings;
 import org.gearvrf.GVRMaterial;
@@ -80,8 +81,6 @@ public final class GVRGearCursorController extends GVRCursorController
         float getHandedness();
 
         void updateTouchpad(PointF pt);
-
-        boolean supportsSendEventsToActivity();
     }
 
     public static class ControllerReaderStubs implements ControllerReader
@@ -110,10 +109,6 @@ public final class GVRGearCursorController extends GVRCursorController
         }
         @Override
         public void updateTouchpad(PointF pt) {
-        }
-        @Override
-        public boolean supportsSendEventsToActivity() {
-            return true;
         }
     }
 
@@ -193,6 +188,7 @@ public final class GVRGearCursorController extends GVRCursorController
         properties.toolType = MotionEvent.TOOL_TYPE_FINGER;
         pointerPropertiesArray = new MotionEvent.PointerProperties[]{properties};
         pointerCoordsArray = new MotionEvent.PointerCoords[]{pointerCoords};
+        mPropagateEvents = new SendEvents(context);
     }
 
     public void attachReader(ControllerReader reader)
@@ -452,7 +448,7 @@ public final class GVRGearCursorController extends GVRCursorController
                 Handedness.LEFT : Handedness.RIGHT;
     }
 
-    private final SendEvents mPropagateEvents = new SendEvents(getGVRContext().getActivity());
+    private final SendEvents mPropagateEvents;
 
     @Override
     protected void updatePicker(MotionEvent event, boolean isActive)
@@ -512,7 +508,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                     prevButtonHome, KeyEvent.KEYCODE_HOME);
         prevButtonHome = handleResult == -1 ? prevButtonHome : handleResult;
         event.recycle();
-        if (canSendEventsToActivity() && ((keyEvent.size() > 0) || (motionEvent.size() > 0)))
+        if (keyEvent.size() > 0 || motionEvent.size() > 0)
         {
             mPropagateEvents.init(keyEvent, motionEvent);
             getGVRContext().getActivity().runOnUiThread(mPropagateEvents);
@@ -717,11 +713,11 @@ public final class GVRGearCursorController extends GVRCursorController
         private final ConcurrentLinkedQueue<KeyEvent> mKeyEvents = new ConcurrentLinkedQueue<>();
         private final ConcurrentLinkedQueue<MotionEvent> mMotionEvents =
                 new ConcurrentLinkedQueue<>();
-        private final Activity mActivity;
+        private final GVRContext mContext;
 
-        SendEvents(final Activity activity)
+        SendEvents(final GVRContext context)
         {
-            mActivity = activity;
+            mContext = context;
         }
 
         public void init(List<KeyEvent> keyEvents, List<MotionEvent> motionEvents)
@@ -730,33 +726,30 @@ public final class GVRGearCursorController extends GVRCursorController
             mMotionEvents.addAll(motionEvents);
         }
 
-        public void run()
-        {
-            for (final Iterator<KeyEvent> it = mKeyEvents.iterator(); it.hasNext(); )
-            {
+        public void run() {
+            final Activity activity = mContext.getActivity();
+            for (final Iterator<KeyEvent> it = mKeyEvents.iterator(); it.hasNext(); ) {
                 final KeyEvent e = it.next();
-                mActivity.dispatchKeyEvent(e);
+                //@todo for now stays the same until the implications of using a new event is
+                //better understood
+                activity.dispatchKeyEvent(e);
                 it.remove();
             }
 
-            for (Iterator<MotionEvent> it = mMotionEvents.iterator(); it.hasNext(); )
-            {
+            for (Iterator<MotionEvent> it = mMotionEvents.iterator(); it.hasNext(); ) {
                 final MotionEvent e = it.next();
                 final MotionEvent dupe = MotionEvent.obtain(e);
                 it.remove();
 
-                mActivity.dispatchTouchEvent(dupe);
+                //@todo move the io package back to gearvrf
+                mContext.getEventManager().sendEventWithMask(
+                        GVREventManager.SEND_MASK_ALL & ~GVREventManager.SEND_MASK_OBJECT,
+                        activity,
+                        IActivityEvents.class,
+                        "dispatchTouchEvent", dupe);
+
                 dupe.recycle();
             }
-        }
-    }
-
-    @Override
-    protected boolean canSendEventsToActivity() {
-        if (mControllerReader.supportsSendEventsToActivity()) {
-            return super.canSendEventsToActivity();
-        } else {
-            return false;
         }
     }
 }
