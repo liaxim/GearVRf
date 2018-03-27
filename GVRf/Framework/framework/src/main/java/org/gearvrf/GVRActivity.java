@@ -405,6 +405,13 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
                     }
             }
         }
+
+        mViewManager.getEventManager().sendEventWithMask(
+                SEND_EVENT_MASK,
+                this,
+                IActivityEvents.class,
+                "dispatchKeyEvent", event);
+
         if (mViewManager.dispatchKeyEvent(event)) {
             return true;
         }
@@ -654,7 +661,7 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
      * @see GVRMain#onSwipe(GVRTouchPadGestureListener.Action, float)
      * @see GVRTouchPadGestureListener
      */
-    public synchronized void enableSwipeEvents() {
+    public synchronized void enableSwipeEvent() {
         final GVRTouchPadGestureListener gestureListener = new GVRTouchPadGestureListener() {
             @Override
             public boolean onSwipe(MotionEvent e, Action action, float vx, float vy) {

@@ -157,7 +157,7 @@ public abstract class GVRMain implements IScriptEvents, IScriptable, IEventRecei
 
     /**
      * Handle swipe events by implementing this method.
-     * @see GVRActivity#enableSwipeEvents()
+     * @see GVRActivity#enableSwipeEvent()
      * @see GVRTouchPadGestureListener
      * @param action
      * @param vx

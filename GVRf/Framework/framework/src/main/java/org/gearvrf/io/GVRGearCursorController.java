@@ -730,9 +730,11 @@ public final class GVRGearCursorController extends GVRCursorController
             final Activity activity = mContext.getActivity();
             for (final Iterator<KeyEvent> it = mKeyEvents.iterator(); it.hasNext(); ) {
                 final KeyEvent e = it.next();
-                //@todo for now stays the same until the implications of using a new event is
-                //better understood
-                activity.dispatchKeyEvent(e);
+                mContext.getEventManager().sendEventWithMask(
+                        GVREventManager.SEND_MASK_ALL & ~GVREventManager.SEND_MASK_OBJECT,
+                        activity,
+                        IActivityEvents.class,
+                        "dispatchKeyEvent", e);
                 it.remove();
             }
 
