@@ -657,16 +657,26 @@ public class GVRActivity extends Activity implements IEventReceiver, IScriptable
     }
 
     /**
-     * Enables the onSwipe event. By default it is not.
+     * Enables the Android GestureDetector which in turn fires the appropriate {@link GVRMain} callbacks.
+     * By default it is not.
      * @see GVRMain#onSwipe(GVRTouchPadGestureListener.Action, float)
+     * @see GVRMain#onSingleTapUp(MotionEvent)
      * @see GVRTouchPadGestureListener
      */
-    public synchronized void enableSwipeEvent() {
+    public synchronized void enableGestureDetector() {
         final GVRTouchPadGestureListener gestureListener = new GVRTouchPadGestureListener() {
             @Override
             public boolean onSwipe(MotionEvent e, Action action, float vx, float vy) {
                 if (null != mGVRMain) {
                     mGVRMain.onSwipe(action, vx);
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                if (null != mGVRMain) {
+                    mGVRMain.onSingleTapUp(e);
                 }
                 return true;
             }
