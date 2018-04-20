@@ -689,7 +689,9 @@ class GVRJassimpAdapter {
         wrapModeMap.put(AiTextureMapMode.WRAP, GVRTextureParameters.TextureWrapType.GL_REPEAT );
         wrapModeMap.put(AiTextureMapMode.CLAMP, GVRTextureParameters.TextureWrapType.GL_CLAMP_TO_EDGE );
         wrapModeMap.put(AiTextureMapMode.MIRROR, GVRTextureParameters.TextureWrapType.GL_MIRRORED_REPEAT );
-
+        wrapModeMap.put(AiTextureMapMode.GL_REPEAT, GVRTextureParameters.TextureWrapType.GL_REPEAT );
+        wrapModeMap.put(AiTextureMapMode.GL_CLAMP, GVRTextureParameters.TextureWrapType.GL_CLAMP_TO_EDGE );
+        wrapModeMap.put(AiTextureMapMode.GL_MIRRORED_REPEAT, GVRTextureParameters.TextureWrapType.GL_MIRRORED_REPEAT );
     }
 
     private GVRMaterial createMaterial(AiMaterial material, EnumSet<GVRImportSettings> settings)
