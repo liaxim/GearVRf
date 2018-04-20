@@ -564,7 +564,7 @@ class GVRJassimpAdapter {
         GVRLight light =  lightlist.get(name);
         if (light != null) {
             Quaternionf q = new Quaternionf();
-            q.rotationX((float) Math.PI / 2.0f);
+            q.rotationX((float) -Math.PI / 2.0f);
             q.normalize();
             light.setDefaultOrientation(q);
             sceneObject.attachLight(light);
@@ -753,6 +753,7 @@ class GVRJassimpAdapter {
 
         gvrTex.setTexCoord(texCoordKey, shaderKey);
         gvrmtl.setTexture(textureKey, gvrTex);
+
         if (texFileName.startsWith("*"))
         {
             AiTexture tex = null;
