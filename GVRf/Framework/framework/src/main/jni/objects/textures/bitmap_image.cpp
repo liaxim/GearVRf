@@ -38,8 +38,10 @@ void BitmapImage::update(JNIEnv* env, int width, int height, jbyteArray data)
     std::lock_guard<std::mutex> lock(mUpdateLock);
     env->GetJavaVM(&mJava);
     clearData(env);
-    mWidth = width;
-    mHeight = height;
+
+    setWidth(width);
+    setHeight(height);
+
     mFormat = GL_RGBA; // PixelFormat::A8;
     mIsCompressed = false;
 
@@ -81,8 +83,10 @@ void BitmapImage::update(JNIEnv* env, int xoffset, int yoffset, int width, int h
     {
         mXOffset = xoffset;
         mYOffset = yoffset;
-        mWidth = width;
-        mHeight = height;
+
+        setWidth(width);
+        setHeight(height);
+
         mFormat = format;
         mType = type;
         mBitmap = env->NewGlobalRef(buffer);
@@ -98,8 +102,10 @@ void BitmapImage::update(JNIEnv *env, int width, int height, int imageSize,
     std::lock_guard<std::mutex> lock(mUpdateLock);
     env->GetJavaVM(&mJava);
     clearData(env);
-    mWidth = width;
-    mHeight = height;
+
+    setWidth(width);
+    setHeight(height);
+
     mLevels = levels;
     mIsCompressed = true;
     mImageSize = imageSize;

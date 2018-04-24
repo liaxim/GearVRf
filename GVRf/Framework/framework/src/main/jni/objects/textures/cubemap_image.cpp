@@ -42,8 +42,10 @@ namespace gvr {
     {
         std::lock_guard<std::mutex> lock(mUpdateLock);
         env->GetJavaVM(&mJava);
-        mWidth = width;
-        mHeight = height;
+
+        setWidth(width);
+        setHeight(height);
+
         mImageSize = imageSize;
         mIsCompressed = true;
         setDataOffsets(textureOffset, 6);

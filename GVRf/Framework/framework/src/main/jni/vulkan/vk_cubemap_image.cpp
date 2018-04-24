@@ -88,8 +88,9 @@ extern std::map<int, VkFormat> compressed_formats;
                 {
                     VkBufferImageCopy bufferCopyRegion = {};
                     ImageInfo imageInfo = {};
-                    mWidth = info.width;
-                    mHeight = info.height;
+                    setWidth(info.width);
+                    setHeight(info.height);
+
                     mImageSize = info.height * info.stride;
                     bufferCopyRegion.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
                     bufferCopyRegion.imageSubresource.mipLevel = 0;
@@ -97,8 +98,8 @@ extern std::map<int, VkFormat> compressed_formats;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
                     bufferCopyRegion.imageExtent.depth = 1;
 
-                    bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(mWidth);
-                    bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(mHeight);
+                    bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(getWidth());
+                    bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(getHeight());
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = tex_size;
                     imageInfo.width = bufferCopyRegion.imageExtent.width;
@@ -167,8 +168,8 @@ extern std::map<int, VkFormat> compressed_formats;
                     bufferCopyRegion.imageSubresource.layerCount = 1;
                     bufferCopyRegion.imageExtent.depth = 1;
 
-                    bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(mWidth);
-                    bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(mHeight);
+                    bufferCopyRegion.imageExtent.width = static_cast<uint32_t>(getWidth());
+                    bufferCopyRegion.imageExtent.height = static_cast<uint32_t>(getHeight());
                     bufferCopyRegion.imageExtent.depth = 1;
                     bufferCopyRegion.bufferOffset = tex_size;
                     imageInfo.width = bufferCopyRegion.imageExtent.width;

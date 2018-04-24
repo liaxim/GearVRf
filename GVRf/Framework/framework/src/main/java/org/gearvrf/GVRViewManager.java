@@ -340,11 +340,12 @@ abstract class GVRViewManager extends GVRContext {
                         mEventManager.sendEvent(mMain, IScriptEvents.class, "onEarlyInit", GVRViewManager.this);
                         mEventManager.sendEvent(mMain, IScriptEvents.class, "onInit", GVRViewManager.this);
 
-                        if (null != mSplashScreen && GVRMain.SplashMode.AUTOMATIC == mMain
+                        final SplashScreen splashScreen = mSplashScreen;
+                        if (null != splashScreen && GVRMain.SplashMode.AUTOMATIC == mMain
                                 .getSplashMode() && mMain.getSplashDisplayTime() < 0f) {
                             runOnGlThread(new Runnable() {
                                 public void run() {
-                                    mSplashScreen.closeSplashScreen();
+                                    splashScreen.closeSplashScreen();
                                 }
                             });
                         }

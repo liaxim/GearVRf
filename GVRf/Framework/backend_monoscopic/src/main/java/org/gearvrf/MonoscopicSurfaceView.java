@@ -30,6 +30,9 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 
+import static android.opengl.EGLExt.EGL_OPENGL_ES3_BIT_KHR;
+import static javax.microedition.khronos.egl.EGL10.EGL_SAMPLE_BUFFERS;
+
 /**
  * This GVRSurfaceView class extends from {@link GLSurfaceView} which is used
  * for OpenGL rendering. In GVR, GVRSurfaceView acts the same way
@@ -172,17 +175,20 @@ class MonoscopicConfigChooser implements GLSurfaceView.EGLConfigChooser {
         mAlphaSize = a;
         mDepthSize = depth;
         mStencilSize = stencil;
-    }
 
-    /*
-     * This EGL config specification is used to specify 2.0 rendering. We use a
-     * minimum size of 4 bits for red/green/blue, but will perform actual
-     * matching in chooseConfig() below.
-     */
-    private static final int EGL_OPENGL_ES2_BIT = 4;
-    private final int[] s_configAttribs2 = { EGL10.EGL_RED_SIZE, 4,
-            EGL10.EGL_GREEN_SIZE, 4, EGL10.EGL_BLUE_SIZE, 4,
-            EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL10.EGL_NONE };
+        mConfigAttribs = new int[] {
+                EGL10.EGL_RED_SIZE, mRedSize,
+                EGL10.EGL_GREEN_SIZE, mGreenSize,
+                EGL10.EGL_BLUE_SIZE, mBlueSize,
+                EGL10.EGL_DEPTH_SIZE, mDepthSize,
+                EGL10.EGL_STENCIL_SIZE, mStencilSize,
+                EGL10.EGL_ALPHA_SIZE, mAlphaSize,
+                EGL10.EGL_SAMPLES, 4,
+                EGL10.EGL_SAMPLE_BUFFERS, 1,
+                EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES3_BIT_KHR,
+                EGL10.EGL_NONE};
+    }
+    private final int[] mConfigAttribs;
 
     public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
 
@@ -190,7 +196,7 @@ class MonoscopicConfigChooser implements GLSurfaceView.EGLConfigChooser {
          * Get the number of minimally matching EGL configurations
          */
         int[] num_config = new int[1];
-        egl.eglChooseConfig(display, s_configAttribs2, null, 0, num_config);
+        egl.eglChooseConfig(display, mConfigAttribs, null, 0, num_config);
 
         int numConfigs = num_config[0];
 
@@ -202,7 +208,7 @@ class MonoscopicConfigChooser implements GLSurfaceView.EGLConfigChooser {
          * Allocate then read the array of minimally matching EGL configs
          */
         EGLConfig[] configs = new EGLConfig[numConfigs];
-        egl.eglChooseConfig(display, s_configAttribs2, configs, numConfigs,
+        egl.eglChooseConfig(display, mConfigAttribs, configs, numConfigs,
                 num_config);
 
         /*

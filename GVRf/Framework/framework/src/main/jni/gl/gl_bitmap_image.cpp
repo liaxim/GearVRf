@@ -76,7 +76,7 @@ int GLBitmapImage::updateFromBitmap(JNIEnv *env, int target, jobject bitmap, boo
 void GLBitmapImage::updateFromBuffer(JNIEnv *env, int target, jobject pixels)
 {
     void* directPtr = env->GetDirectBufferAddress(pixels);
-    glTexSubImage2D(target, 0, mXOffset, mYOffset, mWidth, mHeight, mFormat, mType, directPtr);
+    glTexSubImage2D(target, 0, mXOffset, mYOffset, getWidth(), getHeight(), mFormat, mType, directPtr);
 }
 
 void GLBitmapImage::update(int texid)
@@ -117,13 +117,13 @@ void GLBitmapImage::updateFromMemory(int texid)
         }
         else
         {
-            glCompressedTexImage2D(mGLTarget, 0, mFormat, mWidth, mHeight, 0,
+            glCompressedTexImage2D(mGLTarget, 0, mFormat, getWidth(), getHeight(), 0,
                                    mImageSize, pixels + getDataOffset(0));
         }
     }
     else
     {
-        glTexImage2D(mGLTarget, 0, GL_LUMINANCE, mWidth, mHeight, 0, GL_LUMINANCE,
+        glTexImage2D(mGLTarget, 0, GL_LUMINANCE, getWidth(), getHeight(), 0, GL_LUMINANCE,
                      GL_UNSIGNED_BYTE, pixels);
         glGenerateMipmap(mGLTarget);
     }
@@ -159,8 +159,8 @@ void GLBitmapImage::loadCompressedMipMaps(jbyte *data, int format)
     {
         int levelOffset = getDataOffset(level);
         int levelSize = getDataOffset(level + 1) - levelOffset;
-        int width = mWidth >> level;
-        int height = mHeight >> level;
+        int width = getWidth() >> level;
+        int height = getHeight() >> level;
         if (width < 1) width = 1;
         if (height < 1) height = 1;
         glCompressedTexImage2D(mGLTarget, level, format, width, height, levelOffset, levelSize,

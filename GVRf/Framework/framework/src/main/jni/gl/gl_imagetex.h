@@ -55,8 +55,8 @@ namespace gvr {
                 Image(type, format),
                 GLImage(GL_TEXTURE_2D)
         {
-            mWidth = width;
-            mHeight = height;
+            setWidth(width);
+            setHeight(height);
         }
 
         virtual int getId() { return mId; }

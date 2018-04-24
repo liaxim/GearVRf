@@ -34,8 +34,9 @@ GLRenderImage::GLRenderImage(int width, int height, int layers, GLuint texId, bo
 GLRenderImage::GLRenderImage(int width, int height, int layers)
         : GLImage((layers > 1) ? GL_TEXTURE_2D_ARRAY : GL_TEXTURE_2D)
 {
-    mWidth = width;
-    mHeight = height;
+    setWidth(width);
+    setHeight(height);
+
     mDepth = layers;
     mType = (layers > 1) ? Image::ImageType::ARRAY : Image::ImageType::BITMAP;
     mState = HAS_DATA;
@@ -139,20 +140,21 @@ GLRenderImage::GLRenderImage(int width, int height, int color_format, const Text
 GLuint GLRenderImage::createTexture()
 {
     GLuint texid = GLImage::createTexture();
-    glBindTexture(mGLTarget, texid);
+    GL(glBindTexture(mGLTarget, texid));
     if (mGLTarget == GL_TEXTURE_2D_ARRAY)
     {
-        glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8,
+        GL(glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGBA8,
                      getWidth(), getHeight(), getDepth(),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
     }
     else
     {
-        glTexImage2D(mGLTarget, 0, GL_RGBA8,
+        LOGI("mmarinov: gl_render_image.cpp %d %d %d",mGLTarget, getWidth(), getHeight());
+        GL(glTexImage2D(mGLTarget, 0, GL_RGBA8,
                      getWidth(), getHeight(),
-                     0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+                     0, GL_RGBA, GL_UNSIGNED_BYTE, NULL));
     }
-    glBindTexture(mGLTarget, 0);
+    GL(glBindTexture(mGLTarget, 0));
     checkGLError("GLRenderImage::createTexture");
     return texid;
 }

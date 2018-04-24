@@ -49,8 +49,8 @@ namespace gvr
     : Image(type, format),
       vkImageBase(VK_IMAGE_VIEW_TYPE_2D)
     {
-        Image::mWidth = width;
-        Image::mHeight = height;
+        setWidth(width);
+        setHeight(height);
     }
 }
 #endif

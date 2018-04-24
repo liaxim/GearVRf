@@ -147,6 +147,8 @@ class MonoscopicViewManager extends GVRViewManager implements MonoscopicRotation
         }
 
         mView = new MonoscopicSurfaceView(gvrActivity, this, width, height);
+        gvrActivity.getAppSettings().getEyeBufferParams().setResolutionWidth(width);
+        gvrActivity.getAppSettings().getEyeBufferParams().setResolutionHeight(height);
 
         float aspect = (float) width / (float) height;
         GVRPerspectiveCamera.setDefaultAspectRatio(aspect);

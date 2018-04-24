@@ -36,8 +36,10 @@ namespace gvr {
         std::lock_guard<std::mutex> lock(mUpdateLock);
         env->GetJavaVM(&mJava);
         clearData(env);
-        mWidth = width;
-        mHeight = height;
+
+        setWidth(width);
+        setHeight(height);
+
         if (data != NULL)
         {
             mData = static_cast<jfloatArray>(env->NewGlobalRef(data));

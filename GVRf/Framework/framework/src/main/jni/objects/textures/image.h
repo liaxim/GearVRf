@@ -88,8 +88,17 @@ public:
     virtual bool transparency() { return false; }
 
     bool hasData() const { return mState == HAS_DATA; }
+
     short getWidth() const { return mWidth; }
+    void setWidth(int width) {
+        if (-1 == width) {
+            LOGI("mmarinov: image.h");
+        }
+        mWidth = width;
+    }
     short getHeight() const { return mHeight; }
+    void setHeight(int height) { mHeight = height; }
+
     short getDepth() const { return mDepth; }
     short getLevels() const { return mLevels; }
     short getType() const { return mType; }
@@ -156,8 +165,6 @@ protected:
     short   mLevels;
     int   mXOffset;
     int   mYOffset;
-    int   mWidth;
-    int   mHeight;
     short   mDepth;
     short   mState;
     int     mImageSize;
@@ -167,6 +174,9 @@ protected:
     std::vector<int>    mDataOffsets;
 
 private:
+    int   mWidth;
+    int   mHeight;
+
     Image(const Image& image) = delete;
     Image(Image&& image) = delete;
     Image& operator=(const Image& image) = delete;

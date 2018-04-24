@@ -19,6 +19,9 @@
 
 #include "gl/gl_image.h"
 
+#define VERBOSE_LOGGING 0
+#include "util/gvr_log.h"
+
 namespace gvr {
 GLenum GLImage::MapWrap[3] = { GL_CLAMP_TO_EDGE, GL_REPEAT, GL_MIRRORED_REPEAT };
 GLenum GLImage::MapFilter[6] = { GL_NEAREST, GL_LINEAR, GL_NEAREST_MIPMAP_NEAREST,
@@ -64,9 +67,8 @@ bool GLImage::updateGPU()
 GLuint GLImage::createTexture()
 {
     GLuint id;
-    glGenTextures(1, &id);
+    GL(glGenTextures(1, &id));
     LOGV("GLImage: texture id created is %d", id);
-    checkGLError("GLImage::createTexture");
     return id;
 }
 

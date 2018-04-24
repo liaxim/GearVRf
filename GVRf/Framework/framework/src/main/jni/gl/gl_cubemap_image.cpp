@@ -90,8 +90,8 @@ void GLCubemapImage::updateFromMemory(int texid)
         else
         {
             jbyte* pixels = env->GetByteArrayElements(byteArray, 0);
-            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat, mWidth,
-                                   mHeight, 0, mImageSize, pixels + getDataOffset(i));
+            glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, mFormat, getWidth(),
+                                   getHeight(), 0, mImageSize, pixels + getDataOffset(i));
             checkGLError("GLCubemapImage::updateFromMemory");
             env->ReleaseByteArrayElements(byteArray, pixels, 0);
         }
