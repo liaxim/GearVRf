@@ -109,6 +109,11 @@ android {
         java.srcDirs = ['src/main/java']
         resources.srcDir 'src/main/libs'
     }
+
+    packagingOptions {
+        exclude 'lib/mips/*'
+        exclude 'lib/mips64/*'
+    }
 }
 
 project.ext.jomlVersion = "1.9.3-SNAPSHOT"
