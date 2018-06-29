@@ -41,6 +41,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -70,29 +71,13 @@ public final class GVRGearCursorController extends GVRCursorController
     {
         boolean isConnected(int index);
 
-        boolean isTouched(int index);
-
-        void updateRotation(Quaternionf quat, int index);
-
-        void updatePosition(Vector3f vec, int index);
-
-        void updateAngularVelocity(Vector3f vec, int index);
-
-        void updateAngularAcceleration(Vector3f vec, int index);
-
-        int getKey(int index);
-
-        float getHandedness();
-
-        void updateTouchpad(PointF pt, int index);
-
         void onPause();
 
         void onResume();
 
-        void updatePosData();
-
         String getModelFileName();
+
+        void getEvents(int controllerID, ArrayList<ControllerEvent> mControllerEvents);
     }
 
     public static class ControllerReaderStubs implements ControllerReader
@@ -102,43 +87,20 @@ public final class GVRGearCursorController extends GVRCursorController
             return false;
         }
         @Override
-        public boolean isTouched(int index) {
-            return false;
-        }
-        @Override
-        public void updateRotation(Quaternionf quat, int index) { }
-        @Override
-        public void updatePosition(Vector3f vec, int index) { }
-        @Override
-        public int getKey(int index) {
-            return 0;
-        }
-        @Override
-        public float getHandedness() {
-            return 0;
-        }
-        @Override
-        public void updateTouchpad(PointF pt, int index) { }
-        @Override
         public void onPause() { }
         @Override
         public void onResume() { }
-        @Override
-        public void updatePosData(){}
         @Override
         public String getModelFileName(){
             return "gear_vr_controller.obj";
         }
 
         @Override
-        public void updateAngularVelocity(Vector3f vec, int index){}
-        @Override
-        public void updateAngularAcceleration(Vector3f vec, int index){}
+        public void getEvents(int controllerID, ArrayList<ControllerEvent> mControllerEvents) {}
     }
 
     public enum CONTROLLER_KEYS
     {
-        BUTTON_NONE(0),
         BUTTON_A(0x00000001),
         BUTTON_ENTER(0x00100000),
         BUTTON_BACK(0x00200000),
@@ -149,7 +111,6 @@ public final class GVRGearCursorController extends GVRCursorController
         BUTTON_VOLUME_UP(0x00400000),
         BUTTON_VOLUME_DOWN(0x00800000),
         BUTTON_HOME(0x01000000);
-
         private int numVal;
 
         CONTROLLER_KEYS(int numVal)
@@ -160,34 +121,6 @@ public final class GVRGearCursorController extends GVRCursorController
         public int getNumVal()
         {
             return numVal;
-        }
-
-        static public CONTROLLER_KEYS fromValue(int value) {
-            switch (value) {
-                case 0:
-                    return BUTTON_NONE;
-                case 0x00000001:
-                    return BUTTON_A;
-                case 0x00100000:
-                    return BUTTON_ENTER;
-                case 0x00200000:
-                    return BUTTON_BACK;
-                case 0x00010000:
-                    return BUTTON_UP;
-                case 0x00020000:
-                    return BUTTON_DOWN;
-                case 0x00040000:
-                    return BUTTON_LEFT;
-                case 0x00080000:
-                    return BUTTON_RIGHT;
-                case 0x00400000:
-                    return BUTTON_VOLUME_UP;
-                case 0x00800000:
-                    return BUTTON_VOLUME_DOWN;
-                case 0x01000000:
-                    return BUTTON_HOME;
-            }
-            throw new IllegalArgumentException("Unknown value "+value);
         }
     }
 
@@ -428,6 +361,7 @@ public final class GVRGearCursorController extends GVRCursorController
         showControllerModel(mShowControllerModel);
     }
 
+    private final ArrayList<ControllerEvent> mControllerEvents = new ArrayList<>();
     public void pollController()
     {
         boolean wasConnected = mConnected;
@@ -444,16 +378,17 @@ public final class GVRGearCursorController extends GVRCursorController
         }
         if (isEnabled())
         {
-            ControllerEvent event = ControllerEvent.obtain();
-            mControllerReader.updateRotation(event.rotation,controllerID);
-            mControllerReader.updatePosition(event.position,controllerID);
-            mControllerReader.updateAngularAcceleration(event.angularAcceleration,controllerID);
-            mControllerReader.updateAngularVelocity(event.angularVelocity,controllerID);
-            event.touched = mControllerReader.isTouched(controllerID);
-            event.key = mControllerReader.getKey(controllerID);
-            event.handedness = mControllerReader.getHandedness();
-            mControllerReader.updateTouchpad(event.pointF,controllerID);
-            handleControllerEvent(event);
+            mControllerEvents.clear();
+            try {
+                mControllerReader.getEvents(controllerID, mControllerEvents);
+            } catch (final RuntimeException exc) {
+                Log.i(TAG, "getEvents threw: " + exc.toString());
+                exc.printStackTrace();
+            }
+
+            for (final ControllerEvent event: mControllerEvents) {
+                handleControllerEvent(event);
+            }
         }
     }
 
@@ -742,24 +677,40 @@ public final class GVRGearCursorController extends GVRCursorController
         return -1;
     }
 
-    private static final class ControllerEvent
+    public static final class ControllerEvent
     {
+        @Override
+        public String toString() {
+            return "ControllerEvent{" +
+                    "next=" + next +
+                    ", rotation=" + rotation +
+                    ", position=" + position +
+                    ", angularVelocity=" + angularVelocity +
+                    ", angularAcceleration=" + angularAcceleration +
+                    ", pointF=" + pointF +
+                    ", key=" + key +
+                    ", handedness=" + handedness +
+                    ", recycled=" + recycled +
+                    ", touched=" + touched +
+                    '}';
+        }
+
         private static final int MAX_RECYCLED = 5;
         private static final Object recyclerLock = new Object();
         private static int recyclerUsed;
         private static ControllerEvent recyclerTop;
         private ControllerEvent next;
-        private Quaternionf rotation = new Quaternionf();
-        private Vector3f position = new Vector3f();
-        private Vector3f angularVelocity = new Vector3f();
-        private Vector3f angularAcceleration = new Vector3f();
-        private PointF pointF = new PointF();
-        private int key;
-        private float handedness;
+        public Quaternionf rotation = new Quaternionf();
+        public Vector3f position = new Vector3f();
+        public Vector3f angularVelocity = new Vector3f();
+        public Vector3f angularAcceleration = new Vector3f();
+        public PointF pointF = new PointF();
+        public int key;
+        public float handedness;
         private boolean recycled = false;
-        private boolean touched = false;
+        public boolean touched = false;
 
-        static ControllerEvent obtain()
+        public static ControllerEvent obtain()
         {
             final ControllerEvent event;
             synchronized (recyclerLock)
@@ -768,6 +719,13 @@ public final class GVRGearCursorController extends GVRCursorController
                 if (event == null)
                 {
                     return new ControllerEvent();
+                } else {
+                    event.handedness = GVRGearCursorController.Handedness.RIGHT.ordinal();
+                    event.pointF.set(0, 0);
+                    event.key = 0;
+                    event.touched = false;
+                    event.angularAcceleration.set(0, 0, 0);
+                    event.angularVelocity.set(0, 0, 0);
                 }
                 event.recycled = false;
                 recyclerTop = event.next;
@@ -844,5 +802,5 @@ public final class GVRGearCursorController extends GVRCursorController
         }
     }
 
-    private static final String TAG = "GearCursorController";
+    private static final String TAG = "GVRGearCursorController";
 }
