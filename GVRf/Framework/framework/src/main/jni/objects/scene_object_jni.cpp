@@ -152,6 +152,7 @@ Java_org_gearvrf_NativeSceneObject_removeChildObject(
         JNIEnv * env, jobject obj, jlong jscene_object, jlong jchild) {
     SceneObject* scene_object = reinterpret_cast<SceneObject*>(jscene_object);
     SceneObject* child = reinterpret_cast<SceneObject*>(jchild);
+    LOGI("mmarinov: scene_object_jni.cpp so %p", scene_object);
     scene_object->removeChildObject(child);
 }
 

@@ -39,6 +39,7 @@ SceneObject::SceneObject() :
 }
 
 SceneObject::~SceneObject() {
+    LOGI("mmarinov: scene_object.cpp ~ this %p", this);
     delete queries_;
 }
 
@@ -148,6 +149,7 @@ void SceneObject::addChildObject(SceneObject* self, SceneObject* child) {
         children_.push_back(child);
     }
     child->parent_ = self;
+    LOGI("mmarinov: scene_object.cpp = self %p this %p", self, this);
     child->onTransformChanged();
 }
 
@@ -195,6 +197,7 @@ bool SceneObject::onAddChild(SceneObject* addme, SceneObject* root)
  */
 bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
 {
+    LOGI("mmarinov: scene_object.cpp this %p", this);
     bounding_volume_dirty_ = true;
     if (this == root)
     {
@@ -204,6 +207,7 @@ bool SceneObject::onRemoveChild(SceneObject* removeme, SceneObject* root)
     {
         return false;
     }
+    LOGI("mmarinov: scene_object.cpp parent_ %p this %p", parent_, this);
     return parent_->onRemoveChild(removeme, root);
 }
 
@@ -231,6 +235,7 @@ void SceneObject::removeChildObject(SceneObject* child)
     {
         if (scene != NULL)
         {
+            LOGI("mmarinov: scene_object.cpp 1 this %p", this);
             if (onRemoveChild(child, scene->getRoot()))
             {
                 child->onRemovedFromScene(scene);
@@ -238,6 +243,7 @@ void SceneObject::removeChildObject(SceneObject* child)
         }
         else
         {
+            LOGI("mmarinov: scene_object.cpp 2 this %p", this);
             onRemoveChild(child, NULL);
         }
         {
@@ -245,6 +251,7 @@ void SceneObject::removeChildObject(SceneObject* child)
             children_.erase(std::remove(children_.begin(), children_.end(), child), children_.end());
         }
         child->parent_ = NULL;
+        LOGI("mmarinov: scene_object.cpp parent_ = NULL 1 child %p this %p", child, this);
         child->onTransformChanged();
     }
 }
@@ -288,6 +295,7 @@ void SceneObject::clear()
             onRemoveChild(child, NULL);
         }
         child->parent_ = NULL;
+        LOGI("mmarinov: scene_object.cpp parent_ = NULL 2 this %p", this);
         child->onTransformChanged();
     }
     children_.clear();

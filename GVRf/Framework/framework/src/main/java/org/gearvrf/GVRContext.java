@@ -853,6 +853,7 @@ public abstract class GVRContext implements IEventReceiver {
                             handler.nativeCleanup(mNativePointer);
                         }
                     }
+                    Log.i("mmarinov", "DELETE "+Long.toHexString(mNativePointer));
                     NativeHybridObject.delete(mNativePointer);
                     mNativePointer = 0;
                 }

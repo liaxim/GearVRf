@@ -254,6 +254,7 @@ public abstract class GVRCursorController implements IEventReceiver
         addPickEventListener(GVRSensor.getPickHandler());
         mCursorScale = new GVRSceneObject(context);
         mCursorScale.setName("CursorController_CursorScale");
+
         mDragRoot = new GVRSceneObject(context);
         mDragRoot.setName("CursorController_DragRoot");
         mDragRoot.addChildObject(mCursorScale);
@@ -882,7 +883,7 @@ public abstract class GVRCursorController implements IEventReceiver
                 {
                     mDragRoot.getParent().removeChildObject(mDragRoot);
                 }
-                scene.getMainCameraRig().addChildObject(mDragRoot);
+//                scene.getMainCameraRig().addChildObject(mDragRoot);
             }
         }
         this.scene = scene;
