@@ -160,16 +160,16 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
         final GVRCameraRig rig = getMainCameraRig();
         final GVRSceneObject head = rig.getOwnerObject();
         rig.removeAllChildren();
-        final GVRSceneObject oldRoot = mSceneRoot;
 
         NativeScene.removeAllSceneObjects(getNative());
+        for (final GVRSceneObject child : mSceneRoot.getChildren()) {
+            child.detachAllComponents();
+            child.getParent().removeChildObject(child);
+        }
 
-        mSceneRoot = new GVRSceneObject(getGVRContext());
         if (null != head) {
-            head.getParent().removeChildObject(head);
             mSceneRoot.addChildObject(head);
         }
-        NativeScene.addSceneObject(getNative(), mSceneRoot.getNative());
 
         final int numControllers = getGVRContext().getInputManager().clear();
         if (numControllers > 0)
@@ -180,12 +180,6 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
         getGVRContext().runOnGlThread(new Runnable() {
             @Override
             public void run() {
-                //to prevent components from being deleted concurrently
-                for (final GVRSceneObject child : oldRoot.getChildren()) {
-                    child.detachAllComponents();
-                    child.getParent().removeChildObject(child);
-                }
-
                 NativeScene.deleteLightsAndDepthTextureOnRenderThread(getNative());
             }
         });
@@ -636,8 +630,6 @@ class NativeScene {
 
     static native void setJava(long scene, GVRScene javaScene);
 
-    static native void addSceneObject(long scene, long sceneObject);
-   
     static native void removeAllSceneObjects(long scene);
 
     static native void deleteLightsAndDepthTextureOnRenderThread(long scene);
@@ -655,10 +647,6 @@ class NativeScene {
     public static native int getNumberTriangles(long scene);
 
     public static native void exportToFile(long scene, String file_path);
-
-    static native boolean addLight(long scene, long light);
-
-    static native void clearLights(long scene);
 
     static native GVRLight[] getLightList(long scene);
 
