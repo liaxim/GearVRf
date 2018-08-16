@@ -156,14 +156,16 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
     /**
      * Remove all scene objects.
      */
-    public void removeAllSceneObjects() {
+    public synchronized void removeAllSceneObjects() {
         final GVRCameraRig rig = getMainCameraRig();
         final GVRSceneObject head = rig.getOwnerObject();
         rig.removeAllChildren();
 
         NativeScene.removeAllSceneObjects(getNative());
         for (final GVRSceneObject child : mSceneRoot.getChildren()) {
-            child.detachAllComponents();
+            if (child != head) {
+                child.detachAllComponents();
+            }
             child.getParent().removeChildObject(child);
         }
 
@@ -223,7 +225,7 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      * @return The {@link GVRCameraRig camera rig} used for rendering the scene
      *         on the screen.
      */
-    public GVRCameraRig getMainCameraRig() {
+    public synchronized GVRCameraRig getMainCameraRig() {
         return mMainCameraRig;
     }
 
@@ -234,7 +236,7 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      * @param cameraRig
      *            The {@link GVRCameraRig camera rig} to render with.
      */
-    public void setMainCameraRig(GVRCameraRig cameraRig) {
+    public synchronized void setMainCameraRig(GVRCameraRig cameraRig) {
         mMainCameraRig = cameraRig;
         NativeScene.setMainCameraRig(getNative(), cameraRig.getNative());
 
@@ -523,7 +525,7 @@ public class GVRScene extends GVRHybridObject implements PrettyPrint, IScriptabl
      * know you don't want the corresponding glClear call then you can use these
      * special values to skip it.
      */
-    public final void setBackgroundColor(float r, float g, float b, float a) {
+    public synchronized final void setBackgroundColor(float r, float g, float b, float a) {
         mMainCameraRig.getLeftCamera().setBackgroundColor(r, g, b, a);
         mMainCameraRig.getRightCamera().setBackgroundColor(r, g, b, a);
         mMainCameraRig.getCenterCamera().setBackgroundColor(r, g, b, a);

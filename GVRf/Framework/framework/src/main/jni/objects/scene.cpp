@@ -153,9 +153,7 @@ void Scene::removeCollider(Collider* collider) {
  * Called when the main scene is first presented for render.
  */
 void Scene::set_main_scene(Scene* scene) {
-    LOGI("scene.cpp: scene %p", scene);
     main_scene_ = scene;
-    LOGI("scene.cpp: root %p", scene->getRoot());
     scene->getRoot()->onAddedToScene(scene);
 }
 
@@ -186,7 +184,6 @@ void Scene::clearLights()
 }
 
 void Scene::setSceneRoot(SceneObject* sceneRoot) {
-    LOGI("scene.cpp: scene %p sceneRoot %p", this, sceneRoot);
     scene_root_ = sceneRoot;
 }
 
