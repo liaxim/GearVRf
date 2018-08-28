@@ -18,16 +18,17 @@ class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderS
     private Controller mController;
     private int mConnectionState = ConnectionStates.DISCONNECTED;
     private FloatBuffer readbackBuffer = null;
-    private GVRApplication mApplication;
+    private final DaydreamViewManager mViewManager;
     private final float OCULUS_SCALE = 256.0f;
 
-    DayDreamControllerReader(GVRApplication application) {
+    DayDreamControllerReader(final DaydreamViewManager viewManager) {
+        mViewManager = viewManager;
+
         EventListener listener = new EventListener();
-        mControllerManager = new ControllerManager(application.getActivity(), listener);
+        mControllerManager = new ControllerManager(mViewManager.getApplication().getActivity(), listener);
         mController = mControllerManager.getController();
         mController.setEventListener(listener);
         mControllerManager.start();
-        mApplication = application;
 
         bufferInit();
     }
@@ -58,10 +59,9 @@ class DayDreamControllerReader extends GVRGearCursorController.ControllerReaderS
         ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(4);
         readbackBufferB.order(ByteOrder.nativeOrder());
         readbackBuffer = readbackBufferB.asFloatBuffer();
-        GVRViewManager gvrViewManager = mApplication.getViewManager();
-        DaydreamViewManager viewManager = (DaydreamViewManager)gvrViewManager;
-        setNativeBuffer(viewManager.getNativeRenderer(), readbackBufferB);
-        updateHandedness(viewManager.getNativeRenderer());
+
+        setNativeBuffer(mViewManager.getNativeRenderer(), readbackBufferB);
+        updateHandedness(mViewManager.getNativeRenderer());
     }
 
     private int getKey() {
