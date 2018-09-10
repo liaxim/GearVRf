@@ -101,6 +101,7 @@ public final class GVRGearCursorController extends GVRCursorController
 
     public enum CONTROLLER_KEYS
     {
+        BUTTON_NONE(0),
         BUTTON_A(0x00000001),
         BUTTON_ENTER(0x00100000),
         BUTTON_BACK(0x00200000),
@@ -121,6 +122,47 @@ public final class GVRGearCursorController extends GVRCursorController
         public int getNumVal()
         {
             return numVal;
+        }
+
+        static public CONTROLLER_KEYS[] fromValue(int value) {
+            if (0 == value) {
+                return null;
+            }
+
+            int count = Integer.bitCount(value);
+            CONTROLLER_KEYS[] result = new CONTROLLER_KEYS[count];
+
+            if (0 != (value & 0x00000001)) {
+                result[--count] = BUTTON_A;
+            }
+            if (0 != (value & 0x00100000)) {
+                result[--count] = BUTTON_ENTER;
+            }
+            if (0 != (value & 0x00200000)) {
+                result[--count] = BUTTON_BACK;
+            }
+            if (0 != (value & 0x00010000)) {
+                result[--count] = BUTTON_UP;
+            }
+            if (0 != (value & 0x00020000)) {
+                result[--count] = BUTTON_DOWN;
+            }
+            if (0 != (value & 0x00040000)) {
+                result[--count] = BUTTON_LEFT;
+            }
+            if (0 != (value & 0x00080000)) {
+                result[--count] = BUTTON_RIGHT;
+            }
+            if (0 != (value & 0x00400000)) {
+                result[--count] = BUTTON_VOLUME_UP;
+            }
+            if (0 != (value & 0x00800000)) {
+                result[--count] = BUTTON_VOLUME_DOWN;
+            }
+            if (0 != (value & 0x01000000)) {
+                result[--count] = BUTTON_HOME;
+            }
+            return result;
         }
     }
 
