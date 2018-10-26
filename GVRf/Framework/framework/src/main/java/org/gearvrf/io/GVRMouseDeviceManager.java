@@ -137,8 +137,8 @@ final class GVRMouseDeviceManager {
         }
 
         @Override
-        protected void setKeyEvent(KeyEvent keyEvent) {
-            super.setKeyEvent(keyEvent);
+        protected void addKeyEvent(KeyEvent keyEvent) {
+            super.addKeyEvent(keyEvent);
         }
 
         @Override
@@ -199,7 +199,7 @@ final class GVRMouseDeviceManager {
              */
             if (action == MotionEvent.ACTION_DOWN)
             {
-                setKeyEvent(BUTTON_1_DOWN);
+                addKeyEvent(BUTTON_1_DOWN);
                 if ((mTouchButtons & e.getButtonState()) != 0)
                 {
                     setActive(true);
@@ -207,10 +207,10 @@ final class GVRMouseDeviceManager {
             }
             else if (action == MotionEvent.ACTION_UP)
             {
-                setKeyEvent(BUTTON_1_UP);
+                addKeyEvent(BUTTON_1_UP);
                 setActive(false);
              }
-            setMotionEvent(e);
+            addMotionEvent(e);
             if (mCursorControl == CursorControl.CURSOR_DEPTH_FROM_CONTROLLER)
             {
                 setCursorDepth(depth);
@@ -334,7 +334,7 @@ final class GVRMouseDeviceManager {
                 InputDevice device = event.getDevice();
                 if (device != null) {
                     GVRMouseController mouseDevice = controllers.get(id);
-                    mouseDevice.setKeyEvent(event);
+                    mouseDevice.addKeyEvent(event);
                 }
             }
         }

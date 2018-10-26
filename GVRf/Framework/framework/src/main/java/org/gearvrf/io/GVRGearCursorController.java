@@ -557,7 +557,7 @@ public final class GVRGearCursorController extends GVRCursorController
         prevButtonA = handleResult == -1 ? prevButtonA : handleResult;
 
         handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_BACK,
-                                    prevButtonBack, KeyEvent.KEYCODE_BACK);
+                                    prevButtonBack, KeyEvent.KEYCODE_BACK, event.sendToActivity);
         prevButtonBack = handleResult == -1 ? prevButtonBack : handleResult;
 
         handleResult = handleButton(key, CONTROLLER_KEYS.BUTTON_VOLUME_UP,
@@ -594,7 +594,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                                          pointerPropertiesArray, pointerCoordsArray,
                                                          0, MotionEvent.BUTTON_PRIMARY, 1f, 1f, 0,
                                                          0, InputDevice.SOURCE_TOUCHPAD, 0);
-            setMotionEvent(motionEvent);
+            addMotionEvent(motionEvent);
             setActive(false);
         }
         else if ((handled == KeyEvent.ACTION_DOWN) || (touched && !actionDown))
@@ -607,7 +607,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                                          pointerCoordsArray,
                                                          0, MotionEvent.BUTTON_PRIMARY, 1f, 1f,
                                                          0, 0, InputDevice.SOURCE_TOUCHPAD, 0);
-            setMotionEvent(motionEvent);
+            addMotionEvent(motionEvent);
             if ((mTouchButtons & MotionEvent.BUTTON_PRIMARY) != 0)
             {
                 setActive(true);
@@ -623,7 +623,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                                          pointerPropertiesArray, pointerCoordsArray,
                                                          0, MotionEvent.BUTTON_PRIMARY, 1f, 1f, 0,
                                                          0, InputDevice.SOURCE_TOUCHPAD, 0);
-            setMotionEvent(motionEvent);
+            addMotionEvent(motionEvent);
         }
         /*
          * If the controller is allowed to change the cursor depth,
@@ -668,7 +668,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                                          pointerPropertiesArray, pointerCoordsArray,
                                                          0, MotionEvent.BUTTON_SECONDARY, 1f, 1f, 0,
                                                          0, InputDevice.SOURCE_TOUCHPAD, 0);
-            setMotionEvent(motionEvent);
+            addMotionEvent(motionEvent);
             Log.d(TAG, "handleAButton action=%d button=%d x=%f y=%f",
                   motionEvent.getAction(), motionEvent.getButtonState(), motionEvent.getX(),
                   motionEvent.getY());
@@ -682,7 +682,7 @@ public final class GVRGearCursorController extends GVRCursorController
                                                          pointerPropertiesArray, pointerCoordsArray,
                                                          0, MotionEvent.BUTTON_SECONDARY, 1f, 1f, 0,
                                                          0, InputDevice.SOURCE_TOUCHPAD, 0);
-            setMotionEvent(motionEvent);
+            addMotionEvent(motionEvent);
             prevATime = time;
             if ((mTouchButtons & MotionEvent.BUTTON_SECONDARY) != 0)
             {
@@ -695,15 +695,28 @@ public final class GVRGearCursorController extends GVRCursorController
         return handled;
     }
 
-    private int handleButton(int key, CONTROLLER_KEYS button, int prevButton, int keyCode)
+    private int handleButton(int key, CONTROLLER_KEYS button, int prevButton, int keyCode) {
+        return handleButton(key, button, prevButton, keyCode, false);
+    }
+
+    private int handleButton(int key, CONTROLLER_KEYS button, int prevButton, int keyCode, boolean sendToActivity)
     {
         if ((key & button.getNumVal()) != 0)
         {
             Log.d(TAG, "keyPress button=%d code=%d", button.getNumVal(), keyCode);
             if (prevButton != KeyEvent.ACTION_DOWN)
             {
-                KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
-                setKeyEvent(keyEvent);
+                final KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyCode);
+                addKeyEvent(keyEvent);
+                if (sendToActivity) {
+                    final Activity activity = getGVRContext().getActivity();
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.dispatchKeyEvent(keyEvent);
+                        }
+                    });
+                }
                 return KeyEvent.ACTION_DOWN;
             }
         }
@@ -711,8 +724,17 @@ public final class GVRGearCursorController extends GVRCursorController
         {
             if (prevButton != KeyEvent.ACTION_UP)
             {
-                KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_UP, keyCode);
-                setKeyEvent(keyEvent);
+                final KeyEvent keyEvent = new KeyEvent(KeyEvent.ACTION_UP, keyCode);
+                addKeyEvent(keyEvent);
+                if (sendToActivity) {
+                    final Activity activity = getGVRContext().getActivity();
+                    activity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            activity.dispatchKeyEvent(keyEvent);
+                        }
+                    });
+                }
                 return KeyEvent.ACTION_UP;
             }
         }
@@ -751,6 +773,7 @@ public final class GVRGearCursorController extends GVRCursorController
         public float handedness;
         private boolean recycled = false;
         public boolean touched = false;
+        public boolean sendToActivity;
 
         public static ControllerEvent obtain()
         {

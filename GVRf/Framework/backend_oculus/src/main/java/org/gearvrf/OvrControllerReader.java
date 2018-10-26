@@ -11,13 +11,14 @@ final class OvrControllerReader extends GVRGearCursorController.ControllerReader
 
     private FloatBuffer readbackBuffer;
     private final long mPtr;
+    private final boolean mIsOculusGo;
 
     OvrControllerReader(long ptrActivityNative) {
         ByteBuffer readbackBufferB = ByteBuffer.allocateDirect(DATA_SIZE * BYTE_TO_FLOAT);
         readbackBufferB.order(ByteOrder.nativeOrder());
         readbackBuffer = readbackBufferB.asFloatBuffer();
         mPtr = OvrNativeGearController.ctor(readbackBufferB);
-        OvrNativeGearController.nativeInitializeGearController(ptrActivityNative, mPtr);
+        mIsOculusGo = OvrNativeGearController.nativeInitializeGearController(ptrActivityNative, mPtr);
     }
 
     @Override
@@ -36,6 +37,14 @@ final class OvrControllerReader extends GVRGearCursorController.ControllerReader
                 readbackBuffer.get(INDEX_POSITION + 1),
                 readbackBuffer.get(INDEX_POSITION + 2));
         event.key = (int) readbackBuffer.get(INDEX_BUTTON);
+
+        if (mIsOculusGo) {
+            if (0x20000000 == event.key) {
+                event.key = GVRGearCursorController.CONTROLLER_KEYS.BUTTON_A.getNumVal();
+            } else if (GVRGearCursorController.CONTROLLER_KEYS.BUTTON_BACK.getNumVal() == event.key) {
+                event.sendToActivity = true;
+            }
+        }
 
         controllerEvents.add(event);
     }
@@ -71,5 +80,5 @@ class OvrNativeGearController {
 
     static native void delete(long jConfigurationManager);
 
-    static native void nativeInitializeGearController(long ptr, long controllerPtr);
+    static native boolean nativeInitializeGearController(long ptr, long controllerPtr);
 }

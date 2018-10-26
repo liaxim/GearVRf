@@ -91,8 +91,16 @@ namespace gvr {
         bool isHmtConnected() const;
         bool usingMultiview() const;
 
-        void setGearController(GearController *controller){
+        void setGearController(GearController *controller) {
             gearController = controller;
+        }
+
+        bool isOculusGo() {
+            const ovrDeviceType deviceType = ( ovrDeviceType )vrapi_GetSystemPropertyInt(&oculusJavaMainThread_, VRAPI_SYS_PROP_DEVICE_TYPE);
+            if (deviceType >= VRAPI_DEVICE_TYPE_OCULUSGO_START && deviceType <= VRAPI_DEVICE_TYPE_OCULUSGO_END) {
+                return true;
+            }
+            return false;
         }
     };
 

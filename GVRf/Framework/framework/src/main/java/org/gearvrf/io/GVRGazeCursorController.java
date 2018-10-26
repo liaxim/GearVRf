@@ -15,18 +15,10 @@
 
 package org.gearvrf.io;
 
-import android.os.Handler;
-import android.os.Handler.Callback;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 import org.gearvrf.GVRContext;
-import org.gearvrf.GVRScene;
-import org.joml.Vector3f;
-
-import java.util.concurrent.CountDownLatch;
 
 final public class GVRGazeCursorController extends GVRCursorController
 {
@@ -48,7 +40,7 @@ final public class GVRGazeCursorController extends GVRCursorController
     synchronized public boolean dispatchKeyEvent(KeyEvent event) {
         if (isEnabled())
         {
-            setKeyEvent(event);
+            addKeyEvent(event);
             return true;
         }
         return false;
@@ -86,12 +78,12 @@ final public class GVRGazeCursorController extends GVRCursorController
                 setActive(true);
             }
             // report ACTION_DOWN as a button
-            setKeyEvent(BUTTON_GAZE_DOWN);
+            addKeyEvent(BUTTON_GAZE_DOWN);
             break;
 
             case MotionEvent.ACTION_UP:
             setActive(false);
-            setKeyEvent(BUTTON_GAZE_UP);
+            addKeyEvent(BUTTON_GAZE_UP);
             break;
 
             case MotionEvent.ACTION_MOVE:
@@ -114,7 +106,7 @@ final public class GVRGazeCursorController extends GVRCursorController
                 event.recycle();
                 return;
         }
-        setMotionEvent(event);
+        addMotionEvent(event);
         invalidate();
     }
 }

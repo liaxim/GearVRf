@@ -63,13 +63,13 @@ namespace gvr {
 
             ovrInputStateTrackedRemote remoteInputState;
             remoteInputState.Header.ControllerType = ovrControllerType_TrackedRemote;
-            result = vrapi_GetCurrentInputState(ovrMobile_, RemoteDeviceID, &remoteInputState
-                    .Header);
+            if (0 > vrapi_GetCurrentInputState(ovrMobile_, RemoteDeviceID, &remoteInputState.Header)) {
+                FAIL("failed to get input state");
+            }
         }
-        vrapi_SetRemoteEmulation(ovrMobile_, false);
     }
 
-    void GearController::onControllerDisconnected(const ovrDeviceID deviceID) {
+    void GearController::onControllerDisconnected(const ovrDeviceID) {
         // not used at the moment
     }
 

@@ -363,7 +363,7 @@ public class IoDevice {
         if (gvrCursorController instanceof GVRExternalCursorController) {
             GVRExternalCursorController controller = (GVRExternalCursorController)
                     gvrCursorController;
-            controller.setKeyEvent(keyEvent);
+            controller.addKeyEvent(keyEvent);
         } else {
             throw new UnsupportedOperationException("setKeyEvent not supported");
         }
@@ -431,8 +431,9 @@ public class IoDevice {
             super(context, GVRControllerType.EXTERNAL);
         }
 
-        public void setKeyEvent(KeyEvent keyEvent) {
-            super.setKeyEvent(keyEvent);
+        @Override
+        public void addKeyEvent(KeyEvent keyEvent) {
+            super.addKeyEvent(keyEvent);
         }
 
         public float getNearDepth() {

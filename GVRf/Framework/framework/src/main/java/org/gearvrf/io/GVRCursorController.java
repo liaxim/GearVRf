@@ -1035,7 +1035,7 @@ public abstract class GVRCursorController implements IEventReceiver
      *
      * @param keyEvent
      */
-    protected void setKeyEvent(KeyEvent keyEvent) {
+    protected void addKeyEvent(KeyEvent keyEvent) {
         synchronized (eventLock) {
             this.keyEvent.add(keyEvent);
         }
@@ -1052,7 +1052,7 @@ public abstract class GVRCursorController implements IEventReceiver
      * @param motionEvent the {@link MotionEvent} processed by the
      *                    {@link GVRCursorController}.
      */
-    protected void setMotionEvent(MotionEvent motionEvent) {
+    protected void addMotionEvent(MotionEvent motionEvent) {
         synchronized (eventLock) {
             this.motionEvent.add(motionEvent);
         }

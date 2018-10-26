@@ -174,7 +174,7 @@ class GVRGamepadDeviceManager {
         }
 
         @Override
-        protected void setKeyEvent(KeyEvent keyEvent) {
+        protected void addKeyEvent(KeyEvent keyEvent) {
             int action = keyEvent.getAction();
 
             if (keyEvent.getKeyCode() == KeyEvent.KEYCODE_BUTTON_L1)
@@ -188,12 +188,12 @@ class GVRGamepadDeviceManager {
                     setActive(false);
                 }
             }
-            super.setKeyEvent(keyEvent);
+            super.addKeyEvent(keyEvent);
         }
 
         @Override
-        protected void setMotionEvent(MotionEvent motionEvent) {
-            super.setMotionEvent(motionEvent);
+        protected void addMotionEvent(MotionEvent motionEvent) {
+            super.addMotionEvent(motionEvent);
         }
 
         @Override
@@ -425,7 +425,7 @@ class GVRGamepadDeviceManager {
             int action = event.getAction();
 
             if (ACTIVE_BUTTONS.contains(keyCode)) {
-                controller.setKeyEvent(event);
+                controller.addKeyEvent(event);
             } else {
                 switch (keyCode) {
                     case KeyEvent.KEYCODE_DPAD_LEFT:
@@ -556,17 +556,17 @@ class GVRGamepadDeviceManager {
                         MotionEvent.AXIS_GAS);
                 if (brakeAxis != 0 && pedalDown == false) {
                     pedalDown = true;
-                    controller.setKeyEvent(BUTTON_L2_DOWN);
+                    controller.addKeyEvent(BUTTON_L2_DOWN);
                 } else if (brakeAxis == 0 && pedalDown == true) {
                     pedalDown = false;
-                    controller.setKeyEvent(BUTTON_L2_UP);
+                    controller.addKeyEvent(BUTTON_L2_UP);
                 }
                 if (gasAxis != 0 && pedalDown == false) {
                     pedalDown = true;
-                    controller.setKeyEvent(BUTTON_R2_DOWN);
+                    controller.addKeyEvent(BUTTON_R2_DOWN);
                 } else if (gasAxis == 0 && pedalDown == true) {
                     pedalDown = false;
-                    controller.setKeyEvent(BUTTON_R2_UP);
+                    controller.addKeyEvent(BUTTON_R2_UP);
                 }
             }
 
@@ -580,7 +580,7 @@ class GVRGamepadDeviceManager {
             } else {
                 MotionEvent clone = MotionEvent.obtain(event);
                 holders.get(controller.getId()).event = clone;
-                controller.setMotionEvent(event);
+                controller.addMotionEvent(event);
             }
         }
 

@@ -47,11 +47,12 @@ extern "C" {
         delete reinterpret_cast<GearController *>(jController);
     }
 
-    JNIEXPORT void JNICALL Java_org_gearvrf_OvrNativeGearController_nativeInitializeGearController
-            (JNIEnv* jni, jclass clazz, jlong appPtr, jlong controllerPtr) {
+    JNIEXPORT bool JNICALL Java_org_gearvrf_OvrNativeGearController_nativeInitializeGearController
+            (JNIEnv*, jclass, jlong appPtr, jlong controllerPtr) {
         GVRActivity *activity = reinterpret_cast<GVRActivity*>(appPtr);
         GearController *gearController = reinterpret_cast<GearController*>(controllerPtr);
         activity->setGearController(gearController);
+        return activity->isOculusGo();
     }
 
 }
